@@ -31,12 +31,12 @@ namespace cloud.charging.open.protocols.OpenADRv3
     {
 
         /// <summary>
-        /// This OpenADR version 3.0 as text "v3.0".
+        /// This OpenADR version 3.0.1 as text "v3.0.1".
         /// </summary>
-        public const            String      String   = "v3.0";
+        public const            String      String   = "v3.0.1";
 
         /// <summary>
-        /// This OpenADR version "3.0" as version identification.
+        /// This OpenADR version "3.0.1" as version identification.
         /// </summary>
         public readonly static  Version_Id  Id       = Version_Id.Parse(String[1..]);
 

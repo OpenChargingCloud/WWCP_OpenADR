@@ -58,7 +58,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
         #region Data
 
         private readonly static Dictionary<String, ValueType>  lookup = new (StringComparer.OrdinalIgnoreCase);
-        private readonly        String                                 InternalId;
+        private readonly        String                         InternalId;
 
         #endregion
 
