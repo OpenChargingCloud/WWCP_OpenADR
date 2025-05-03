@@ -25,7 +25,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
 {
 
     /// <summary>
-    /// Extension methods for value type.
+    /// Extension methods for Value Types
     /// </summary>
     public static class ValueTypeExtensions
     {
@@ -48,7 +48,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
 
     /// <summary>
-    /// A value type.
+    /// A Value Type
     /// </summary>
     public readonly struct ValueType : IId,
                                        IEquatable<ValueType>,

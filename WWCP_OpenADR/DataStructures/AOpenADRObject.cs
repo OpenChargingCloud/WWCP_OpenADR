@@ -27,15 +27,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// The abstract base of all OpenADR top-level objects.
     /// </summary>
-    /// <param name="ObjectType">The type of this OpenADR object.</param>
-    /// <param name="Id">The optional unique identification of this OpenADR object.</param>
-    /// <param name="Created">The optional date and time when this OpenADR object was created.</param>
-    /// <param name="LastModification">The optional date and time when this OpenADR object was last modified.</param>
-
-    public abstract class AOpenADRObject(ObjectType       ObjectType,
-                                         Object_Id?       Id                 = null,
-                                         DateTimeOffset?  Created            = null,
-                                         DateTimeOffset?  LastModification   = null)
+    public abstract class AOpenADRObject
     {
 
         #region Properties
@@ -44,28 +36,75 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// The type of this OpenADR object.
         /// </summary>
         [Mandatory]
-        public ObjectType       ObjectType          { get; } = ObjectType;
+        public ObjectType       ObjectType          { get; }
 
         /// <summary>
         /// The optional unique identification of this OpenADR object.
         /// </summary>
         [Optional]
-        public Object_Id?       Id                  { get; } = Id;
+        public Object_Id?       Id                  { get; }
 
         /// <summary>
         /// The optional date and time when this OpenADR object was created.
         /// </summary>
         [Optional]
-        public DateTimeOffset?  Created             { get; } = Created;
+        public DateTimeOffset?  Created             { get; }
 
         /// <summary>
         /// The optional date and time when this OpenADR object was last modified.
         /// </summary>
         [Optional]
-        public DateTimeOffset?  LastModification    { get; } = LastModification;
+        public DateTimeOffset?  LastModification    { get; }
 
         #endregion
 
+        #region Constructor(s)
+
+        /// <summary>
+        /// Create a new OpenADR object.
+        /// </summary>
+        /// <param name="ObjectType">The type of this OpenADR object.</param>
+        /// <param name="Id">An optional unique identification of this OpenADR object.</param>
+        /// <param name="Created">An optional date and time when this OpenADR object was created.</param>
+        /// <param name="LastModification">An optional date and time when this OpenADR object was last modified.</param>
+        public AOpenADRObject(ObjectType       ObjectType,
+                              Object_Id?       Id                 = null,
+                              DateTimeOffset?  Created            = null,
+                              DateTimeOffset?  LastModification   = null)
+        {
+
+            this.ObjectType        = ObjectType;
+            this.Id                = Id;
+            this.Created           = Created;
+            this.LastModification  = LastModification;
+
+            unchecked
+            {
+
+                hashCode = this.ObjectType.       GetHashCode()       * 7 +
+                          (this.Id?.              GetHashCode() ?? 0) * 5 +
+                          (this.Created?.         GetHashCode() ?? 0) * 3 +
+                           this.LastModification?.GetHashCode() ?? 0;
+
+            }
+
+        }
+
+
+        #endregion
+
+
+        #region (override) GetHashCode()
+
+        private readonly Int32 hashCode;
+
+        /// <summary>
+        /// Return the hash code of this object.
+        /// </summary>
+        public override Int32 GetHashCode()
+            => hashCode;
+
+        #endregion
 
         #region CommonInfo
 

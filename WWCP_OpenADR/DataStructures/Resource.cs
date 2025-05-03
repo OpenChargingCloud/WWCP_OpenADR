@@ -81,14 +81,14 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="Id">The optional unique identification of this resource.</param>
         /// <param name="Created">The optional date and time when this resource was created.</param>
         /// <param name="LastModification">The optional date and time when this resource was last modified.</param>
-        public Resource(String                        ResourceName,
-                        Object_Id?                    VirtualEndNodeId   = null,
-                        IEnumerable<ValuesMap>?       Attributes         = null,
-                        IEnumerable<ValuesMap>?       Targets            = null,
+        public Resource(String                   ResourceName,
+                        Object_Id?               VirtualEndNodeId   = null,
+                        IEnumerable<ValuesMap>?  Attributes         = null,
+                        IEnumerable<ValuesMap>?  Targets            = null,
 
-                        Object_Id?                    Id                 = null,
-                        DateTimeOffset?               Created            = null,
-                        DateTimeOffset?               LastModification   = null)
+                        Object_Id?               Id                 = null,
+                        DateTimeOffset?          Created            = null,
+                        DateTimeOffset?          LastModification   = null)
 
             : base(ObjectType.SUBSCRIPTION,
                    Id,

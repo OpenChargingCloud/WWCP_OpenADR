@@ -25,7 +25,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
 {
 
     /// <summary>
-    /// Extension methods for object types.
+    /// Extension methods for Object Types
     /// </summary>
     public static class ObjectTypeExtensions
     {
@@ -48,7 +48,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
 
     /// <summary>
-    /// Types of objects addressable through API.
+    /// An Object Type
     /// </summary>
     public readonly struct ObjectType : IId,
                                         IEquatable<ObjectType>,
@@ -201,38 +201,53 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <summary>
         /// PROGRAM
         /// </summary>
-        public static ObjectType  PROGRAM         { get; }
+        public static ObjectType  PROGRAM                      { get; }
             = Register("PROGRAM");
 
         /// <summary>
         /// EVENT
         /// </summary>
-        public static ObjectType  EVENT           { get; }
+        public static ObjectType  EVENT                        { get; }
             = Register("EVENT");
 
         /// <summary>
         /// REPORT
         /// </summary>
-        public static ObjectType  REPORT          { get; }
+        public static ObjectType  REPORT                       { get; }
             = Register("REPORT");
 
         /// <summary>
         /// SUBSCRIPTION
         /// </summary>
-        public static ObjectType  SUBSCRIPTION    { get; }
+        public static ObjectType  SUBSCRIPTION                 { get; }
             = Register("SUBSCRIPTION");
 
         /// <summary>
         /// VEN
         /// </summary>
-        public static ObjectType  VEN             { get; }
+        public static ObjectType  VEN                          { get; }
             = Register("VEN");
 
         /// <summary>
         /// RESOURCE
         /// </summary>
-        public static ObjectType  RESOURCE        { get; }
+        public static ObjectType  RESOURCE                     { get; }
             = Register("RESOURCE");
+
+
+
+
+        /// <summary>
+        /// EVENT_PAYLOAD_DESCRIPTOR
+        /// </summary>
+        public static ObjectType  EVENT_PAYLOAD_DESCRIPTOR     { get; }
+            = Register("EVENT_PAYLOAD_DESCRIPTOR");
+
+        /// <summary>
+        /// REPORT_PAYLOAD_DESCRIPTOR
+        /// </summary>
+        public static ObjectType  REPORT_PAYLOAD_DESCRIPTOR    { get; }
+            = Register("REPORT_PAYLOAD_DESCRIPTOR");
 
         #endregion
 
