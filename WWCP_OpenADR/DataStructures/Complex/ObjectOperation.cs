@@ -88,9 +88,9 @@ namespace cloud.charging.open.protocols.OpenADRv3
             unchecked
             {
 
-                hashCode = this.Objects.     CalcHashCode() * 7 +
-                           this.Operations.  CalcHashCode() * 5 +
-                           this.CallbackURL. GetHashCode()  * 3 +
+                hashCode = this.Objects.     CalcHashCode() * 7 ^
+                           this.Operations.  CalcHashCode() * 5 ^
+                           this.CallbackURL. GetHashCode()  * 3 ^
                           (this.BearerToken?.GetHashCode() ?? 0);
 
             }

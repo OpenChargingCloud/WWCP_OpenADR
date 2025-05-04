@@ -105,9 +105,9 @@ namespace cloud.charging.open.protocols.OpenADRv3
             unchecked
             {
 
-                hashCode = this.ResourceName.     GetHashCode()       * 7 +
-                          (this.VirtualEndNodeId?.GetHashCode() ?? 0) * 5 +
-                           this.Attributes.       CalcHashCode()      * 3 +
+                hashCode = this.ResourceName.     GetHashCode()       * 7 ^
+                          (this.VirtualEndNodeId?.GetHashCode() ?? 0) * 5 ^
+                           this.Attributes.       CalcHashCode()      * 3 ^
                            this.Targets.          CalcHashCode();
 
             }

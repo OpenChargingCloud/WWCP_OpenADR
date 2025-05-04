@@ -27,7 +27,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// The abstract base of all OpenADR top-level objects.
     /// </summary>
-    public abstract class AOpenADRObject
+    public abstract class AOpenADRObject : IOpenADRObject
     {
 
         #region Properties
@@ -81,9 +81,9 @@ namespace cloud.charging.open.protocols.OpenADRv3
             unchecked
             {
 
-                hashCode = this.ObjectType.       GetHashCode()       * 7 +
-                          (this.Id?.              GetHashCode() ?? 0) * 5 +
-                          (this.Created?.         GetHashCode() ?? 0) * 3 +
+                hashCode = this.ObjectType.       GetHashCode()       * 7 ^
+                          (this.Id?.              GetHashCode() ?? 0) * 5 ^
+                          (this.Created?.         GetHashCode() ?? 0) * 3 ^
                            this.LastModification?.GetHashCode() ?? 0;
 
             }

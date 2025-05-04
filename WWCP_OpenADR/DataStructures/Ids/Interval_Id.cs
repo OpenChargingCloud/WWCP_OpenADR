@@ -17,6 +17,8 @@
 
 #region Usings
 
+using System.Diagnostics.CodeAnalysis;
+
 using org.GraphDefined.Vanaheimr.Illias;
 
 #endregion
@@ -113,7 +115,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
         #endregion
 
-        #region (static) Parse   (Text)
+        #region (static) Parse    (Text)
 
         /// <summary>
         /// Parse the given string as an interval identification.
@@ -132,7 +134,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
         #endregion
 
-        #region (static) Parse   (Number)
+        #region (static) Parse    (Number)
 
         /// <summary>
         /// Parse the given number as an interval identification.
@@ -144,7 +146,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
         #endregion
 
-        #region (static) TryParse(Text)
+        #region (static) TryParse (Text)
 
         /// <summary>
         /// Try to parse the given text as an interval identification.
@@ -162,7 +164,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
         #endregion
 
-        #region (static) TryParse(Number)
+        #region (static) TryParse (Number)
 
         /// <summary>
         /// Try to parse the given number as an interval identification.
@@ -180,14 +182,15 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
         #endregion
 
-        #region (static) TryParse(Text,   out IntervalId)
+        #region (static) TryParse (Text,   out IntervalId)
 
         /// <summary>
         /// Try to parse the given text as an interval identification.
         /// </summary>
         /// <param name="Text">A text representation of an interval identification.</param>
         /// <param name="IntervalId">The parsed interval identification.</param>
-        public static Boolean TryParse(String Text, out Interval_Id IntervalId)
+        public static Boolean TryParse(String                               Text,
+                                       [NotNullWhen(true)] out Interval_Id  IntervalId)
         {
 
             Text = Text.Trim();
@@ -206,14 +209,15 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
         #endregion
 
-        #region (static) TryParse(Number, out IntervalId)
+        #region (static) TryParse (Number, out IntervalId)
 
         /// <summary>
         /// Try to parse the given number as an interval identification.
         /// </summary>
         /// <param name="Number">A numeric representation of an interval identification.</param>
         /// <param name="IntervalId">The parsed interval identification.</param>
-        public static Boolean TryParse(Int64 Number, out Interval_Id IntervalId)
+        public static Boolean TryParse(Int64                                Number,
+                                       [NotNullWhen(true)] out Interval_Id  IntervalId)
         {
 
             IntervalId = new Interval_Id(Number);

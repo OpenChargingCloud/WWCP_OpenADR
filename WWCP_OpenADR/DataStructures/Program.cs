@@ -337,6 +337,611 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
         #endregion
 
+        #region (static) TryParse(JSON, out Program, CustomProgramParser = null)
+
+        // Note: The following is needed to satisfy pattern matching delegates! Do not refactor it!
+
+        /// <summary>
+        /// Try to parse the given JSON representation of a program.
+        /// </summary>
+        /// <param name="JSON">The JSON to be parsed.</param>
+        /// <param name="Program">The parsed program.</param>
+        /// <param name="ErrorResponse">An optional error response.</param>
+        public static Boolean TryParse(JObject                            JSON,
+                                       [NotNullWhen(true)]  out Program?  Program,
+                                       [NotNullWhen(false)] out String?   ErrorResponse)
+
+            => TryParse(JSON,
+                        out Program,
+                        out ErrorResponse,
+                        null);
+
+
+        /// <summary>
+        /// Try to parse the given JSON representation of a program.
+        /// </summary>
+        /// <param name="JSON">The JSON to be parsed.</param>
+        /// <param name="Program">The parsed program.</param>
+        /// <param name="ErrorResponse">An optional error response.</param>
+        /// <param name="CustomProgramParser">A delegate to parse custom programs.</param>
+        public static Boolean TryParse(JObject                                JSON,
+                                       [NotNullWhen(true)]  out Program?      Program,
+                                       [NotNullWhen(false)] out String?       ErrorResponse,
+                                       CustomJObjectParserDelegate<Program>?  CustomProgramParser)
+        {
+
+            try
+            {
+
+                Program = null;
+
+                #region ProgramName             [mandatory]
+
+                if (!JSON.ParseMandatoryText("programName",
+                                             "program name",
+                                             out String? programName,
+                                             out ErrorResponse))
+                {
+                    return false;
+                }
+
+                #endregion
+
+
+                #region ProgramLongName         [optional]
+
+                if (JSON.ParseOptionalText("programLongName",
+                                           "program long name",
+                                           out String? programLongName,
+                                           out ErrorResponse))
+                {
+                    if (ErrorResponse is not null)
+                        return false;
+                }
+
+                #endregion
+
+                #region RetailerName            [optional]
+
+                if (JSON.ParseOptionalText("retailerName",
+                                           "retailerName",
+                                           out String? retailerName,
+                                           out ErrorResponse))
+                {
+                    if (ErrorResponse is not null)
+                        return false;
+                }
+
+                #endregion
+
+                #region RetailerLongName        [optional]
+
+                if (JSON.ParseOptionalText("retailerLongName",
+                                           "retailer long name",
+                                           out String? retailerLongName,
+                                           out ErrorResponse))
+                {
+                    if (ErrorResponse is not null)
+                        return false;
+                }
+
+                #endregion
+
+                #region ProgramType             [optional]
+
+                if (JSON.ParseOptional("programType",
+                                       "program type",
+                                       OpenADRv3.ProgramType.TryParse,
+                                       out ProgramType? programType,
+                                       out ErrorResponse))
+                {
+                    if (ErrorResponse is not null)
+                        return false;
+                }
+
+                #endregion
+
+                #region Country                 [optional]
+
+                if (JSON.ParseOptional("country",
+                                       "country",
+                                       Country.TryParse,
+                                       out Country? country,
+                                       out ErrorResponse))
+                {
+                    if (ErrorResponse is not null)
+                        return false;
+                }
+
+                #endregion
+
+                #region PrincipalSubdivision    [optional]
+
+                if (JSON.ParseOptionalText("principalSubdivision",
+                                           "principal subdivision",
+                                           out String? principalSubdivision,
+                                           out ErrorResponse))
+                {
+                    if (ErrorResponse is not null)
+                        return false;
+                }
+
+                #endregion
+
+                #region TimeZoneOffset          [optional]
+
+                if (JSON.ParseOptional("timeZoneOffset",
+                                       "time zone offset",
+                                       out TimeSpan? timeZoneOffset,
+                                       out ErrorResponse))
+                {
+                    if (ErrorResponse is not null)
+                        return false;
+                }
+
+                #endregion
+
+                #region IntervalPeriod          [optional]
+
+                if (JSON.ParseOptionalJSON("intervalPeriod",
+                                           "interval period",
+                                           IntervalPeriod.TryParse,
+                                           out IntervalPeriod? intervalPeriod,
+                                           out ErrorResponse))
+                {
+                    if (ErrorResponse is not null)
+                        return false;
+                }
+
+                #endregion
+
+                #region ProgramDescriptions     [optional]
+
+                if (JSON.ParseOptionalHashSet("programDescriptions",
+                                              "interval period",
+                                              URL.TryParse,
+                                              out HashSet<URL> programDescriptions,
+                                              out ErrorResponse))
+                {
+                    if (ErrorResponse is not null)
+                        return false;
+                }
+
+                #endregion
+
+                #region BindingEvents           [optional]
+
+                if (JSON.ParseOptional("bindingEvents",
+                                       "binding events",
+                                       out Boolean? bindingEvents,
+                                       out ErrorResponse))
+                {
+                    if (ErrorResponse is not null)
+                        return false;
+                }
+
+                #endregion
+
+                #region LocalPrice              [optional]
+
+                if (JSON.ParseOptional("localPrice",
+                                       "local price",
+                                       out Boolean? localPrice,
+                                       out ErrorResponse))
+                {
+                    if (ErrorResponse is not null)
+                        return false;
+                }
+
+                #endregion
+
+                #region PayloadDescriptors      [optional]
+
+                var payloadDescriptors = new List<APayloadDescriptor>();
+
+                if (JSON["payloadDescriptors"] is JArray payloadDescriptorJSONArray)
+                {
+                    foreach (var payloadDescriptorJSONToken in payloadDescriptorJSONArray)
+                    {
+                        if (payloadDescriptorJSONToken is JObject payloadDescriptor)
+                        {
+                            switch (payloadDescriptor["objectType"]?.Value<String>())
+                            {
+
+                                case "EVENT_PAYLOAD_DESCRIPTOR":
+                                    if (EventPayloadDescriptor.TryParse(payloadDescriptor,
+                                                                        out var eventPayloadDescriptor,
+                                                                        out var errorResponse1))
+                                        payloadDescriptors.Add(eventPayloadDescriptor);
+                                    else
+                                    {
+                                        ErrorResponse = "The given JSON representation of a payload descriptor is invalid: " + errorResponse1;
+                                        return false;
+                                    }
+                                    break;
+
+                                case "REPORT_PAYLOAD_DESCRIPTOR":
+                                    if (ReportPayloadDescriptor.TryParse(payloadDescriptor,
+                                                                         out var reportPayloadDescriptor,
+                                                                         out var errorResponse2))
+                                        payloadDescriptors.Add(reportPayloadDescriptor);
+                                    else
+                                    {
+                                        ErrorResponse = "The given JSON representation of a payload descriptor is invalid: " + errorResponse2;
+                                        return false;
+                                    }
+                                    break;
+
+                            }
+                        }
+                        else
+                        {
+                            ErrorResponse = "The given JSON representation of a payload descriptor is invalid!";
+                            return false;
+                        }
+                    }
+                }
+
+                #endregion
+
+                #region Targets                 [optional]
+
+                if (JSON.ParseOptionalHashSet("targets",
+                                              "targets",
+                                              ValuesMap.TryParse,
+                                              out HashSet<ValuesMap> targets,
+                                              out ErrorResponse))
+                {
+                    if (ErrorResponse is not null)
+                        return false;
+                }
+
+                #endregion
+
+
+                #region Id                      [optional]
+
+                if (JSON.ParseOptional("id",
+                                       "randomize start",
+                                       Object_Id.TryParse,
+                                       out Object_Id? id,
+                                       out ErrorResponse))
+                {
+                    if (ErrorResponse is not null)
+                        return false;
+                }
+
+                #endregion
+
+                #region Created                 [optional]
+
+                if (JSON.ParseOptional("createdDateTime",
+                                       "randomize start",
+                                       out DateTimeOffset? created,
+                                       out ErrorResponse))
+                {
+                    if (ErrorResponse is not null)
+                        return false;
+                }
+
+                #endregion
+
+                #region LastModification        [optional]
+
+                if (JSON.ParseOptional("modificationDateTime",
+                                       "randomize start",
+                                       out DateTimeOffset? lastModification,
+                                       out ErrorResponse))
+                {
+                    if (ErrorResponse is not null)
+                        return false;
+                }
+
+                #endregion
+
+
+                Program = new Program(
+
+                              programName,
+
+                              programLongName,
+                              retailerName,
+                              retailerLongName,
+                              programType,
+                              country,
+                              principalSubdivision,
+                              timeZoneOffset,
+                              intervalPeriod,
+                              programDescriptions,
+                              bindingEvents,
+                              localPrice,
+                              payloadDescriptors,
+                              targets,
+
+                              id,
+                              created,
+                              lastModification
+
+                          );
+
+                if (CustomProgramParser is not null)
+                    Program = CustomProgramParser(JSON,
+                                                  Program);
+
+                return true;
+
+            }
+            catch (Exception e)
+            {
+                Program        = default;
+                ErrorResponse  = "The given JSON representation of a program is invalid: " + e.Message;
+                return false;
+            }
+
+        }
+
+        #endregion
+
+        #region ToJSON(CustomProgramSerializer = null, CustomIntervalPeriodSerializer = null, ...)
+
+        /// <summary>
+        /// Return a JSON representation of this object.
+        /// </summary>
+        /// <param name="CustomProgramSerializer">A delegate to serialize custom programs.</param>
+        /// <param name="CustomIntervalPeriodSerializer">A delegate to serialize custom interval periods.</param>
+        /// <param name="CustomEventPayloadDescriptorSerializer">A delegate to serialize custom EventPayloadDescriptor objects.</param>
+        /// <param name="CustomReportPayloadDescriptorSerializer">A delegate to serialize custom ReportPayloadDescriptor objects.</param>
+        /// <param name="CustomValuesMapSerializer">A delegate to serialize custom values maps.</param>
+        public JObject ToJSON(CustomJObjectSerializerDelegate<Program>?                  CustomProgramSerializer                   = null,
+                              CustomJObjectSerializerDelegate<IntervalPeriod>?           CustomIntervalPeriodSerializer            = null,
+                              CustomJObjectSerializerDelegate<EventPayloadDescriptor>?   CustomEventPayloadDescriptorSerializer    = null,
+                              CustomJObjectSerializerDelegate<ReportPayloadDescriptor>?  CustomReportPayloadDescriptorSerializer   = null,
+                              CustomJObjectSerializerDelegate<ValuesMap>?                CustomValuesMapSerializer                 = null)
+        {
+
+            var json = JSONObject.Create(
+
+                           Id.              HasValue
+                               ? new JProperty("id",                     Id.                    ToString())
+                               : null,
+
+                           Created.         HasValue
+                               ? new JProperty("createdDateTime",        Created.         Value.ToISO8601())
+                               : null,
+
+                           LastModification.HasValue
+                               ? new JProperty("modificationDateTime",   LastModification.Value.ToISO8601())
+                               : null,
+
+                                 new JProperty("objectType",             ObjectType.            ToString()),
+
+                                 new JProperty("programName",            ProgramName),
+
+                           ProgramLongName      is not null
+                               ? new JProperty("programLongName",        ProgramLongName)
+                               : null,
+
+                           RetailerName         is not null
+                               ? new JProperty("retailerName",           RetailerName)
+                               : null,
+
+                           RetailerLongName     is not null
+                               ? new JProperty("retailerLongName",       RetailerLongName)
+                               : null,
+
+                           ProgramType          is not null
+                               ? new JProperty("programType",            ProgramType)
+                               : null,
+
+                           Country              is not null
+                               ? new JProperty("country",                Country.Alpha2Code)
+                               : null,
+
+                           PrincipalSubdivision is not null
+                               ? new JProperty("principalSubdivision",   PrincipalSubdivision)
+                               : null,
+
+                           TimeZoneOffset.HasValue
+                               ? new JProperty("timeZoneOffset",         TimeZoneOffset.ToISO8601())
+                               : null,
+
+                           IntervalPeriod       is not null
+                               ? new JProperty("intervalPeriod",         IntervalPeriod.ToJSON(CustomIntervalPeriodSerializer))
+                               : null,
+
+                           ProgramDescriptions.Any()
+                               ? new JProperty("programDescriptions",    new JArray(ProgramDescriptions.Select(url => url.ToString())))
+                               : null,
+
+                           BindingEvents.HasValue
+                               ? new JProperty("bindingEvents",          BindingEvents.Value)
+                               : null,
+
+                           LocalPrice.   HasValue
+                               ? new JProperty("localPrice",             LocalPrice.   Value)
+                               : null,
+
+                           PayloadDescriptors.Any()
+                               ? new JProperty("payloadDescriptors",     new JArray(PayloadDescriptors.Select(aPayloadDescriptor => {
+
+                                     if (aPayloadDescriptor is EventPayloadDescriptor  eventPayloadDescriptor)
+                                         return eventPayloadDescriptor. ToJSON(CustomEventPayloadDescriptorSerializer);
+
+                                     if (aPayloadDescriptor is ReportPayloadDescriptor reportPayloadDescriptor)
+                                         return reportPayloadDescriptor.ToJSON(CustomReportPayloadDescriptorSerializer);
+
+                                     return aPayloadDescriptor.ToJSON();
+
+                                 })))
+                               : null,
+
+                           Targets.Any()
+                               ? new JProperty("targets",                 new JArray(Targets.           Select(target             => target.            ToJSON(CustomValuesMapSerializer))))
+                               : null
+
+                       );
+
+            return CustomProgramSerializer is not null
+                       ? CustomProgramSerializer(this, json)
+                       : json;
+
+        }
+
+        #endregion
+
+        #region Clone()
+
+        /// <summary>
+        /// Clone this program.
+        /// </summary>
+        public Program Clone()
+
+            => new (
+
+                   ProgramName.          CloneString(),
+
+                   ProgramLongName?.     CloneString(),
+                   RetailerName?.        CloneString(),
+                   RetailerLongName?.    CloneString(),
+                   ProgramType?.         Clone(),
+                   Country?.             Clone(),
+                   PrincipalSubdivision?.CloneString(),
+                   TimeZoneOffset,
+                   IntervalPeriod?.      Clone(),
+                   ProgramDescriptions.Select(programDescription => programDescription.Clone()),
+                   BindingEvents,
+                   LocalPrice,
+                   PayloadDescriptors. Select(payloadDescriptor  => payloadDescriptor. Clone()),
+                   Targets.            Select(taraget            => taraget.           Clone()),
+
+                   Id?.                  Clone(),
+                   Created,
+                   LastModification
+
+                );
+
+        #endregion
+
+
+        #region Operator overloading
+
+        #region Operator == (Program1, Program2)
+
+        /// <summary>
+        /// Compares two instances of this object.
+        /// </summary>
+        /// <param name="Program1">A program.</param>
+        /// <param name="Program2">Another program.</param>
+        /// <returns>true|false</returns>
+        public static Boolean operator == (Program? Program1,
+                                           Program? Program2)
+        {
+
+            // If both are null, or both are same instance, return true.
+            if (ReferenceEquals(Program1, Program2))
+                return true;
+
+            // If one is null, but not both, return false.
+            if (Program1 is null || Program2 is null)
+                return false;
+
+            return Program1.Equals(Program2);
+
+        }
+
+        #endregion
+
+        #region Operator != (Program1, Program2)
+
+        /// <summary>
+        /// Compares two instances of this object.
+        /// </summary>
+        /// <param name="Program1">A program.</param>
+        /// <param name="Program2">Another program.</param>
+        /// <returns>true|false</returns>
+        public static Boolean operator != (Program? Program1,
+                                           Program? Program2)
+
+            => !(Program1 == Program2);
+
+        #endregion
+
+        #endregion
+
+        #region IEquatable<Program> Members
+
+        #region Equals(Object)
+
+        /// <summary>
+        /// Compares two programs for equality.
+        /// </summary>
+        /// <param name="Object">A program to compare with.</param>
+        public override Boolean Equals(Object? Object)
+
+            => Object is Program program &&
+                   Equals(program);
+
+        #endregion
+
+        #region Equals(Program)
+
+        /// <summary>
+        /// Compares two programs for equality.
+        /// </summary>
+        /// <param name="Program">A program to compare with.</param>
+        public Boolean Equals(Program? Program)
+
+            => Program is not null &&
+
+               ProgramName.         Equals        (Program.ProgramName) &&
+
+             ((Id                   is null     && Program.Id                   is null) ||
+              (Id                   is not null && Program.Id                   is not null && Id.                  Equals(Program.Id))) &&
+
+             ((Created              is null     && Program.Created              is null) ||
+              (Created              is not null && Program.Created              is not null && Created.             Equals(Program.Created))) &&
+
+             ((LastModification     is null     && Program.LastModification     is null) ||
+              (LastModification     is not null && Program.LastModification     is not null && LastModification.    Equals(Program.LastModification))) &&
+
+
+             ((ProgramLongName      is null     && Program.ProgramLongName      is null) ||
+              (ProgramLongName      is not null && Program.ProgramLongName      is not null && ProgramLongName.     Equals(Program.ProgramLongName))) &&
+
+             ((RetailerName         is null     && Program.RetailerName         is null) ||
+              (RetailerName         is not null && Program.RetailerName         is not null && RetailerName.        Equals(Program.RetailerName))) &&
+
+             ((RetailerLongName     is null     && Program.RetailerLongName     is null) ||
+              (RetailerLongName     is not null && Program.RetailerLongName     is not null && RetailerLongName.    Equals(Program.RetailerLongName))) &&
+
+            ((!ProgramType.         HasValue    && !Program.ProgramType.        HasValue) ||
+              (ProgramType.         HasValue    &&  Program.ProgramType.        HasValue && ProgramType.  Value.    Equals(Program.ProgramType.Value))) &&
+
+             ((Country              is null     && Program.Country              is null) ||
+              (Country              is not null && Program.Country              is not null && Country.             Equals(Program.Country))) &&
+
+             ((PrincipalSubdivision is null     && Program.PrincipalSubdivision is null) ||
+              (PrincipalSubdivision is not null && Program.PrincipalSubdivision is not null && PrincipalSubdivision.Equals(Program.PrincipalSubdivision))) &&
+
+            ((!TimeZoneOffset.      HasValue    && !Program.TimeZoneOffset.     HasValue) ||
+              (TimeZoneOffset.      HasValue    &&  Program.TimeZoneOffset.     HasValue && TimeZoneOffset.Value.   Equals(Program.TimeZoneOffset.Value))) &&
+
+             ((IntervalPeriod       is null     && Program.IntervalPeriod       is null) ||
+              (IntervalPeriod       is not null && Program.IntervalPeriod       is not null && IntervalPeriod.      Equals(Program.IntervalPeriod))) &&
+
+             ((BindingEvents        is null     && Program.BindingEvents        is null) ||
+              (BindingEvents        is not null && Program.BindingEvents        is not null && BindingEvents.       Equals(Program.BindingEvents))) &&
+
+             ((LocalPrice           is null     && Program.LocalPrice           is null) ||
+              (LocalPrice           is not null && Program.LocalPrice           is not null && LocalPrice.          Equals(Program.LocalPrice))) &&
+
+               ProgramDescriptions.Order().SequenceEqual(Program.ProgramDescriptions.Order()) &&
+               PayloadDescriptors. Order().SequenceEqual(Program.PayloadDescriptors. Order()) &&
+               Targets.            Order().SequenceEqual(Program.Targets.            Order());
+
+        #endregion
+
+        #endregion
 
         #region (override) GetHashCode()
 
@@ -350,6 +955,28 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
         #endregion
 
+        #region (override) ToString()
+
+        /// <summary>
+        /// Return a text representation of this object.
+        /// </summary>
+        public override String ToString()
+
+            => String.Concat(
+
+                   CommonInfo.Length > 0
+                       ? $"{CommonInfo.AggregateWith(", ")}, "
+                       : "",
+
+                   $"'{ProgramName}' /  '{RetailerName}'",
+
+                   Targets.Any()
+                       ? $" at '{Targets.AggregateWith(", ")}'"
+                       : ""
+
+               );
+
+        #endregion
 
     }
 

@@ -17,6 +17,8 @@
 
 #region Usings
 
+using Newtonsoft.Json.Linq;
+
 using org.GraphDefined.Vanaheimr.Illias;
 
 #endregion
@@ -64,7 +66,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
             unchecked
             {
 
-                hashCode = this.ObjectType. GetHashCode() * 3 +
+                hashCode = this.ObjectType. GetHashCode() * 3 ^
                            this.PayloadType.GetHashCode();
 
             }
@@ -72,6 +74,10 @@ namespace cloud.charging.open.protocols.OpenADRv3
         }
 
         #endregion
+
+        public abstract JObject ToJSON();
+
+        public abstract APayloadDescriptor Clone();
 
 
         #region (override) GetHashCode()

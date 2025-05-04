@@ -17,6 +17,8 @@
 
 #region Usings
 
+using System.Diagnostics.CodeAnalysis;
+
 using org.GraphDefined.Vanaheimr.Illias;
 
 #endregion
@@ -123,7 +125,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
         #endregion
 
-        #region (static) Parse   (Text)
+        #region (static) Parse    (Text)
 
         /// <summary>
         /// Parse the given string as an object identification.
@@ -142,7 +144,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
         #endregion
 
-        #region (static) TryParse(Text)
+        #region (static) TryParse (Text)
 
         /// <summary>
         /// Try to parse the given text as an object identification.
@@ -160,14 +162,15 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
         #endregion
 
-        #region (static) TryParse(Text,   out ObjectId)
+        #region (static) TryParse (Text, out ObjectId)
 
         /// <summary>
         /// Try to parse the given text as an object identification.
         /// </summary>
         /// <param name="Text">A text representation of an object identification.</param>
         /// <param name="ObjectId">The parsed object identification.</param>
-        public static Boolean TryParse(String Text, out Object_Id ObjectId)
+        public static Boolean TryParse(String                             Text,
+                                       [NotNullWhen(true)] out Object_Id  ObjectId)
         {
 
             Text = Text.Trim();

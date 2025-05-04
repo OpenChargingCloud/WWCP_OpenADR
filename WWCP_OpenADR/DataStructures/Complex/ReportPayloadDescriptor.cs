@@ -158,8 +158,291 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
         #endregion
 
+        #region (static) TryParse(JSON, out ReportPayloadDescriptor, CustomReportPayloadDescriptorParser = null)
+
+        // Note: The following is needed to satisfy pattern matching delegates! Do not refactor it!
+
+        /// <summary>
+        /// Try to parse the given JSON representation of a report payload descriptor.
+        /// </summary>
+        /// <param name="JSON">The JSON to be parsed.</param>
+        /// <param name="ReportPayloadDescriptor">The parsed report payload descriptor.</param>
+        /// <param name="ErrorResponse">An optional error response.</param>
+        public static Boolean TryParse(JObject                                            JSON,
+                                       [NotNullWhen(true)]  out ReportPayloadDescriptor?  ReportPayloadDescriptor,
+                                       [NotNullWhen(false)] out String?                   ErrorResponse)
+
+            => TryParse(JSON,
+                        out ReportPayloadDescriptor,
+                        out ErrorResponse,
+                        null);
 
 
+        /// <summary>
+        /// Try to parse the given JSON representation of a report payload descriptor.
+        /// </summary>
+        /// <param name="JSON">The JSON to be parsed.</param>
+        /// <param name="ReportPayloadDescriptor">The parsed report payload descriptor.</param>
+        /// <param name="ErrorResponse">An optional error response.</param>
+        /// <param name="CustomReportPayloadDescriptorParser">A delegate to parse custom report payload descriptors.</param>
+        public static Boolean TryParse(JObject                                                JSON,
+                                       [NotNullWhen(true)]  out ReportPayloadDescriptor?      ReportPayloadDescriptor,
+                                       [NotNullWhen(false)] out String?                       ErrorResponse,
+                                       CustomJObjectParserDelegate<ReportPayloadDescriptor>?  CustomReportPayloadDescriptorParser)
+        {
+
+            try
+            {
+
+                ReportPayloadDescriptor = null;
+
+                #region PayloadType    [mandatory]
+
+                if (!JSON.ParseMandatory("payloadType",
+                                         "payload type",
+                                         PayloadType.TryParse,
+                                         out PayloadType payloadType,
+                                         out ErrorResponse))
+                {
+                    return false;
+                }
+
+                #endregion
+
+                #region ReadingType    [optional]
+
+                if (JSON.ParseOptional("readingType",
+                                       "reading type",
+                                       OpenADRv3.ReadingType.TryParse,
+                                       out ReadingType? readingType,
+                                       out ErrorResponse))
+                {
+                    if (ErrorResponse is not null)
+                        return false;
+                }
+
+                #endregion
+
+                #region Units          [optional]
+
+                if (JSON.ParseOptional("units",
+                                       "units",
+                                       UnitType.TryParse,
+                                       out UnitType? units,
+                                       out ErrorResponse))
+                {
+                    if (ErrorResponse is not null)
+                        return false;
+                }
+
+                #endregion
+
+                #region Accuracy       [optional]
+
+                if (JSON.ParseOptional("currency",
+                                       "currency",
+                                       out Single? accuracy,
+                                       out ErrorResponse))
+                {
+                    if (ErrorResponse is not null)
+                        return false;
+                }
+
+                #endregion
+
+                #region Confidence     [optional]
+
+                if (JSON.ParseOptional("confidence",
+                                       "confidence",
+                                       PercentageByte.TryParse,
+                                       out PercentageByte? confidence,
+                                       out ErrorResponse))
+                {
+                    if (ErrorResponse is not null)
+                        return false;
+                }
+
+                #endregion
+
+
+                ReportPayloadDescriptor = new ReportPayloadDescriptor(
+                                              payloadType,
+                                              readingType,
+                                              units,
+                                              accuracy,
+                                              confidence
+                                          );
+
+                if (CustomReportPayloadDescriptorParser is not null)
+                    ReportPayloadDescriptor = CustomReportPayloadDescriptorParser(JSON,
+                                                                                  ReportPayloadDescriptor);
+
+                return true;
+
+            }
+            catch (Exception e)
+            {
+                ReportPayloadDescriptor  = default;
+                ErrorResponse            = "The given JSON representation of a report payload descriptor is invalid: " + e.Message;
+                return false;
+            }
+
+        }
+
+        #endregion
+
+        #region ToJSON(CustomReportPayloadDescriptorSerializer = null)
+
+        /// <summary>
+        /// Return a JSON representation of this object.
+        /// </summary>
+        public override JObject ToJSON()
+            => ToJSON(null);
+
+
+        /// <summary>
+        /// Return a JSON representation of this object.
+        /// </summary>
+        /// <param name="CustomReportPayloadDescriptorSerializer">A delegate to serialize custom ReportPayloadDescriptor objects.</param>
+        public JObject ToJSON(CustomJObjectSerializerDelegate<ReportPayloadDescriptor>? CustomReportPayloadDescriptorSerializer)
+        {
+
+            var json = JSONObject.Create(
+
+                                 new JProperty("objectType",    ObjectType.       ToString()),
+                                 new JProperty("payloadType",   PayloadType.      ToString()),
+
+                           ReadingType.HasValue
+                               ? new JProperty("readingType",   ReadingType.Value.ToString())
+                               : null,
+
+                           Units.      HasValue
+                               ? new JProperty("units",         Units.            ToString())
+                               : null,
+
+                           Accuracy.   HasValue
+                               ? new JProperty("accuracy",      Accuracy.  Value)
+                               : null,
+
+                           Confidence. HasValue
+                               ? new JProperty("confidence",    Confidence.Value.Value)
+                               : null
+
+                       );
+
+            return CustomReportPayloadDescriptorSerializer is not null
+                       ? CustomReportPayloadDescriptorSerializer(this, json)
+                       : json;
+
+        }
+
+        #endregion
+
+        #region Clone()
+
+        /// <summary>
+        /// Clone this report payload descriptor.
+        /// </summary>
+        public override ReportPayloadDescriptor Clone()
+
+            => new (
+                   PayloadType. Clone(),
+                   ReadingType?.Clone(),
+                   Units?.      Clone(),
+                   Accuracy,
+                   Confidence?. Clone()
+               );
+
+        #endregion
+
+
+        #region Operator overloading
+
+        #region Operator == (ReportPayloadDescriptor1, ReportPayloadDescriptor2)
+
+        /// <summary>
+        /// Compares two instances of this object.
+        /// </summary>
+        /// <param name="ReportPayloadDescriptor1">A report payload descriptor.</param>
+        /// <param name="ReportPayloadDescriptor2">Another report payload descriptor.</param>
+        /// <returns>true|false</returns>
+        public static Boolean operator == (ReportPayloadDescriptor? ReportPayloadDescriptor1,
+                                           ReportPayloadDescriptor? ReportPayloadDescriptor2)
+        {
+
+            // If both are null, or both are same instance, return true.
+            if (ReferenceEquals(ReportPayloadDescriptor1, ReportPayloadDescriptor2))
+                return true;
+
+            // If one is null, but not both, return false.
+            if (ReportPayloadDescriptor1 is null || ReportPayloadDescriptor2 is null)
+                return false;
+
+            return ReportPayloadDescriptor1.Equals(ReportPayloadDescriptor2);
+
+        }
+
+        #endregion
+
+        #region Operator != (ReportPayloadDescriptor1, ReportPayloadDescriptor2)
+
+        /// <summary>
+        /// Compares two instances of this object.
+        /// </summary>
+        /// <param name="ReportPayloadDescriptor1">A report payload descriptor.</param>
+        /// <param name="ReportPayloadDescriptor2">Another report payload descriptor.</param>
+        /// <returns>true|false</returns>
+        public static Boolean operator != (ReportPayloadDescriptor? ReportPayloadDescriptor1,
+                                           ReportPayloadDescriptor? ReportPayloadDescriptor2)
+
+            => !(ReportPayloadDescriptor1 == ReportPayloadDescriptor2);
+
+        #endregion
+
+        #endregion
+
+        #region IEquatable<ReportPayloadDescriptor> Members
+
+        #region Equals(Object)
+
+        /// <summary>
+        /// Compares two report payload descriptors for equality.
+        /// </summary>
+        /// <param name="Object">A report payload descriptor to compare with.</param>
+        public override Boolean Equals(Object? Object)
+
+            => Object is ReportPayloadDescriptor reportPayloadDescriptor &&
+                   Equals(reportPayloadDescriptor);
+
+        #endregion
+
+        #region Equals(ReportPayloadDescriptor)
+
+        /// <summary>
+        /// Compares two report payload descriptors for equality.
+        /// </summary>
+        /// <param name="ReportPayloadDescriptor">A report payload descriptor to compare with.</param>
+        public Boolean Equals(ReportPayloadDescriptor? ReportPayloadDescriptor)
+
+            => ReportPayloadDescriptor is not null &&
+
+               PayloadType.Equals(ReportPayloadDescriptor.PayloadType) &&
+
+            ((!ReadingType.HasValue && !ReportPayloadDescriptor.ReadingType.HasValue) ||
+              (ReadingType.HasValue &&  ReportPayloadDescriptor.ReadingType.HasValue    && ReadingType.Value.Equals(ReportPayloadDescriptor.ReadingType.Value))) &&
+
+            ((!Units.      HasValue && !ReportPayloadDescriptor.Units.      HasValue) ||
+              (Units.      HasValue &&  ReportPayloadDescriptor.Units.      HasValue    && Units.      Value.Equals(ReportPayloadDescriptor.Units.      Value))) &&
+
+            ((!Accuracy.   HasValue && !ReportPayloadDescriptor.Accuracy.   HasValue) ||
+              (Accuracy.   HasValue &&  ReportPayloadDescriptor.Accuracy.   HasValue    && Accuracy.   Value.Equals(ReportPayloadDescriptor.Accuracy.   Value))) &&
+
+            ((!Confidence. HasValue && !ReportPayloadDescriptor.Confidence. HasValue) ||
+              (Confidence. HasValue &&  ReportPayloadDescriptor.Confidence. HasValue    && Confidence. Value.Equals(ReportPayloadDescriptor.Confidence. Value)));
+
+        #endregion
+
+        #endregion
 
         #region (override) GetHashCode()
 
@@ -173,6 +456,36 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
         #endregion
 
+        #region (override) ToString()
+
+        /// <summary>
+        /// Return a text representation of this object.
+        /// </summary>
+        public override String ToString()
+
+            => String.Concat(
+
+                   $"'{PayloadType}'",
+
+                   ReadingType.HasValue
+                       ? $", of {ReadingType}"
+                       : "",
+
+                   Units.HasValue
+                       ? $", in {Units}"
+                       : "",
+
+                   Accuracy.HasValue
+                       ? $", accuracy: {Accuracy}"
+                       : "",
+
+                   Confidence.HasValue
+                       ? $", confidence: {Confidence}"
+                       : ""
+
+               );
+
+        #endregion
 
     }
 
