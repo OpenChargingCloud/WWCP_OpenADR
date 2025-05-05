@@ -55,6 +55,24 @@ namespace cloud.charging.open.protocols.OpenADRv3
                                         IComparable<ObjectType>
     {
 
+        #region (class) Defaults
+
+        /// <summary>
+        /// Default object types.
+        /// </summary>
+        public static class Defaults
+        {
+            public const String EVENT         = "EVENT";
+            public const String PROGRAM       = "PROGRAM";
+            public const String REPORT        = "REPORT";
+            public const String RESOURCE      = "RESOURCE";
+            public const String SUBSCRIPTION  = "SUBSCRIPTION";
+            public const String VEN           = "VEN";
+        }
+
+        #endregion
+
+
         #region Data
 
         private readonly static Dictionary<String, ObjectType>  lookup = new (StringComparer.OrdinalIgnoreCase);
@@ -202,37 +220,37 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// PROGRAM
         /// </summary>
         public static ObjectType  PROGRAM                      { get; }
-            = Register("PROGRAM");
+            = Register(Defaults.PROGRAM);
 
         /// <summary>
         /// EVENT
         /// </summary>
         public static ObjectType  EVENT                        { get; }
-            = Register("EVENT");
+            = Register(Defaults.EVENT);
 
         /// <summary>
         /// REPORT
         /// </summary>
         public static ObjectType  REPORT                       { get; }
-            = Register("REPORT");
+            = Register(Defaults.REPORT);
 
         /// <summary>
         /// SUBSCRIPTION
         /// </summary>
         public static ObjectType  SUBSCRIPTION                 { get; }
-            = Register("SUBSCRIPTION");
+            = Register(Defaults.SUBSCRIPTION);
 
         /// <summary>
         /// VEN
         /// </summary>
         public static ObjectType  VEN                          { get; }
-            = Register("VEN");
+            = Register(Defaults.VEN);
 
         /// <summary>
         /// RESOURCE
         /// </summary>
         public static ObjectType  RESOURCE                     { get; }
-            = Register("RESOURCE");
+            = Register(Defaults.RESOURCE);
 
 
 

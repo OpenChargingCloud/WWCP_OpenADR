@@ -33,7 +33,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// Provides program specific metadata from a Virtual Top Node (VTN)
     /// to a Virtuel End Node (VEN).
     /// </summary>
-    public class Program : AOpenADRObject
+    public class Program : AOpenADRObject<Program_Id>
     {
 
         #region Properties
@@ -165,7 +165,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                        IEnumerable<APayloadDescriptor>?  PayloadDescriptors     = null,
                        IEnumerable<ValuesMap>?           Targets                = null,
 
-                       Object_Id?                        Id                     = null,
+                       Program_Id?                       Id                     = null,
                        DateTimeOffset?                   Created                = null,
                        DateTimeOffset?                   LastModification       = null)
 
@@ -603,8 +603,8 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
                 if (JSON.ParseOptional("id",
                                        "randomize start",
-                                       Object_Id.TryParse,
-                                       out Object_Id? id,
+                                       Program_Id.TryParse,
+                                       out Program_Id? id,
                                        out ErrorResponse))
                 {
                     if (ErrorResponse is not null)
@@ -794,7 +794,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <summary>
         /// Clone this program.
         /// </summary>
-        public Program Clone()
+        public override Program Clone()
 
             => new (
 

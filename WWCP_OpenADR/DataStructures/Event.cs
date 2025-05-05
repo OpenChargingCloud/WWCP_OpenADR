@@ -28,25 +28,11 @@ using org.GraphDefined.Vanaheimr.Illias;
 namespace cloud.charging.open.protocols.OpenADRv3
 {
 
-    //public sealed record Event(
-
-    //    [property: JsonPropertyName("programID")] String ProgramId,
-    //    [property: JsonPropertyName("eventName")] String EventName,
-    //    [property: JsonPropertyName("priority")] int Priority,
-
-    //    [property: JsonPropertyName("targets")] IReadOnlyList<Target>? Targets,
-    //    [property: JsonPropertyName("reportDescriptors")] IReadOnlyList<ReportDescriptor>? ReportDescriptors,
-    //    [property: JsonPropertyName("payloadDescriptors")] IReadOnlyList<EventPayloadDescriptor> PayloadDescriptors,
-    //    [property: JsonPropertyName("intervalPeriod")] IntervalPeriod IntervalPeriod,
-    //    [property: JsonPropertyName("intervals")] IReadOnlyList<Interval> Intervals
-    //) : IOpenADRObject;
-
-
     /// <summary>
     /// Event object to communicate a Demand Response request to VEN.
     /// If intervalPeriod is present, sets default start time and duration of intervals.
     /// </summary>
-    public class Event : AOpenADRObject
+    public class Event : AOpenADRObject<Event_Id>
     {
 
         #region Properties
@@ -129,7 +115,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                      IEnumerable<EventPayloadDescriptor>?  PayloadDescriptors   = null,
                      IntervalPeriod?                       IntervalPeriod       = null,
 
-                     Object_Id?                            Id                   = null,
+                     Event_Id?                             Id                   = null,
                      DateTimeOffset?                       Created              = null,
                      DateTimeOffset?                       LastModification     = null)
 
@@ -242,6 +228,427 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
         #endregion
 
+        #region (static) TryParse(JSON, out Event, CustomEventParser = null)
+
+        // Note: The following is needed to satisfy pattern matching delegates! Do not refactor it!
+
+        /// <summary>
+        /// Try to parse the given JSON representation of an event.
+        /// </summary>
+        /// <param name="JSON">The JSON to be parsed.</param>
+        /// <param name="Event">The parsed event.</param>
+        /// <param name="ErrorResponse">An optional error response.</param>
+        public static Boolean TryParse(JObject                           JSON,
+                                       [NotNullWhen(true)]  out Event?   Event,
+                                       [NotNullWhen(false)] out String?  ErrorResponse)
+
+            => TryParse(JSON,
+                        out Event,
+                        out ErrorResponse,
+                        null);
+
+
+        /// <summary>
+        /// Try to parse the given JSON representation of an event.
+        /// </summary>
+        /// <param name="JSON">The JSON to be parsed.</param>
+        /// <param name="Event">The parsed event.</param>
+        /// <param name="ErrorResponse">An optional error response.</param>
+        /// <param name="CustomEventParser">A delegate to parse custom events.</param>
+        public static Boolean TryParse(JObject                              JSON,
+                                       [NotNullWhen(true)]  out Event?      Event,
+                                       [NotNullWhen(false)] out String?     ErrorResponse,
+                                       CustomJObjectParserDelegate<Event>?  CustomEventParser)
+        {
+
+            try
+            {
+
+                Event = null;
+
+                #region ProgramId             [mandatory]
+
+                if (!JSON.ParseMandatory("programID",
+                                         "program identification",
+                                         Object_Id.TryParse,
+                                         out Object_Id programId,
+                                         out ErrorResponse))
+                {
+                    return false;
+                }
+
+                #endregion
+
+                #region Intervals             [mandatory]
+
+                if (!JSON.ParseMandatoryHashSet("intervals",
+                                                "intervals",
+                                                Interval.TryParse,
+                                                out HashSet<Interval> intervals,
+                                                out ErrorResponse))
+                {
+                    return false;
+                }
+
+                #endregion
+
+                #region EventName             [optional]
+
+                if (JSON.ParseOptionalText("eventName",
+                                           "event name",
+                                           out String? eventName,
+                                           out ErrorResponse))
+                {
+                    if (ErrorResponse is not null)
+                        return false;
+                }
+
+                #endregion
+
+                #region Priority              [optional]
+
+                if (JSON.ParseOptional("priority",
+                                       "priority",
+                                       out UInt32? priority,
+                                       out ErrorResponse))
+                {
+                    if (ErrorResponse is not null)
+                        return false;
+                }
+
+                #endregion
+
+                #region Targets               [optional]
+
+                if (JSON.ParseOptionalHashSet("targets",
+                                              "targets",
+                                              ValuesMap.TryParse,
+                                              out HashSet<ValuesMap> targets,
+                                              out ErrorResponse))
+                {
+                    if (ErrorResponse is not null)
+                        return false;
+                }
+
+                #endregion
+
+                #region ReportDescriptors     [optional]
+
+                if (JSON.ParseOptionalHashSet("reportDescriptors",
+                                              "report descriptors",
+                                              ReportDescriptor.TryParse,
+                                              out HashSet<ReportDescriptor> reportDescriptors,
+                                              out ErrorResponse))
+                {
+                    if (ErrorResponse is not null)
+                        return false;
+                }
+
+                #endregion
+
+                #region PayloadDescriptors    [optional]
+
+                if (JSON.ParseOptionalHashSet("payloadDescriptors",
+                                              "payload descriptors",
+                                              EventPayloadDescriptor.TryParse,
+                                              out HashSet<EventPayloadDescriptor> payloadDescriptors,
+                                              out ErrorResponse))
+                {
+                    if (ErrorResponse is not null)
+                        return false;
+                }
+
+                #endregion
+
+                #region IntervalPeriod        [optional]
+
+                if (JSON.ParseOptionalJSON("intervalPeriod",
+                                           "interval period",
+                                           IntervalPeriod.TryParse,
+                                           out IntervalPeriod? intervalPeriod,
+                                           out ErrorResponse))
+                {
+                    if (ErrorResponse is not null)
+                        return false;
+                }
+
+                #endregion
+
+
+                #region Id                    [optional]
+
+                if (JSON.ParseOptional("id",
+                                       "randomize start",
+                                       Event_Id.TryParse,
+                                       out Event_Id? id,
+                                       out ErrorResponse))
+                {
+                    if (ErrorResponse is not null)
+                        return false;
+                }
+
+                #endregion
+
+                #region Created               [optional]
+
+                if (JSON.ParseOptional("createdDateTime",
+                                       "randomize start",
+                                       out DateTimeOffset? created,
+                                       out ErrorResponse))
+                {
+                    if (ErrorResponse is not null)
+                        return false;
+                }
+
+                #endregion
+
+                #region LastModification      [optional]
+
+                if (JSON.ParseOptional("modificationDateTime",
+                                       "randomize start",
+                                       out DateTimeOffset? lastModification,
+                                       out ErrorResponse))
+                {
+                    if (ErrorResponse is not null)
+                        return false;
+                }
+
+                #endregion
+
+
+                Event = new Event(
+
+                            programId,
+                            intervals,
+                            eventName,
+                            priority,
+                            targets,
+                            reportDescriptors,
+                            payloadDescriptors,
+                            intervalPeriod,
+
+                            id,
+                            created,
+                            lastModification
+
+                        );
+
+                if (CustomEventParser is not null)
+                    Event = CustomEventParser(JSON,
+                                              Event);
+
+                return true;
+
+            }
+            catch (Exception e)
+            {
+                Event   = default;
+                ErrorResponse  = "The given JSON representation of an event is invalid: " + e.Message;
+                return false;
+            }
+
+        }
+
+        #endregion
+
+        #region ToJSON(CustomEventSerializer = null, CustomIntervalSerializer = null, ...)
+
+        /// <summary>
+        /// Return a JSON representation of this object.
+        /// </summary>
+        /// <param name="CustomEventSerializer">A delegate to serialize custom events.</param>
+        /// <param name="CustomIntervalSerializer">A delegate to serialize custom intervals.</param>
+        /// <param name="CustomIntervalPeriodSerializer">A delegate to serialize custom interval periods.</param>
+        /// <param name="CustomValuesMapSerializer">A delegate to serialize custom values maps.</param>
+        /// <param name="CustomReportDescriptorSerializer">A delegate to serialize custom report descriptors.</param>
+        /// <param name="CustomEventPayloadDescriptorSerializer">A delegate to serialize custom EventPayloadDescriptor objects.</param>
+        public JObject ToJSON(CustomJObjectSerializerDelegate<Event>?                   CustomEventSerializer                    = null,
+                              CustomJObjectSerializerDelegate<Interval>?                CustomIntervalSerializer                 = null,
+                              CustomJObjectSerializerDelegate<IntervalPeriod>?          CustomIntervalPeriodSerializer           = null,
+                              CustomJObjectSerializerDelegate<ValuesMap>?               CustomValuesMapSerializer                = null,
+                              CustomJObjectSerializerDelegate<ReportDescriptor>?        CustomReportDescriptorSerializer         = null,
+                              CustomJObjectSerializerDelegate<EventPayloadDescriptor>?  CustomEventPayloadDescriptorSerializer   = null)
+        {
+
+            var json = JSONObject.Create(
+
+                           Id.              HasValue
+                               ? new JProperty("id",                     Id.                    ToString())
+                               : null,
+
+                           Created.         HasValue
+                               ? new JProperty("createdDateTime",        Created.         Value.ToISO8601())
+                               : null,
+
+                           LastModification.HasValue
+                               ? new JProperty("modificationDateTime",   LastModification.Value.ToISO8601())
+                               : null,
+
+
+                                 new JProperty("programID",            ProgramId.     ToString()),
+                                 new JProperty("intervals",            new JArray(Intervals.         Select(interval               => interval.ToJSON(CustomIntervalSerializer,
+                                                                                                                                                      CustomIntervalPeriodSerializer)))),
+
+                            EventName is not null
+                               ? new JProperty("eventName",            EventName)
+                               : null,
+
+                            Priority.HasValue
+                               ? new JProperty("priority",             Priority.Value)
+                               : null,
+
+                            Targets.Any()
+                               ? new JProperty("targets",              new JArray(Targets.           Select(target                 => target.                ToJSON(CustomValuesMapSerializer))))
+                               : null,
+
+                            ReportDescriptors.Any()
+                               ? new JProperty("reportDescriptors",    new JArray(ReportDescriptors. Select(reportDescriptor       => reportDescriptor.      ToJSON(CustomReportDescriptorSerializer,
+                                                                                                                                                                    CustomValuesMapSerializer))))
+                               : null,
+
+                            PayloadDescriptors.Any()
+                               ? new JProperty("payloadDescriptors",   new JArray(PayloadDescriptors.Select(eventPayloadDescriptor => eventPayloadDescriptor.ToJSON(CustomEventPayloadDescriptorSerializer))))
+                               : null,
+
+                            IntervalPeriod is not null
+                               ? new JProperty("intervalPeriod",       IntervalPeriod.ToJSON(CustomIntervalPeriodSerializer))
+                               : null
+
+                       );
+
+            return CustomEventSerializer is not null
+                       ? CustomEventSerializer(this, json)
+                       : json;
+
+        }
+
+        #endregion
+
+        #region Clone()
+
+        /// <summary>
+        /// Clone this event.
+        /// </summary>
+        public override Event Clone()
+
+            => new (
+
+                   ProgramId.      Clone(),
+                   Intervals.         Select(interval          => interval.         Clone()),
+                   EventName?.     CloneString(),
+                   Priority,
+                   Targets.           Select(taraget           => taraget.          Clone()),
+                   ReportDescriptors. Select(reportDescriptor  => reportDescriptor. Clone()),
+                   PayloadDescriptors.Select(payloadDescriptor => payloadDescriptor.Clone()),
+                   IntervalPeriod?.Clone(),
+
+                   Id?.            Clone(),
+                   Created,
+                   LastModification
+
+                );
+
+        #endregion
+
+
+        #region Operator overloading
+
+        #region Operator == (Event1, Event2)
+
+        /// <summary>
+        /// Compares two instances of this object.
+        /// </summary>
+        /// <param name="Event1">An event.</param>
+        /// <param name="Event2">Another event.</param>
+        /// <returns>true|false</returns>
+        public static Boolean operator == (Event? Event1,
+                                           Event? Event2)
+        {
+
+            // If both are null, or both are same instance, return true.
+            if (ReferenceEquals(Event1, Event2))
+                return true;
+
+            // If one is null, but not both, return false.
+            if (Event1 is null || Event2 is null)
+                return false;
+
+            return Event1.Equals(Event2);
+
+        }
+
+        #endregion
+
+        #region Operator != (Event1, Event2)
+
+        /// <summary>
+        /// Compares two instances of this object.
+        /// </summary>
+        /// <param name="Event1">An event.</param>
+        /// <param name="Event2">Another event.</param>
+        /// <returns>true|false</returns>
+        public static Boolean operator != (Event? Event1,
+                                           Event? Event2)
+
+            => !(Event1 == Event2);
+
+        #endregion
+
+        #endregion
+
+        #region IEquatable<Event> Members
+
+        #region Equals(Object)
+
+        /// <summary>
+        /// Compares two events for equality.
+        /// </summary>
+        /// <param name="Object">An event to compare with.</param>
+        public override Boolean Equals(Object? Object)
+
+            => Object is Event @event &&
+                   Equals(@event);
+
+        #endregion
+
+        #region Equals(Event)
+
+        /// <summary>
+        /// Compares two events for equality.
+        /// </summary>
+        /// <param name="Event">An event to compare with.</param>
+        public Boolean Equals(Event? Event)
+
+            => Event is not null &&
+
+               ProgramId.                 Equals       (Event.ProgramId) &&
+
+            ((!Id.              HasValue    && !Event.Id.              HasValue) ||
+              (Id.              HasValue    &&  Event.Id.              HasValue    && Id.              Value.Equals(Event.Id.              Value))) &&
+
+            ((!Created.         HasValue    && !Event.Created.         HasValue) ||
+              (Created.         HasValue    &&  Event.Created.         HasValue    && Created.         Value.Equals(Event.Created.         Value))) &&
+
+            ((!LastModification.HasValue    && !Event.LastModification.HasValue) ||
+              (LastModification.HasValue    &&  Event.LastModification.HasValue    && LastModification.Value.Equals(Event.LastModification.Value))) &&
+
+             ((EventName        is null     &&  Event.EventName        is null) ||
+              (EventName        is not null &&  Event.EventName        is not null && EventName.             Equals(Event.EventName)))              &&
+
+            ((!Priority.        HasValue    && !Event.Priority.        HasValue) ||
+              (Priority.        HasValue    &&  Event.Priority.        HasValue    && Priority.        Value.Equals(Event.Priority.        Value))) &&
+
+             ((IntervalPeriod   is null     &&  Event.IntervalPeriod   is null) ||
+              (IntervalPeriod   is not null &&  Event.IntervalPeriod   is not null && IntervalPeriod.        Equals(Event.IntervalPeriod)))         &&
+
+               Intervals.         Order().SequenceEqual(Event.Intervals.         Order()) &&
+               Targets.           Order().SequenceEqual(Event.Targets.           Order()) &&
+               ReportDescriptors. Order().SequenceEqual(Event.ReportDescriptors. Order()) &&
+               PayloadDescriptors.Order().SequenceEqual(Event.PayloadDescriptors.Order());
+
+        #endregion
+
+        #endregion
 
         #region (override) GetHashCode()
 
@@ -252,6 +659,33 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// </summary>
         public override Int32 GetHashCode()
             => hashCode;
+
+        #endregion
+
+        #region (override) ToString()
+
+        /// <summary>
+        /// Return a text representation of this object.
+        /// </summary>
+        public override String ToString()
+
+            => String.Concat(
+
+                   CommonInfo.Length > 0
+                       ? $"{CommonInfo.AggregateWith(", ")}, "
+                       : "",
+
+                   $"''{ProgramId}'",
+
+                   EventName is not null
+                       ? $" for event: '{EventName}'"
+                       : "",
+
+                   Targets.Any()
+                       ? $" at '{Targets.AggregateWith(", ")}'"
+                       : ""
+
+               );
 
         #endregion
 

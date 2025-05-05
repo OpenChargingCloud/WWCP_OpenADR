@@ -31,7 +31,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// A Virtual End Node.
     /// </summary>
-    public class VirtualEndNode : AOpenADRObject
+    public class VirtualEndNode : AOpenADRObject<VirtualEndNode_Id>
     {
 
         #region Properties
@@ -83,7 +83,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                               IEnumerable<ValuesMap>?  Targets            = null,
                               IEnumerable<Resource>?   Resources          = null,
 
-                              Object_Id?               Id                 = null,
+                              VirtualEndNode_Id?       Id                 = null,
                               DateTimeOffset?          Created            = null,
                               DateTimeOffset?          LastModification   = null)
 
@@ -265,8 +265,8 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
                 if (JSON.ParseOptional("id",
                                        "randomize start",
-                                       Object_Id.TryParse,
-                                       out Object_Id? id,
+                                       VirtualEndNode_Id.TryParse,
+                                       out VirtualEndNode_Id? id,
                                        out ErrorResponse))
                 {
                     if (ErrorResponse is not null)
@@ -392,7 +392,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <summary>
         /// Clone this Virtual End Node.
         /// </summary>
-        public VirtualEndNode Clone()
+        public override VirtualEndNode Clone()
 
             => new (
 

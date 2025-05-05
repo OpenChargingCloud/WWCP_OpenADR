@@ -17,6 +17,7 @@
 
 #region Usings
 
+using Newtonsoft.Json.Linq;
 using org.GraphDefined.Vanaheimr.Illias;
 
 #endregion
@@ -53,6 +54,29 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// </summary>
         [Optional]
         DateTimeOffset?  LastModification    { get; }
+
+        JObject ToJSON();
+
+        IOpenADRObject Clone();
+
+    }
+
+
+    /// <summary>
+    /// The common interface of all OpenADR top-level objects.
+    /// </summary>
+    public interface IOpenADRObject<T> : IOpenADRObject
+        where T : struct
+    {
+
+        /// <summary>
+        /// The optional unique identification of this OpenADR object.
+        /// </summary>
+        [Optional]
+        new T?           Id                  { get; }
+
+
+        new IOpenADRObject<T> Clone();
 
     }
 

@@ -53,8 +53,8 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// The program identification.
     /// </summary>
     public readonly struct Program_Id : IId,
-                                       IEquatable<Program_Id>,
-                                       IComparable<Program_Id>
+                                        IEquatable<Program_Id>,
+                                        IComparable<Program_Id>
     {
 
         #region Data

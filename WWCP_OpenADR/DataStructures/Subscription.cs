@@ -33,7 +33,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// Clients may subscribe to be notified when a type of object is created,
     /// updated, or deleted.
     /// </summary>
-    public class Subscription : AOpenADRObject
+    public class Subscription : AOpenADRObject<Subscription_Id>
     {
 
         #region Properties
@@ -49,7 +49,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// The identification of the program this subscription is associated with.
         /// </summary>
         [Mandatory]
-        public Object_Id                     ProgramId           { get; }
+        public Program_Id                    ProgramId           { get; }
 
         /// <summary>
         /// The enumeration of objects and operations to subscribe to.
@@ -79,11 +79,11 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="Created">The optional date and time when this subscription was created.</param>
         /// <param name="LastModification">The optional date and time when this subscription was last modified.</param>
         public Subscription(String                        ClientName,
-                            Object_Id                     ProgramId,
+                            Program_Id                    ProgramId,
                             IEnumerable<ObjectOperation>  ObjectOperations,
                             IEnumerable<ValuesMap>?       Targets            = null,
 
-                            Object_Id?                    Id                 = null,
+                            Subscription_Id?              Id                 = null,
                             DateTimeOffset?               Created            = null,
                             DateTimeOffset?               LastModification   = null)
 
@@ -253,8 +253,8 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
                 if (!JSON.ParseMandatory("programID",
                                          "program identification",
-                                         Object_Id.TryParse,
-                                         out Object_Id programId,
+                                         Program_Id.TryParse,
+                                         out Program_Id programId,
                                          out ErrorResponse))
                 {
                     return false;
@@ -294,8 +294,8 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
                 if (JSON.ParseOptional("id",
                                        "randomize start",
-                                       Object_Id.TryParse,
-                                       out Object_Id? id,
+                                       Subscription_Id.TryParse,
+                                       out Subscription_Id? id,
                                        out ErrorResponse))
                 {
                     if (ErrorResponse is not null)
@@ -415,7 +415,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <summary>
         /// Clone this subscription.
         /// </summary>
-        public Subscription Clone()
+        public override Subscription Clone()
 
             => new (
 

@@ -32,7 +32,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// A resource is an energy device or system subject to control
     /// by a Virtual End Node (VEN).
     /// </summary>
-    public class Resource : AOpenADRObject
+    public class Resource : AOpenADRObject<Resource_Id>
     {
 
         #region Properties
@@ -52,7 +52,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// e.g. POST <>/ven/{venID}/resources.
         /// </summary>
         [Optional]
-        public Object_Id?              VirtualEndNodeId    { get; }
+        public VirtualEndNode_Id?      VirtualEndNodeId    { get; }
 
         /// <summary>
         /// The optional enumeration of valuesMap objects describing attributes.
@@ -82,11 +82,11 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="Created">The optional date and time when this resource was created.</param>
         /// <param name="LastModification">The optional date and time when this resource was last modified.</param>
         public Resource(String                   ResourceName,
-                        Object_Id?               VirtualEndNodeId   = null,
+                        VirtualEndNode_Id?       VirtualEndNodeId   = null,
                         IEnumerable<ValuesMap>?  Attributes         = null,
                         IEnumerable<ValuesMap>?  Targets            = null,
 
-                        Object_Id?               Id                 = null,
+                        Resource_Id?             Id                 = null,
                         DateTimeOffset?          Created            = null,
                         DateTimeOffset?          LastModification   = null)
 
@@ -222,8 +222,8 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
                 if (JSON.ParseOptional("venID",
                                        "virtuel end node identification",
-                                       Object_Id.TryParse,
-                                       out Object_Id? virtuelEndNodeId,
+                                       VirtualEndNode_Id.TryParse,
+                                       out VirtualEndNode_Id? virtuelEndNodeId,
                                        out ErrorResponse))
                 {
                     if (ErrorResponse is not null)
@@ -265,8 +265,8 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
                 if (JSON.ParseOptional("id",
                                        "randomize start",
-                                       Object_Id.TryParse,
-                                       out Object_Id? id,
+                                       Resource_Id.TryParse,
+                                       out Resource_Id? id,
                                        out ErrorResponse))
                 {
                     if (ErrorResponse is not null)
@@ -387,7 +387,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <summary>
         /// Clone this resource.
         /// </summary>
-        public Resource Clone()
+        public override Resource Clone()
 
             => new (
 

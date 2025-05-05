@@ -17,6 +17,10 @@
 
 #region Usings
 
+using System.Diagnostics.CodeAnalysis;
+
+using Newtonsoft.Json.Linq;
+
 using org.GraphDefined.Vanaheimr.Illias;
 
 #endregion
@@ -27,7 +31,8 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// The abstract base of all OpenADR top-level objects.
     /// </summary>
-    public abstract class AOpenADRObject : IOpenADRObject
+    public abstract class AOpenADRObject<T> : IOpenADRObject<T>
+        where T: struct
     {
 
         #region Properties
@@ -42,7 +47,16 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// The optional unique identification of this OpenADR object.
         /// </summary>
         [Optional]
-        public Object_Id?       Id                  { get; }
+        public T?               Id                  { get; }
+
+        /// <summary>
+        /// The optional unique identification of this OpenADR object.
+        /// </summary>
+        [Optional]
+        Object_Id?              IOpenADRObject.Id
+            => Id.HasValue
+                   ? Object_Id.Parse(Id.Value.ToString() ?? "")
+                   : null;
 
         /// <summary>
         /// The optional date and time when this OpenADR object was created.
@@ -68,7 +82,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="Created">An optional date and time when this OpenADR object was created.</param>
         /// <param name="LastModification">An optional date and time when this OpenADR object was last modified.</param>
         public AOpenADRObject(ObjectType       ObjectType,
-                              Object_Id?       Id                 = null,
+                              T?               Id                 = default,
                               DateTimeOffset?  Created            = null,
                               DateTimeOffset?  LastModification   = null)
         {
@@ -92,6 +106,86 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
 
         #endregion
+
+
+        public static Boolean TryBaseParse<T>(JObject                       JSON,
+                                              [NotNullWhen(true)]  T?       OpenADRObject,
+                                              [NotNullWhen(false)] String?  ErrorResponse)
+
+            where T: class, IOpenADRObject
+
+        {
+
+            OpenADRObject = null;
+            ErrorResponse = null;
+
+            if (typeof(T) == typeof(Program))
+            {
+
+                if (!Program.TryParse(JSON, out var program, out ErrorResponse))
+                    return false;
+
+                OpenADRObject = program as T;
+
+            }
+
+            return false;
+
+        }
+
+
+        public JObject ToJSON()
+            => ToBaseJSON(null, null, null, null, null, null);
+
+        public JObject ToBaseJSON(CustomJObjectSerializerDelegate<Program>?                  CustomProgramSerializer                   = null,
+                                  CustomJObjectSerializerDelegate<IntervalPeriod>?           CustomIntervalPeriodSerializer            = null,
+                                  CustomJObjectSerializerDelegate<EventPayloadDescriptor>?   CustomEventPayloadDescriptorSerializer    = null,
+                                  CustomJObjectSerializerDelegate<ReportPayloadDescriptor>?  CustomReportPayloadDescriptorSerializer   = null,
+                                  CustomJObjectSerializerDelegate<ValuesMap>?                CustomValuesMapSerializer                 = null,
+
+                                  CustomJObjectSerializerDelegate<Resource>?   CustomResourceSerializer    = null
+                                 // CustomJObjectSerializerDelegate<ValuesMap>?  CustomValuesMapSerializer   = null
+            
+            
+            
+            
+            
+            
+            )
+        {
+
+            if (this is Program _program)
+                return _program.       ToJSON(CustomProgramSerializer,
+                                              CustomIntervalPeriodSerializer,
+                                              CustomEventPayloadDescriptorSerializer,
+                                              CustomReportPayloadDescriptorSerializer,
+                                              CustomValuesMapSerializer);
+
+            else if (this is Event _event)
+                return _event.         ToJSON();
+
+            else if (this is Report _report)
+                return _report.        ToJSON();
+
+            else if (this is Subscription _subscription)
+                return _subscription.  ToJSON();
+
+            else if (this is VirtualEndNode _virtualEndNode)
+                return _virtualEndNode.ToJSON();
+
+            else if (this is Resource _resource)
+                return _resource.      ToJSON(CustomResourceSerializer,
+                                              CustomValuesMapSerializer);
+
+            return [];
+
+        }
+
+
+        IOpenADRObject IOpenADRObject.Clone()
+            => Clone();
+
+        public abstract IOpenADRObject<T> Clone();
 
 
         #region (override) GetHashCode()
