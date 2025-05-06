@@ -4,6 +4,8 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <AssemblyName>cloud.charging.open.protocols.OpenADRv3.OpenADR.Node</AssemblyName>
+    <RootNamespace>cloud.charging.open.protocols.OpenADRv3.OpenADR</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

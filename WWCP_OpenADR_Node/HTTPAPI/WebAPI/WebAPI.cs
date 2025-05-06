@@ -55,7 +55,7 @@ namespace cloud.charging.open.protocols.OpenADRv3.Node
         /// <summary>
         /// The default HTTP server name.
         /// </summary>
-        public const    String    DefaultHTTPServerName  = $"Open Charging Cloud OCPP {Version.String} OpenADR WebAPI";
+        public const    String    DefaultHTTPServerName  = $"Open Charging Cloud OpenADR {Version.String} WebAPI";
 
         /// <summary>
         /// The default HTTP server name.
@@ -65,7 +65,7 @@ namespace cloud.charging.open.protocols.OpenADRv3.Node
         /// <summary>
         /// The HTTP root for embedded resources.
         /// </summary>
-        public const    String    HTTPRoot               = "cloud.charging.open.protocols.OCPPv2_1.OpenADR.HTTPAPI.WebAPI.HTTPRoot.";
+        public const    String    HTTPRoot               = "cloud.charging.open.protocols.OpenADRv3.OpenADR.HTTPAPI.WebAPI.HTTPRoot.";
 
         #endregion
 
@@ -104,7 +104,7 @@ namespace cloud.charging.open.protocols.OpenADRv3.Node
 
             RegisterURITemplates();
 
-            DebugX.Log($"OCPP {Version.String} Charging Station Management System WebAPI started on {HTTPAPI.HTTPServer.IPSockets.AggregateWith(", ")}{URLPathPrefix}");
+            DebugX.Log($"OpenADR {Version.String} WebAPI started on {HTTPAPI.HTTPServer.IPSockets.AggregateWith(", ")}{URLPathPrefix}");
 
         }
 

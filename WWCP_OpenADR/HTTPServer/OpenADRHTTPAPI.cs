@@ -18,23 +18,14 @@
 #region Usings
 
 using System.Reflection;
-using System.Security.Authentication;
+using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 using org.GraphDefined.Vanaheimr.Illias;
-using org.GraphDefined.Vanaheimr.Hermod;
 using org.GraphDefined.Vanaheimr.Hermod.HTTP;
-using org.GraphDefined.Vanaheimr.Hermod.SMTP;
-using org.GraphDefined.Vanaheimr.Hermod.Mail;
-using org.GraphDefined.Vanaheimr.Hermod.DNS;
-using org.GraphDefined.Vanaheimr.Hermod.Logging;
-using org.GraphDefined.Vanaheimr.Hermod.Sockets;
-using org.GraphDefined.Vanaheimr.Hermod.Sockets.TCP;
-
-using cloud.charging.open.protocols.WWCP;
-using System.Collections.Concurrent;
 
 #endregion
 
@@ -42,48 +33,40 @@ namespace cloud.charging.open.protocols.OpenADRv3
 {
 
     /// <summary>
-    /// Extension methods for the OpenADR API.
+    /// OpenADR API extension methods.
     /// </summary>
     public static class OpenADRAPIExtensions
     {
 
-        #region ParseProgramId (this Request, out ProgramId, out HTTPResponseBuilder)
+        #region ParseProgramId                  (this Request, out ProgramId, ...)
 
         /// <summary>
-        /// Parse the given HTTP request and return the party identification
-        /// or an HTTP error response.
+        /// Parse the program identification from the given HTTP request
+        /// or return a HTTP error.
         /// </summary>
         /// <param name="Request">A HTTP request.</param>
-        /// <param name="ProgramId">The parsed party identification.</param>
+        /// <param name="ProgramId">The parsed program identification.</param>
         /// <param name="HTTPResponseBuilder">An HTTP response builder.</param>
         public static Boolean ParseProgramId(this HTTPRequest                                Request,
-                                             [NotNullWhen(true)]  out Program_Id?            ProgramId,
+                                             [NotNullWhen(true)]  out Program_Id             ProgramId,
                                              [NotNullWhen(false)] out HTTPResponse.Builder?  HTTPResponseBuilder)
         {
 
             ProgramId            = default;
             HTTPResponseBuilder  = default;
 
-            if (Request.ParsedURLParameters.Length < 1)
+            if (Request.ParsedURLParameters.Length < 1 ||
+                !Program_Id.TryParse(Request.ParsedURLParameters[0], out var programId))
             {
 
                 HTTPResponseBuilder = new HTTPResponse.Builder(Request) {
-                    HTTPStatusCode             = HTTPStatusCode.BadRequest,
-                    AccessControlAllowHeaders  = [ "Authorization" ],
-                    Connection                 = ConnectionType.Close
-                };
-
-                return false;
-
-            }
-
-            if (!Program_Id.TryParse(Request.ParsedURLParameters[0], out var programId))
-            {
-
-                HTTPResponseBuilder = new HTTPResponse.Builder(Request) {
-                    HTTPStatusCode             = HTTPStatusCode.BadRequest,
-                    AccessControlAllowHeaders  = [ "Authorization" ],
-                    Connection                 = ConnectionType.Close
+                    HTTPStatusCode              = HTTPStatusCode.BadRequest,
+                    Allow                       = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE],
+                    AccessControlAllowOrigin    = "*",
+                    AccessControlAllowMethods   = [ "OPTIONS", "GET", "PUT", "DELETE" ],
+                    AccessControlAllowHeaders   = [ "Content-Type", "Accept", "Authorization"],
+                    AccessControlExposeHeaders  = [ "X-Request-ID", "X-Correlation-ID", "Link", "X-Total-Count", "X-Filtered-Count" ],
+                    Connection                  = ConnectionType.Close
                 };
 
                 return false;
@@ -97,7 +80,220 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
         #endregion
 
+        #region ParseReportId                   (this Request, out ReportId, ...)
 
+        /// <summary>
+        /// Parse the report identification from the given HTTP request
+        /// or return a HTTP error.
+        /// </summary>
+        /// <param name="Request">A HTTP request.</param>
+        /// <param name="ReportId">The parsed report identification.</param>
+        /// <param name="HTTPResponseBuilder">An HTTP response builder.</param>
+        public static Boolean ParseReportId(this HTTPRequest                                Request,
+                                            [NotNullWhen(true)]  out Report_Id              ReportId,
+                                            [NotNullWhen(false)] out HTTPResponse.Builder?  HTTPResponseBuilder)
+        {
+
+            ReportId             = default;
+            HTTPResponseBuilder  = default;
+
+            if (Request.ParsedURLParameters.Length < 1 ||
+                !Report_Id.TryParse(Request.ParsedURLParameters[0], out var reportId))
+            {
+
+                HTTPResponseBuilder = new HTTPResponse.Builder(Request) {
+                    HTTPStatusCode              = HTTPStatusCode.BadRequest,
+                    Allow                       = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE],
+                    AccessControlAllowOrigin    = "*",
+                    AccessControlAllowMethods   = [ "OPTIONS", "GET", "PUT", "DELETE" ],
+                    AccessControlAllowHeaders   = [ "Content-Type", "Accept", "Authorization"],
+                    AccessControlExposeHeaders  = [ "X-Request-ID", "X-Correlation-ID", "Link", "X-Total-Count", "X-Filtered-Count" ],
+                    Connection                  = ConnectionType.Close
+                };
+
+                return false;
+
+            }
+
+            ReportId = reportId;
+            return true;
+
+        }
+
+        #endregion
+
+        #region ParseEventId                    (this Request, out EventId, ...)
+
+        /// <summary>
+        /// Parse the event identification from the given HTTP request
+        /// or return a HTTP error.
+        /// </summary>
+        /// <param name="Request">A HTTP request.</param>
+        /// <param name="EventId">The parsed event identification.</param>
+        /// <param name="HTTPResponseBuilder">An HTTP response builder.</param>
+        public static Boolean ParseEventId(this HTTPRequest                                Request,
+                                           [NotNullWhen(true)]  out Event_Id               EventId,
+                                           [NotNullWhen(false)] out HTTPResponse.Builder?  HTTPResponseBuilder)
+        {
+
+            EventId              = default;
+            HTTPResponseBuilder  = default;
+
+            if (Request.ParsedURLParameters.Length < 1 ||
+                !Event_Id.TryParse(Request.ParsedURLParameters[0], out var eventId))
+            {
+
+                HTTPResponseBuilder = new HTTPResponse.Builder(Request) {
+                    HTTPStatusCode              = HTTPStatusCode.BadRequest,
+                    Allow                       = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE],
+                    AccessControlAllowOrigin    = "*",
+                    AccessControlAllowMethods   = [ "OPTIONS", "GET", "PUT", "DELETE" ],
+                    AccessControlAllowHeaders   = [ "Content-Type", "Accept", "Authorization"],
+                    AccessControlExposeHeaders  = [ "X-Request-ID", "X-Correlation-ID", "Link", "X-Total-Count", "X-Filtered-Count" ],
+                    Connection                  = ConnectionType.Close
+                };
+
+                return false;
+
+            }
+
+            EventId = eventId;
+            return true;
+
+        }
+
+        #endregion
+
+        #region ParseSubscriptionId             (this Request, out SubscriptionId, ...)
+
+        /// <summary>
+        /// Parse the subscription identification from the given HTTP request
+        /// or return a HTTP error.
+        /// </summary>
+        /// <param name="Request">A HTTP request.</param>
+        /// <param name="SubscriptionId">The parsed subscription identification.</param>
+        /// <param name="HTTPResponseBuilder">An HTTP response builder.</param>
+        public static Boolean ParseSubscriptionId(this HTTPRequest                                Request,
+                                                  [NotNullWhen(true)]  out Subscription_Id        SubscriptionId,
+                                                  [NotNullWhen(false)] out HTTPResponse.Builder?  HTTPResponseBuilder)
+        {
+
+            SubscriptionId       = default;
+            HTTPResponseBuilder  = default;
+
+            if (Request.ParsedURLParameters.Length < 1 ||
+                !Subscription_Id.TryParse(Request.ParsedURLParameters[0], out var subscriptionId))
+            {
+
+                HTTPResponseBuilder = new HTTPResponse.Builder(Request) {
+                    HTTPStatusCode              = HTTPStatusCode.BadRequest,
+                    Allow                       = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE],
+                    AccessControlAllowOrigin    = "*",
+                    AccessControlAllowMethods   = [ "OPTIONS", "GET", "PUT", "DELETE" ],
+                    AccessControlAllowHeaders   = [ "Content-Type", "Accept", "Authorization"],
+                    AccessControlExposeHeaders  = [ "X-Request-ID", "X-Correlation-ID", "Link", "X-Total-Count", "X-Filtered-Count" ],
+                    Connection                  = ConnectionType.Close
+                };
+
+                return false;
+
+            }
+
+            SubscriptionId = subscriptionId;
+            return true;
+
+        }
+
+        #endregion
+
+        #region ParseVirtualEndNodeId           (this Request, out VirtualEndNodeId, ...)
+
+        /// <summary>
+        /// Parse the ven identification from the given HTTP request
+        /// or return a HTTP error.
+        /// </summary>
+        /// <param name="Request">A HTTP request.</param>
+        /// <param name="VirtualEndNodeId">The parsed ven identification.</param>
+        /// <param name="HTTPResponseBuilder">An HTTP response builder.</param>
+        public static Boolean ParseVirtualEndNodeId(this HTTPRequest                                Request,
+                                                    [NotNullWhen(true)]  out VirtualEndNode_Id      VirtualEndNodeId,
+                                                    [NotNullWhen(false)] out HTTPResponse.Builder?  HTTPResponseBuilder)
+        {
+
+            VirtualEndNodeId     = default;
+            HTTPResponseBuilder  = default;
+
+            if (Request.ParsedURLParameters.Length < 1 ||
+                !VirtualEndNode_Id.TryParse(Request.ParsedURLParameters[0], out var venId))
+            {
+
+                HTTPResponseBuilder = new HTTPResponse.Builder(Request) {
+                    HTTPStatusCode              = HTTPStatusCode.BadRequest,
+                    Allow                       = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE],
+                    AccessControlAllowOrigin    = "*",
+                    AccessControlAllowMethods   = [ "OPTIONS", "GET", "PUT", "DELETE" ],
+                    AccessControlAllowHeaders   = [ "Content-Type", "Accept", "Authorization"],
+                    AccessControlExposeHeaders  = [ "X-Request-ID", "X-Correlation-ID", "Link", "X-Total-Count", "X-Filtered-Count" ],
+                    Connection                  = ConnectionType.Close
+                };
+
+                return false;
+
+            }
+
+            VirtualEndNodeId = venId;
+            return true;
+
+        }
+
+        #endregion
+
+        #region ParseVirtualEndNodeIdResourceId (this Request, out VirtualEndNodeId, out ResourceId, ...)
+
+        /// <summary>
+        /// Parse the virtual end node and resource identification from the given HTTP request
+        /// or return a HTTP error.
+        /// </summary>
+        /// <param name="Request">A HTTP request.</param>
+        /// <param name="VirtualEndNodeId">The parsed virtual end node identification.</param>
+        /// <param name="ResourceId">The parsed resource identification.</param>
+        /// <param name="HTTPResponseBuilder">An HTTP response builder.</param>
+        public static Boolean ParseVirtualEndNodeIdResourceId(this HTTPRequest                                Request,
+                                                              [NotNullWhen(true)]  out VirtualEndNode_Id      VirtualEndNodeId,
+                                                              [NotNullWhen(true)]  out Resource_Id            ResourceId,
+                                                              [NotNullWhen(false)] out HTTPResponse.Builder?  HTTPResponseBuilder)
+        {
+
+            VirtualEndNodeId     = default;
+            ResourceId           = default;
+            HTTPResponseBuilder  = default;
+
+            if (Request.ParsedURLParameters.Length == 2 &&
+                VirtualEndNode_Id.TryParse(Request.ParsedURLParameters[0], out var virtualEndNodeId) &&
+                Resource_Id.      TryParse(Request.ParsedURLParameters[1], out var resourceId))
+            {
+
+                VirtualEndNodeId  = virtualEndNodeId;
+                ResourceId        = resourceId;
+                return true;
+
+            }
+
+            HTTPResponseBuilder = new HTTPResponse.Builder(Request) {
+                HTTPStatusCode              = HTTPStatusCode.BadRequest,
+                Allow                       = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE],
+                AccessControlAllowOrigin    = "*",
+                AccessControlAllowMethods   = [ "OPTIONS", "GET", "PUT", "DELETE" ],
+                AccessControlAllowHeaders   = [ "Content-Type", "Accept", "Authorization"],
+                AccessControlExposeHeaders  = [ "X-Request-ID", "X-Correlation-ID", "Link", "X-Total-Count", "X-Filtered-Count" ],
+                Connection                  = ConnectionType.Close
+            };
+
+            return false;
+
+        }
+
+        #endregion
 
     }
 
@@ -105,7 +301,8 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// The OpenADR HTTP API.
     /// </summary>
-    public class OpenADRAPI : HTTPExtAPI
+    public class OpenADRHTTPAPI : AHTTPAPIExtension<HTTPExtAPI>,
+                                  IHTTPAPIExtension<HTTPExtAPI>
     {
 
         #region Data
@@ -113,712 +310,1478 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <summary>
         /// The default HTTP server name.
         /// </summary>
-        public new const       String               DefaultHTTPServerName                          = "OpenADR API";
+        public const           String              DefaultHTTPServerName                = "OpenADR API";
 
         /// <summary>
         /// The default HTTP service name.
         /// </summary>
-        public new const       String               DefaultHTTPServiceName                         = "OpenADR API";
+        public const           String              DefaultHTTPServiceName               = "OpenADR API";
+
+        /// <summary>
+        /// The default HTTP realm, if HTTP Basic Authentication is used.
+        /// </summary>
+        public const           String              DefaultHTTPRealm                     = "Open Charging Cloud OpenADR HTTP API";
 
         /// <summary>
         /// The HTTP root for embedded resources.
         /// </summary>
-        public new const       String               HTTPRoot                                       = "cloud.charging.open.API.HTTPRoot.";
+        public const           String              HTTPRoot                             = "cloud.charging.open.API.HTTPRoot.";
 
-        public const           String               DefaultOpenADRAPI_DatabaseFileName   = "OpenADRAPI.db";
-        public const           String               DefaultOpenADRAPI_LogfileName        = "OpenADRAPI.log";
+        public const           String              DefaultOpenADRAPI_DatabaseFileName   = "OpenADRAPI.db";
+        public const           String              DefaultOpenADRAPI_LogfileName        = "OpenADRAPI.log";
 
-        public static readonly HTTPEventSource_Id   DebugLogId                                     = HTTPEventSource_Id.Parse("DebugLog");
-        public static readonly HTTPEventSource_Id   ImporterLogId                                  = HTTPEventSource_Id.Parse("ImporterLog");
-        public static readonly HTTPEventSource_Id   ForwardingInfosId                              = HTTPEventSource_Id.Parse("ForwardingInfos");
+        public static readonly HTTPEventSource_Id  DebugLogId                           = HTTPEventSource_Id.Parse("DebugLog");
 
-        public                 WWWAuthenticate      WWWAuthenticateDefaults                        = WWWAuthenticate.Basic("OpenADR");
-
-        #endregion
-
-        #region Additional HTTP methods
-
-        public readonly static HTTPMethod RESERVE      = HTTPMethod.TryParse("RESERVE",     IsSafe: false, IsIdempotent: true)!;
-        public readonly static HTTPMethod SETEXPIRED   = HTTPMethod.TryParse("SETEXPIRED",  IsSafe: false, IsIdempotent: true)!;
-        public readonly static HTTPMethod AUTHSTART    = HTTPMethod.TryParse("AUTHSTART",   IsSafe: false, IsIdempotent: true)!;
-        public readonly static HTTPMethod AUTHSTOP     = HTTPMethod.TryParse("AUTHSTOP",    IsSafe: false, IsIdempotent: true)!;
-        public readonly static HTTPMethod REMOTESTART  = HTTPMethod.TryParse("REMOTESTART", IsSafe: false, IsIdempotent: true)!;
-        public readonly static HTTPMethod REMOTESTOP   = HTTPMethod.TryParse("REMOTESTOP",  IsSafe: false, IsIdempotent: true)!;
-        public readonly static HTTPMethod SENDCDR      = HTTPMethod.TryParse("SENDCDR",     IsSafe: false, IsIdempotent: true)!;
+        public                 WWWAuthenticate     WWWAuthenticateDefaults              = WWWAuthenticate.Basic("OpenADR");
 
         #endregion
 
         #region Properties
 
-        /// <summary>
-        /// The API version hash (git commit hash value).
-        /// </summary>
-        public new String                                   APIVersionHash                { get; }
+        public String    OpenADRAPIPath     { get; }
 
-        public String                                       OpenADRAPIPath      { get; }
-
-
-
-        /// <summary>
-        /// Send debug information via HTTP Server Sent Events.
-        /// </summary>
-        public HTTPEventSource<JObject>                     DebugLog                      { get; }
+        public Boolean?  AllowDowngrades    { get; } = false;
 
         #endregion
 
         #region Events
 
-        #region (protected internal) CreateRoamingNetworkRequest (Request)
+        // HTTP Events
+
+        #region On ~/programs
+
+        #region (protected internal) On GET    ~/programs              HTTP(Request/Response)
 
         /// <summary>
-        /// An event sent whenever a authenticate start EVSE request was received.
+        /// An event sent whenever a GET ~/programs HTTP request was received.
         /// </summary>
-        public HTTPRequestLogEvent OnCreateRoamingNetworkRequest = new ();
+        public HTTPRequestLogEvent  OnGET_programs__HTTPRequest   = new ();
 
         /// <summary>
-        /// An event sent whenever a authenticate start EVSE request was received.
+        /// An event sent whenever a GET ~/programs HTTP response was sent.
         /// </summary>
-        /// <param name="Timestamp">The timestamp of the request.</param>
-        /// <param name="API">The HTTP API.</param>
-        /// <param name="Request">A HTTP request.</param>
-        protected internal Task CreateRoamingNetworkRequest(DateTime     Timestamp,
-                                                            HTTPAPI      API,
-                                                            HTTPRequest  Request)
+        public HTTPResponseLogEvent OnGET_programs__HTTPResponse  = new ();
 
-            => OnCreateRoamingNetworkRequest?.WhenAll(Timestamp,
-                                                      API ?? this,
-                                                      Request) ?? Task.CompletedTask;
 
-        #endregion
-
-        #region (protected internal) CreateRoamingNetworkResponse(Response)
 
         /// <summary>
-        /// An event sent whenever a authenticate start EVSE response was sent.
-        /// </summary>
-        public HTTPResponseLogEvent OnCreateRoamingNetworkResponse = new ();
-
-        /// <summary>
-        /// An event sent whenever a authenticate start EVSE response was sent.
+        /// An event sent whenever a GET ~/programs HTTP request was received.
         /// </summary>
         /// <param name="Timestamp">The timestamp of the request.</param>
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
-        /// <param name="Response">A HTTP response.</param>
-        protected internal Task CreateRoamingNetworkResponse(DateTime      Timestamp,
-                                                             HTTPAPI       API,
-                                                             HTTPRequest   Request,
-                                                             HTTPResponse  Response)
-
-            => OnCreateRoamingNetworkResponse?.WhenAll(Timestamp,
-                                                       API ?? this,
-                                                       Request,
-                                                       Response) ?? Task.CompletedTask;
-
-        #endregion
-
-
-        #region (protected internal) DeleteRoamingNetworkRequest (Request)
-
-        /// <summary>
-        /// An event sent whenever a authenticate start EVSE request was received.
-        /// </summary>
-        public HTTPRequestLogEvent OnDeleteRoamingNetworkRequest = new ();
-
-        /// <summary>
-        /// An event sent whenever a authenticate start EVSE request was received.
-        /// </summary>
-        /// <param name="Timestamp">The timestamp of the request.</param>
-        /// <param name="API">The HTTP API.</param>
-        /// <param name="Request">A HTTP request.</param>
-        protected internal Task DeleteRoamingNetworkRequest(DateTime     Timestamp,
-                                                            HTTPAPI      API,
-                                                            HTTPRequest  Request)
-
-            => OnDeleteRoamingNetworkRequest?.WhenAll(Timestamp,
-                                                      API ?? this,
-                                                      Request) ?? Task.CompletedTask;
-
-        #endregion
-
-        #region (protected internal) DeleteRoamingNetworkResponse(Response)
-
-        /// <summary>
-        /// An event sent whenever a authenticate start EVSE response was sent.
-        /// </summary>
-        public HTTPResponseLogEvent OnDeleteRoamingNetworkResponse = new ();
-
-        /// <summary>
-        /// An event sent whenever a authenticate start EVSE response was sent.
-        /// </summary>
-        /// <param name="Timestamp">The timestamp of the request.</param>
-        /// <param name="API">The HTTP API.</param>
-        /// <param name="Request">A HTTP request.</param>
-        /// <param name="Response">A HTTP response.</param>
-        protected internal Task DeleteRoamingNetworkResponse(DateTime      Timestamp,
-                                                             HTTPAPI       API,
-                                                             HTTPRequest   Request,
-                                                             HTTPResponse  Response)
-
-            => OnDeleteRoamingNetworkResponse?.WhenAll(Timestamp,
-                                                       API ?? this,
-                                                       Request,
-                                                       Response) ?? Task.CompletedTask;
-
-        #endregion
-
-
-
-        #region (protected internal) CreateChargingPoolRequest (Request)
-
-        /// <summary>
-        /// An event sent whenever a authenticate start EVSE request was received.
-        /// </summary>
-        public HTTPRequestLogEvent OnCreateChargingPoolRequest = new ();
-
-        /// <summary>
-        /// An event sent whenever a authenticate start EVSE request was received.
-        /// </summary>
-        /// <param name="Timestamp">The timestamp of the request.</param>
-        /// <param name="API">The HTTP API.</param>
-        /// <param name="Request">A HTTP request.</param>
-        protected internal Task CreateChargingPoolRequest(DateTime     Timestamp,
+        protected internal Task GET_programs__HTTPRequest(DateTime     Timestamp,
                                                           HTTPAPI      API,
                                                           HTTPRequest  Request)
 
-            => OnCreateChargingPoolRequest?.WhenAll(Timestamp,
-                                                    API ?? this,
+            => OnGET_programs__HTTPRequest?.WhenAll(Timestamp,
+                                                    API,
                                                     Request) ?? Task.CompletedTask;
 
-        #endregion
-
-        #region (protected internal) CreateChargingPoolResponse(Response)
-
         /// <summary>
-        /// An event sent whenever a authenticate start EVSE response was sent.
-        /// </summary>
-        public HTTPResponseLogEvent OnCreateChargingPoolResponse = new ();
-
-        /// <summary>
-        /// An event sent whenever a authenticate start EVSE response was sent.
+        /// An event sent whenever a GET ~/programs HTTP response was sent.
         /// </summary>
         /// <param name="Timestamp">The timestamp of the request.</param>
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
         /// <param name="Response">A HTTP response.</param>
-        protected internal Task CreateChargingPoolResponse(DateTime      Timestamp,
+        protected internal Task GET_programs__HTTPResponse(DateTime      Timestamp,
                                                            HTTPAPI       API,
                                                            HTTPRequest   Request,
                                                            HTTPResponse  Response)
 
-            => OnCreateChargingPoolResponse?.WhenAll(Timestamp,
-                                                     API ?? this,
+            => OnGET_programs__HTTPResponse?.WhenAll(Timestamp,
+                                                     API,
                                                      Request,
                                                      Response) ?? Task.CompletedTask;
 
         #endregion
 
-
-        #region (protected internal) DeleteChargingPoolRequest (Request)
+        #region (protected internal) On POST   ~/programs              HTTP(Request/Response)
 
         /// <summary>
-        /// An event sent whenever a authenticate start EVSE request was received.
+        /// An event sent whenever a POST ~/programs HTTP request was received.
         /// </summary>
-        public HTTPRequestLogEvent OnDeleteChargingPoolRequest = new ();
+        public HTTPRequestLogEvent  OnPOST_programs__HTTPRequest   = new ();
 
         /// <summary>
-        /// An event sent whenever a authenticate start EVSE request was received.
+        /// An event sent whenever a POST ~/programs HTTP response was sent.
         /// </summary>
-        /// <param name="Timestamp">The timestamp of the request.</param>
-        /// <param name="API">The HTTP API.</param>
-        /// <param name="Request">A HTTP request.</param>
-        protected internal Task DeleteChargingPoolRequest(DateTime     Timestamp,
-                                                          HTTPAPI      API,
-                                                          HTTPRequest  Request)
+        public HTTPResponseLogEvent OnPOST_programs__HTTPResponse  = new ();
 
-            => OnDeleteChargingPoolRequest?.WhenAll(Timestamp,
-                                                    API ?? this,
-                                                    Request) ?? Task.CompletedTask;
 
-        #endregion
-
-        #region (protected internal) DeleteChargingPoolResponse(Response)
 
         /// <summary>
-        /// An event sent whenever a authenticate start EVSE response was sent.
-        /// </summary>
-        public HTTPResponseLogEvent OnDeleteChargingPoolResponse = new ();
-
-        /// <summary>
-        /// An event sent whenever a authenticate start EVSE response was sent.
+        /// An event sent whenever a POST ~/programs HTTP request was received.
         /// </summary>
         /// <param name="Timestamp">The timestamp of the request.</param>
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
-        /// <param name="Response">A HTTP response.</param>
-        protected internal Task DeleteChargingPoolResponse(DateTime      Timestamp,
-                                                           HTTPAPI       API,
-                                                           HTTPRequest   Request,
-                                                           HTTPResponse  Response)
-
-            => OnDeleteChargingPoolResponse?.WhenAll(Timestamp,
-                                                     API ?? this,
-                                                     Request,
-                                                     Response) ?? Task.CompletedTask;
-
-        #endregion
-
-
-
-        #region (protected internal) CreateChargingStationRequest (Request)
-
-        /// <summary>
-        /// An event sent whenever a authenticate start EVSE request was received.
-        /// </summary>
-        public HTTPRequestLogEvent OnCreateChargingStationRequest = new ();
-
-        /// <summary>
-        /// An event sent whenever a authenticate start EVSE request was received.
-        /// </summary>
-        /// <param name="Timestamp">The timestamp of the request.</param>
-        /// <param name="API">The HTTP API.</param>
-        /// <param name="Request">A HTTP request.</param>
-        protected internal Task CreateChargingStationRequest(DateTime     Timestamp,
-                                                             HTTPAPI      API,
-                                                             HTTPRequest  Request)
-
-            => OnCreateChargingStationRequest?.WhenAll(Timestamp,
-                                                       API ?? this,
-                                                       Request) ?? Task.CompletedTask;
-
-        #endregion
-
-        #region (protected internal) CreateChargingStationResponse(Response)
-
-        /// <summary>
-        /// An event sent whenever a authenticate start EVSE response was sent.
-        /// </summary>
-        public HTTPResponseLogEvent OnCreateChargingStationResponse = new ();
-
-        /// <summary>
-        /// An event sent whenever a authenticate start EVSE response was sent.
-        /// </summary>
-        /// <param name="Timestamp">The timestamp of the request.</param>
-        /// <param name="API">The HTTP API.</param>
-        /// <param name="Request">A HTTP request.</param>
-        /// <param name="Response">A HTTP response.</param>
-        protected internal Task CreateChargingStationResponse(DateTime      Timestamp,
-                                                              HTTPAPI       API,
-                                                              HTTPRequest   Request,
-                                                              HTTPResponse  Response)
-
-            => OnCreateChargingStationResponse?.WhenAll(Timestamp,
-                                                        API ?? this,
-                                                        Request,
-                                                        Response) ?? Task.CompletedTask;
-
-        #endregion
-
-
-        #region (protected internal) DeleteChargingStationRequest (Request)
-
-        /// <summary>
-        /// An event sent whenever a authenticate start EVSE request was received.
-        /// </summary>
-        public HTTPRequestLogEvent OnDeleteChargingStationRequest = new ();
-
-        /// <summary>
-        /// An event sent whenever a authenticate start EVSE request was received.
-        /// </summary>
-        /// <param name="Timestamp">The timestamp of the request.</param>
-        /// <param name="API">The HTTP API.</param>
-        /// <param name="Request">A HTTP request.</param>
-        protected internal Task DeleteChargingStationRequest(DateTime     Timestamp,
-                                                             HTTPAPI      API,
-                                                             HTTPRequest  Request)
-
-            => OnDeleteChargingStationRequest?.WhenAll(Timestamp,
-                                                       API ?? this,
-                                                       Request) ?? Task.CompletedTask;
-
-        #endregion
-
-        #region (protected internal) DeleteChargingStationResponse(Response)
-
-        /// <summary>
-        /// An event sent whenever a authenticate start EVSE response was sent.
-        /// </summary>
-        public HTTPResponseLogEvent OnDeleteChargingStationResponse = new ();
-
-        /// <summary>
-        /// An event sent whenever a authenticate start EVSE response was sent.
-        /// </summary>
-        /// <param name="Timestamp">The timestamp of the request.</param>
-        /// <param name="API">The HTTP API.</param>
-        /// <param name="Request">A HTTP request.</param>
-        /// <param name="Response">A HTTP response.</param>
-        protected internal Task DeleteChargingStationResponse(DateTime      Timestamp,
-                                                              HTTPAPI       API,
-                                                              HTTPRequest   Request,
-                                                              HTTPResponse  Response)
-
-            => OnDeleteChargingStationResponse?.WhenAll(Timestamp,
-                                                        API ?? this,
-                                                        Request,
-                                                        Response) ?? Task.CompletedTask;
-
-        #endregion
-
-
-
-        #region (protected internal) SendGetEVSEsStatusRequest (Request)
-
-        /// <summary>
-        /// An event sent whenever an EVSEs->Status request was received.
-        /// </summary>
-        public HTTPRequestLogEvent OnGetEVSEsStatusRequest = new ();
-
-        /// <summary>
-        /// An event sent whenever an EVSEs->Status request was received.
-        /// </summary>
-        /// <param name="Timestamp">The timestamp of the request.</param>
-        /// <param name="API">The HTTP API.</param>
-        /// <param name="Request">A HTTP request.</param>
-        protected internal Task SendGetEVSEsStatusRequest(DateTime     Timestamp,
-                                                          HTTPAPI      API,
-                                                          HTTPRequest  Request)
-
-            => OnGetEVSEsStatusRequest?.WhenAll(Timestamp,
-                                                API ?? this,
-                                                Request) ?? Task.CompletedTask;
-
-        #endregion
-
-        #region (protected internal) SendGetEVSEsStatusResponse(Response)
-
-        /// <summary>
-        /// An event sent whenever an EVSEs->Status response was sent.
-        /// </summary>
-        public HTTPResponseLogEvent OnGetEVSEsStatusResponse = new ();
-
-        /// <summary>
-        /// An event sent whenever an EVSEs->Status response was sent.
-        /// </summary>
-        /// <param name="Timestamp">The timestamp of the request.</param>
-        /// <param name="API">The HTTP API.</param>
-        /// <param name="Request">A HTTP request.</param>
-        /// <param name="Response">A HTTP response.</param>
-        protected internal Task SendGetEVSEsStatusResponse(DateTime      Timestamp,
-                                                           HTTPAPI       API,
-                                                           HTTPRequest   Request,
-                                                           HTTPResponse  Response)
-
-            => OnGetEVSEsStatusResponse?.WhenAll(Timestamp,
-                                                 API ?? this,
-                                                 Request,
-                                                 Response) ?? Task.CompletedTask;
-
-        #endregion
-
-
-
-        #region (protected internal) SendRemoteStartEVSERequest (Request)
-
-        /// <summary>
-        /// An event sent whenever a authenticate start EVSE request was received.
-        /// </summary>
-        public HTTPRequestLogEvent OnSendRemoteStartEVSERequest = new ();
-
-        /// <summary>
-        /// An event sent whenever a authenticate start EVSE request was received.
-        /// </summary>
-        /// <param name="Timestamp">The timestamp of the request.</param>
-        /// <param name="API">The HTTP API.</param>
-        /// <param name="Request">A HTTP request.</param>
-        protected internal Task SendRemoteStartEVSERequest(DateTime     Timestamp,
+        protected internal Task POST_programs__HTTPRequest(DateTime     Timestamp,
                                                            HTTPAPI      API,
                                                            HTTPRequest  Request)
 
-            => OnSendRemoteStartEVSERequest?.WhenAll(Timestamp,
-                                                     API ?? this,
+            => OnPOST_programs__HTTPRequest?.WhenAll(Timestamp,
+                                                     API,
                                                      Request) ?? Task.CompletedTask;
 
-        #endregion
-
-        #region (protected internal) SendRemoteStartEVSEResponse(Response)
-
         /// <summary>
-        /// An event sent whenever a authenticate start EVSE response was sent.
-        /// </summary>
-        public HTTPResponseLogEvent OnSendRemoteStartEVSEResponse = new ();
-
-        /// <summary>
-        /// An event sent whenever a authenticate start EVSE response was sent.
+        /// An event sent whenever a POST ~/programs HTTP response was sent.
         /// </summary>
         /// <param name="Timestamp">The timestamp of the request.</param>
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
         /// <param name="Response">A HTTP response.</param>
-        protected internal Task SendRemoteStartEVSEResponse(DateTime      Timestamp,
+        protected internal Task POST_programs__HTTPResponse(DateTime      Timestamp,
                                                             HTTPAPI       API,
                                                             HTTPRequest   Request,
                                                             HTTPResponse  Response)
 
-            => OnSendRemoteStartEVSEResponse?.WhenAll(Timestamp,
-                                                      API ?? this,
+            => OnPOST_programs__HTTPResponse?.WhenAll(Timestamp,
+                                                      API,
                                                       Request,
                                                       Response) ?? Task.CompletedTask;
 
         #endregion
 
 
-        #region (protected internal) SendRemoteStopEVSERequest (Request)
+        #region (protected internal) On GET    ~/programs/{programId}  HTTP(Request/Response)
 
         /// <summary>
-        /// An event sent whenever a authenticate start EVSE request was received.
+        /// An event sent whenever a GET ~/programs/{programId} HTTP request was received.
         /// </summary>
-        public HTTPRequestLogEvent OnSendRemoteStopEVSERequest = new ();
+        public HTTPRequestLogEvent  OnGET_program__HTTPRequest   = new ();
 
         /// <summary>
-        /// An event sent whenever a authenticate start EVSE request was received.
+        /// An event sent whenever a GET ~/programs/{programId} HTTP response was sent.
+        /// </summary>
+        public HTTPResponseLogEvent OnGET_program__HTTPResponse  = new ();
+
+
+
+        /// <summary>
+        /// An event sent whenever a GET ~/programs/{programId} HTTP request was received.
         /// </summary>
         /// <param name="Timestamp">The timestamp of the request.</param>
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
-        protected internal Task SendRemoteStopEVSERequest(DateTime     Timestamp,
-                                                          HTTPAPI      API,
-                                                          HTTPRequest  Request)
+        protected internal Task GET_program__HTTPRequest(DateTime     Timestamp,
+                                                         HTTPAPI      API,
+                                                         HTTPRequest  Request)
 
-            => OnSendRemoteStopEVSERequest?.WhenAll(Timestamp,
-                                                    API ?? this,
-                                                    Request) ?? Task.CompletedTask;
-
-        #endregion
-
-        #region (protected internal) SendRemoteStopEVSEResponse(Response)
+            => OnGET_program__HTTPRequest?.WhenAll(Timestamp,
+                                                   API,
+                                                   Request) ?? Task.CompletedTask;
 
         /// <summary>
-        /// An event sent whenever a authenticate start EVSE response was sent.
-        /// </summary>
-        public HTTPResponseLogEvent OnSendRemoteStopEVSEResponse = new ();
-
-        /// <summary>
-        /// An event sent whenever a authenticate start EVSE response was sent.
+        /// An event sent whenever a GET ~/programs/{programId} HTTP response was sent.
         /// </summary>
         /// <param name="Timestamp">The timestamp of the request.</param>
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
         /// <param name="Response">A HTTP response.</param>
-        protected internal Task SendRemoteStopEVSEResponse(DateTime      Timestamp,
+        protected internal Task GET_program__HTTPResponse(DateTime      Timestamp,
+                                                          HTTPAPI       API,
+                                                          HTTPRequest   Request,
+                                                          HTTPResponse  Response)
+
+            => OnGET_program__HTTPResponse?.WhenAll(Timestamp,
+                                                    API,
+                                                    Request,
+                                                    Response) ?? Task.CompletedTask;
+
+        #endregion
+
+        #region (protected internal) On PUT    ~/programs/{programId}  HTTP(Request/Response)
+
+        /// <summary>
+        /// An event sent whenever a PUT ~/programs/{programId} HTTP request was received.
+        /// </summary>
+        public HTTPRequestLogEvent  OnPUT_program__HTTPRequest   = new ();
+
+        /// <summary>
+        /// An event sent whenever a PUT ~/programs/{programId} HTTP response was sent.
+        /// </summary>
+        public HTTPResponseLogEvent OnPUT_program__HTTPResponse  = new ();
+
+
+
+        /// <summary>
+        /// An event sent whenever a PUT ~/programs/{programId} HTTP request was received.
+        /// </summary>
+        /// <param name="Timestamp">The timestamp of the request.</param>
+        /// <param name="API">The HTTP API.</param>
+        /// <param name="Request">A HTTP request.</param>
+        protected internal Task PUT_program__HTTPRequest(DateTime     Timestamp,
+                                                         HTTPAPI      API,
+                                                         HTTPRequest  Request)
+
+            => OnPUT_program__HTTPRequest?.WhenAll(Timestamp,
+                                                   API,
+                                                   Request) ?? Task.CompletedTask;
+
+        /// <summary>
+        /// An event sent whenever a PUT ~/programs/{programId} HTTP response was sent.
+        /// </summary>
+        /// <param name="Timestamp">The timestamp of the request.</param>
+        /// <param name="API">The HTTP API.</param>
+        /// <param name="Request">A HTTP request.</param>
+        /// <param name="Response">A HTTP response.</param>
+        protected internal Task PUT_program__HTTPResponse(DateTime      Timestamp,
+                                                          HTTPAPI       API,
+                                                          HTTPRequest   Request,
+                                                          HTTPResponse  Response)
+
+            => OnPUT_program__HTTPResponse?.WhenAll(Timestamp,
+                                                    API,
+                                                    Request,
+                                                    Response) ?? Task.CompletedTask;
+
+        #endregion
+
+        #region (protected internal) On DELETE ~/programs/{programId}  HTTP(Request/Response)
+
+        /// <summary>
+        /// An event sent whenever a DELETE ~/programs/{programId} HTTP request was received.
+        /// </summary>
+        public HTTPRequestLogEvent  OnDELETE_program__HTTPRequest   = new ();
+
+        /// <summary>
+        /// An event sent whenever a DELETE ~/programs/{programId} HTTP response was sent.
+        /// </summary>
+        public HTTPResponseLogEvent OnDELETE_program__HTTPResponse  = new ();
+
+
+
+        /// <summary>
+        /// An event sent whenever a DELETE ~/programs/{programId} HTTP request was received.
+        /// </summary>
+        /// <param name="Timestamp">The timestamp of the request.</param>
+        /// <param name="API">The HTTP API.</param>
+        /// <param name="Request">A HTTP request.</param>
+        protected internal Task DELETE_program__HTTPRequest(DateTime     Timestamp,
+                                                            HTTPAPI      API,
+                                                            HTTPRequest  Request)
+
+            => OnDELETE_program__HTTPRequest?.WhenAll(Timestamp,
+                                                      API,
+                                                      Request) ?? Task.CompletedTask;
+
+        /// <summary>
+        /// An event sent whenever a DELETE ~/programs/{programId} HTTP response was sent.
+        /// </summary>
+        /// <param name="Timestamp">The timestamp of the request.</param>
+        /// <param name="API">The HTTP API.</param>
+        /// <param name="Request">A HTTP request.</param>
+        /// <param name="Response">A HTTP response.</param>
+        protected internal Task DELETE_program__HTTPResponse(DateTime      Timestamp,
+                                                             HTTPAPI       API,
+                                                             HTTPRequest   Request,
+                                                             HTTPResponse  Response)
+
+            => OnDELETE_program__HTTPResponse?.WhenAll(Timestamp,
+                                                       API,
+                                                       Request,
+                                                       Response) ?? Task.CompletedTask;
+
+        #endregion
+
+        #endregion
+
+        #region On ~/reports
+
+        #region (protected internal) On GET    ~/reports             HTTP(Request/Response)
+
+        /// <summary>
+        /// An event sent whenever a GET ~/reports HTTP request was received.
+        /// </summary>
+        public HTTPRequestLogEvent  OnGET_reports__HTTPRequest   = new ();
+
+        /// <summary>
+        /// An event sent whenever a GET ~/reports HTTP response was sent.
+        /// </summary>
+        public HTTPResponseLogEvent OnGET_reports__HTTPResponse  = new ();
+
+
+
+        /// <summary>
+        /// An event sent whenever a GET ~/reports HTTP request was received.
+        /// </summary>
+        /// <param name="Timestamp">The timestamp of the request.</param>
+        /// <param name="API">The HTTP API.</param>
+        /// <param name="Request">A HTTP request.</param>
+        protected internal Task GET_reports__HTTPRequest(DateTime     Timestamp,
+                                                         HTTPAPI      API,
+                                                         HTTPRequest  Request)
+
+            => OnGET_reports__HTTPRequest?.WhenAll(Timestamp,
+                                                   API,
+                                                   Request) ?? Task.CompletedTask;
+
+        /// <summary>
+        /// An event sent whenever a GET ~/reports HTTP response was sent.
+        /// </summary>
+        /// <param name="Timestamp">The timestamp of the request.</param>
+        /// <param name="API">The HTTP API.</param>
+        /// <param name="Request">A HTTP request.</param>
+        /// <param name="Response">A HTTP response.</param>
+        protected internal Task GET_reports__HTTPResponse(DateTime      Timestamp,
+                                                          HTTPAPI       API,
+                                                          HTTPRequest   Request,
+                                                          HTTPResponse  Response)
+
+            => OnGET_reports__HTTPResponse?.WhenAll(Timestamp,
+                                                    API,
+                                                    Request,
+                                                    Response) ?? Task.CompletedTask;
+
+        #endregion
+
+        #region (protected internal) On POST   ~/reports             HTTP(Request/Response)
+
+        /// <summary>
+        /// An event sent whenever a POST ~/reports HTTP request was received.
+        /// </summary>
+        public HTTPRequestLogEvent  OnPOST_reports__HTTPRequest   = new ();
+
+        /// <summary>
+        /// An event sent whenever a POST ~/reports HTTP response was sent.
+        /// </summary>
+        public HTTPResponseLogEvent OnPOST_reports__HTTPResponse  = new ();
+
+
+
+        /// <summary>
+        /// An event sent whenever a POST ~/reports HTTP request was received.
+        /// </summary>
+        /// <param name="Timestamp">The timestamp of the request.</param>
+        /// <param name="API">The HTTP API.</param>
+        /// <param name="Request">A HTTP request.</param>
+        protected internal Task POST_reports__HTTPRequest(DateTime     Timestamp,
+                                                          HTTPAPI      API,
+                                                          HTTPRequest  Request)
+
+            => OnPOST_reports__HTTPRequest?.WhenAll(Timestamp,
+                                                    API,
+                                                    Request) ?? Task.CompletedTask;
+
+        /// <summary>
+        /// An event sent whenever a POST ~/reports HTTP response was sent.
+        /// </summary>
+        /// <param name="Timestamp">The timestamp of the request.</param>
+        /// <param name="API">The HTTP API.</param>
+        /// <param name="Request">A HTTP request.</param>
+        /// <param name="Response">A HTTP response.</param>
+        protected internal Task POST_reports__HTTPResponse(DateTime      Timestamp,
                                                            HTTPAPI       API,
                                                            HTTPRequest   Request,
                                                            HTTPResponse  Response)
 
-            => OnSendRemoteStopEVSEResponse?.WhenAll(Timestamp,
-                                                     API ?? this,
+            => OnPOST_reports__HTTPResponse?.WhenAll(Timestamp,
+                                                     API,
                                                      Request,
                                                      Response) ?? Task.CompletedTask;
 
         #endregion
 
 
-
-        #region (protected internal) SendReserveEVSERequest     (Request)
+        #region (protected internal) On GET    ~/reports/{reportId}  HTTP(Request/Response)
 
         /// <summary>
-        /// An event sent whenever a authenticate start EVSE request was received.
+        /// An event sent whenever a GET ~/reports/{reportId} HTTP request was received.
         /// </summary>
-        public HTTPRequestLogEvent OnSendReserveEVSERequest = new ();
+        public HTTPRequestLogEvent  OnGET_report__HTTPRequest   = new ();
 
         /// <summary>
-        /// An event sent whenever a authenticate start EVSE request was received.
+        /// An event sent whenever a GET ~/reports/{reportId} HTTP response was sent.
+        /// </summary>
+        public HTTPResponseLogEvent OnGET_report__HTTPResponse  = new ();
+
+
+
+        /// <summary>
+        /// An event sent whenever a GET ~/reports/{reportId} HTTP request was received.
         /// </summary>
         /// <param name="Timestamp">The timestamp of the request.</param>
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
-        protected internal Task SendReserveEVSERequest(DateTime     Timestamp,
-                                                       HTTPAPI      API,
-                                                       HTTPRequest  Request)
+        protected internal Task GET_report__HTTPRequest(DateTime     Timestamp,
+                                                        HTTPAPI      API,
+                                                        HTTPRequest  Request)
 
-            => OnSendReserveEVSERequest?.WhenAll(Timestamp,
-                                                 API ?? this,
-                                                 Request) ?? Task.CompletedTask;
-
-        #endregion
-
-        #region (protected internal) SendReserveEVSEResponse    (Response)
+            => OnGET_report__HTTPRequest?.WhenAll(Timestamp,
+                                                  API,
+                                                  Request) ?? Task.CompletedTask;
 
         /// <summary>
-        /// An event sent whenever a authenticate start EVSE response was sent.
-        /// </summary>
-        public HTTPResponseLogEvent OnSendReserveEVSEResponse = new ();
-
-        /// <summary>
-        /// An event sent whenever a authenticate start EVSE response was sent.
+        /// An event sent whenever a GET ~/reports/{reportId} HTTP response was sent.
         /// </summary>
         /// <param name="Timestamp">The timestamp of the request.</param>
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
         /// <param name="Response">A HTTP response.</param>
-        protected internal Task SendReserveEVSEResponse(DateTime      Timestamp,
+        protected internal Task GET_report__HTTPResponse(DateTime      Timestamp,
+                                                         HTTPAPI       API,
+                                                         HTTPRequest   Request,
+                                                         HTTPResponse  Response)
+
+            => OnGET_report__HTTPResponse?.WhenAll(Timestamp,
+                                                   API,
+                                                   Request,
+                                                   Response) ?? Task.CompletedTask;
+
+        #endregion
+
+        #region (protected internal) On PUT    ~/reports/{reportId}  HTTP(Request/Response)
+
+        /// <summary>
+        /// An event sent whenever a PUT ~/reports/{reportId} HTTP request was received.
+        /// </summary>
+        public HTTPRequestLogEvent  OnPUT_report__HTTPRequest   = new ();
+
+        /// <summary>
+        /// An event sent whenever a PUT ~/reports/{reportId} HTTP response was sent.
+        /// </summary>
+        public HTTPResponseLogEvent OnPUT_report__HTTPResponse  = new ();
+
+
+
+        /// <summary>
+        /// An event sent whenever a PUT ~/reports/{reportId} HTTP request was received.
+        /// </summary>
+        /// <param name="Timestamp">The timestamp of the request.</param>
+        /// <param name="API">The HTTP API.</param>
+        /// <param name="Request">A HTTP request.</param>
+        protected internal Task PUT_report__HTTPRequest(DateTime     Timestamp,
+                                                        HTTPAPI      API,
+                                                        HTTPRequest  Request)
+
+            => OnPUT_report__HTTPRequest?.WhenAll(Timestamp,
+                                                  API,
+                                                  Request) ?? Task.CompletedTask;
+
+        /// <summary>
+        /// An event sent whenever a PUT ~/reports/{reportId} HTTP response was sent.
+        /// </summary>
+        /// <param name="Timestamp">The timestamp of the request.</param>
+        /// <param name="API">The HTTP API.</param>
+        /// <param name="Request">A HTTP request.</param>
+        /// <param name="Response">A HTTP response.</param>
+        protected internal Task PUT_report__HTTPResponse(DateTime      Timestamp,
+                                                         HTTPAPI       API,
+                                                         HTTPRequest   Request,
+                                                         HTTPResponse  Response)
+
+            => OnPUT_report__HTTPResponse?.WhenAll(Timestamp,
+                                                   API,
+                                                   Request,
+                                                   Response) ?? Task.CompletedTask;
+
+        #endregion
+
+        #region (protected internal) On DELETE ~/reports/{reportId}  HTTP(Request/Response)
+
+        /// <summary>
+        /// An event sent whenever a DELETE ~/reports/{reportId} HTTP request was received.
+        /// </summary>
+        public HTTPRequestLogEvent  OnDELETE_report__HTTPRequest   = new ();
+
+        /// <summary>
+        /// An event sent whenever a DELETE ~/reports/{reportId} HTTP response was sent.
+        /// </summary>
+        public HTTPResponseLogEvent OnDELETE_report__HTTPResponse  = new ();
+
+
+
+        /// <summary>
+        /// An event sent whenever a DELETE ~/reports/{reportId} HTTP request was received.
+        /// </summary>
+        /// <param name="Timestamp">The timestamp of the request.</param>
+        /// <param name="API">The HTTP API.</param>
+        /// <param name="Request">A HTTP request.</param>
+        protected internal Task DELETE_report__HTTPRequest(DateTime     Timestamp,
+                                                           HTTPAPI      API,
+                                                           HTTPRequest  Request)
+
+            => OnDELETE_report__HTTPRequest?.WhenAll(Timestamp,
+                                                     API,
+                                                     Request) ?? Task.CompletedTask;
+
+        /// <summary>
+        /// An event sent whenever a DELETE ~/reports/{reportId} HTTP response was sent.
+        /// </summary>
+        /// <param name="Timestamp">The timestamp of the request.</param>
+        /// <param name="API">The HTTP API.</param>
+        /// <param name="Request">A HTTP request.</param>
+        /// <param name="Response">A HTTP response.</param>
+        protected internal Task DELETE_report__HTTPResponse(DateTime      Timestamp,
+                                                            HTTPAPI       API,
+                                                            HTTPRequest   Request,
+                                                            HTTPResponse  Response)
+
+            => OnDELETE_report__HTTPResponse?.WhenAll(Timestamp,
+                                                      API,
+                                                      Request,
+                                                      Response) ?? Task.CompletedTask;
+
+        #endregion
+
+        #endregion
+
+        #region On ~/events
+
+        #region (protected internal) On GET    ~/events            HTTP(Request/Response)
+
+        /// <summary>
+        /// An event sent whenever a GET ~/events HTTP request was received.
+        /// </summary>
+        public HTTPRequestLogEvent  OnGET_events__HTTPRequest   = new ();
+
+        /// <summary>
+        /// An event sent whenever a GET ~/events HTTP response was sent.
+        /// </summary>
+        public HTTPResponseLogEvent OnGET_events__HTTPResponse  = new ();
+
+
+
+        /// <summary>
+        /// An event sent whenever a GET ~/events HTTP request was received.
+        /// </summary>
+        /// <param name="Timestamp">The timestamp of the request.</param>
+        /// <param name="API">The HTTP API.</param>
+        /// <param name="Request">A HTTP request.</param>
+        protected internal Task GET_events__HTTPRequest(DateTime     Timestamp,
+                                                        HTTPAPI      API,
+                                                        HTTPRequest  Request)
+
+            => OnGET_events__HTTPRequest?.WhenAll(Timestamp,
+                                                  API,
+                                                  Request) ?? Task.CompletedTask;
+
+        /// <summary>
+        /// An event sent whenever a GET ~/events HTTP response was sent.
+        /// </summary>
+        /// <param name="Timestamp">The timestamp of the request.</param>
+        /// <param name="API">The HTTP API.</param>
+        /// <param name="Request">A HTTP request.</param>
+        /// <param name="Response">A HTTP response.</param>
+        protected internal Task GET_events__HTTPResponse(DateTime      Timestamp,
+                                                         HTTPAPI       API,
+                                                         HTTPRequest   Request,
+                                                         HTTPResponse  Response)
+
+            => OnGET_events__HTTPResponse?.WhenAll(Timestamp,
+                                                   API,
+                                                   Request,
+                                                   Response) ?? Task.CompletedTask;
+
+        #endregion
+
+        #region (protected internal) On POST   ~/events            HTTP(Request/Response)
+
+        /// <summary>
+        /// An event sent whenever a POST ~/events HTTP request was received.
+        /// </summary>
+        public HTTPRequestLogEvent  OnPOST_events__HTTPRequest   = new ();
+
+        /// <summary>
+        /// An event sent whenever a POST ~/events HTTP response was sent.
+        /// </summary>
+        public HTTPResponseLogEvent OnPOST_events__HTTPResponse  = new ();
+
+
+
+        /// <summary>
+        /// An event sent whenever a POST ~/events HTTP request was received.
+        /// </summary>
+        /// <param name="Timestamp">The timestamp of the request.</param>
+        /// <param name="API">The HTTP API.</param>
+        /// <param name="Request">A HTTP request.</param>
+        protected internal Task POST_events__HTTPRequest(DateTime     Timestamp,
+                                                         HTTPAPI      API,
+                                                         HTTPRequest  Request)
+
+            => OnPOST_events__HTTPRequest?.WhenAll(Timestamp,
+                                                   API,
+                                                   Request) ?? Task.CompletedTask;
+
+        /// <summary>
+        /// An event sent whenever a POST ~/events HTTP response was sent.
+        /// </summary>
+        /// <param name="Timestamp">The timestamp of the request.</param>
+        /// <param name="API">The HTTP API.</param>
+        /// <param name="Request">A HTTP request.</param>
+        /// <param name="Response">A HTTP response.</param>
+        protected internal Task POST_events__HTTPResponse(DateTime      Timestamp,
+                                                          HTTPAPI       API,
+                                                          HTTPRequest   Request,
+                                                          HTTPResponse  Response)
+
+            => OnPOST_events__HTTPResponse?.WhenAll(Timestamp,
+                                                    API,
+                                                    Request,
+                                                    Response) ?? Task.CompletedTask;
+
+        #endregion
+
+
+        #region (protected internal) On GET    ~/events/{eventId}  HTTP(Request/Response)
+
+        /// <summary>
+        /// An event sent whenever a GET ~/events/{eventId} HTTP request was received.
+        /// </summary>
+        public HTTPRequestLogEvent  OnGET_event__HTTPRequest   = new ();
+
+        /// <summary>
+        /// An event sent whenever a GET ~/events/{eventId} HTTP response was sent.
+        /// </summary>
+        public HTTPResponseLogEvent OnGET_event__HTTPResponse  = new ();
+
+
+
+        /// <summary>
+        /// An event sent whenever a GET ~/events/{eventId} HTTP request was received.
+        /// </summary>
+        /// <param name="Timestamp">The timestamp of the request.</param>
+        /// <param name="API">The HTTP API.</param>
+        /// <param name="Request">A HTTP request.</param>
+        protected internal Task GET_event__HTTPRequest(DateTime     Timestamp,
+                                                       HTTPAPI      API,
+                                                       HTTPRequest  Request)
+
+            => OnGET_event__HTTPRequest?.WhenAll(Timestamp,
+                                                 API,
+                                                 Request) ?? Task.CompletedTask;
+
+        /// <summary>
+        /// An event sent whenever a GET ~/events/{eventId} HTTP response was sent.
+        /// </summary>
+        /// <param name="Timestamp">The timestamp of the request.</param>
+        /// <param name="API">The HTTP API.</param>
+        /// <param name="Request">A HTTP request.</param>
+        /// <param name="Response">A HTTP response.</param>
+        protected internal Task GET_event__HTTPResponse(DateTime      Timestamp,
                                                         HTTPAPI       API,
                                                         HTTPRequest   Request,
                                                         HTTPResponse  Response)
 
-            => OnSendReserveEVSEResponse?.WhenAll(Timestamp,
-                                                  API ?? this,
+            => OnGET_event__HTTPResponse?.WhenAll(Timestamp,
+                                                  API,
+                                                  Request,
+                                                  Response) ?? Task.CompletedTask;
+
+        #endregion
+
+        #region (protected internal) On PUT    ~/events/{eventId}  HTTP(Request/Response)
+
+        /// <summary>
+        /// An event sent whenever a PUT ~/events/{eventId} HTTP request was received.
+        /// </summary>
+        public HTTPRequestLogEvent  OnPUT_event__HTTPRequest   = new ();
+
+        /// <summary>
+        /// An event sent whenever a PUT ~/events/{eventId} HTTP response was sent.
+        /// </summary>
+        public HTTPResponseLogEvent OnPUT_event__HTTPResponse  = new ();
+
+
+
+        /// <summary>
+        /// An event sent whenever a PUT ~/events/{eventId} HTTP request was received.
+        /// </summary>
+        /// <param name="Timestamp">The timestamp of the request.</param>
+        /// <param name="API">The HTTP API.</param>
+        /// <param name="Request">A HTTP request.</param>
+        protected internal Task PUT_event__HTTPRequest(DateTime     Timestamp,
+                                                       HTTPAPI      API,
+                                                       HTTPRequest  Request)
+
+            => OnPUT_event__HTTPRequest?.WhenAll(Timestamp,
+                                                 API,
+                                                 Request) ?? Task.CompletedTask;
+
+        /// <summary>
+        /// An event sent whenever a PUT ~/events/{eventId} HTTP response was sent.
+        /// </summary>
+        /// <param name="Timestamp">The timestamp of the request.</param>
+        /// <param name="API">The HTTP API.</param>
+        /// <param name="Request">A HTTP request.</param>
+        /// <param name="Response">A HTTP response.</param>
+        protected internal Task PUT_event__HTTPResponse(DateTime      Timestamp,
+                                                        HTTPAPI       API,
+                                                        HTTPRequest   Request,
+                                                        HTTPResponse  Response)
+
+            => OnPUT_event__HTTPResponse?.WhenAll(Timestamp,
+                                                  API,
+                                                  Request,
+                                                  Response) ?? Task.CompletedTask;
+
+        #endregion
+
+        #region (protected internal) On DELETE ~/events/{eventId}  HTTP(Request/Response)
+
+        /// <summary>
+        /// An event sent whenever a DELETE ~/events/{eventId} HTTP request was received.
+        /// </summary>
+        public HTTPRequestLogEvent  OnDELETE_event__HTTPRequest   = new ();
+
+        /// <summary>
+        /// An event sent whenever a DELETE ~/events/{eventId} HTTP response was sent.
+        /// </summary>
+        public HTTPResponseLogEvent OnDELETE_event__HTTPResponse  = new ();
+
+
+
+        /// <summary>
+        /// An event sent whenever a DELETE ~/events/{eventId} HTTP request was received.
+        /// </summary>
+        /// <param name="Timestamp">The timestamp of the request.</param>
+        /// <param name="API">The HTTP API.</param>
+        /// <param name="Request">A HTTP request.</param>
+        protected internal Task DELETE_event__HTTPRequest(DateTime     Timestamp,
+                                                          HTTPAPI      API,
+                                                          HTTPRequest  Request)
+
+            => OnDELETE_event__HTTPRequest?.WhenAll(Timestamp,
+                                                    API,
+                                                    Request) ?? Task.CompletedTask;
+
+        /// <summary>
+        /// An event sent whenever a DELETE ~/events/{eventId} HTTP response was sent.
+        /// </summary>
+        /// <param name="Timestamp">The timestamp of the request.</param>
+        /// <param name="API">The HTTP API.</param>
+        /// <param name="Request">A HTTP request.</param>
+        /// <param name="Response">A HTTP response.</param>
+        protected internal Task DELETE_event__HTTPResponse(DateTime      Timestamp,
+                                                           HTTPAPI       API,
+                                                           HTTPRequest   Request,
+                                                           HTTPResponse  Response)
+
+            => OnDELETE_event__HTTPResponse?.WhenAll(Timestamp,
+                                                     API,
+                                                     Request,
+                                                     Response) ?? Task.CompletedTask;
+
+        #endregion
+
+        #endregion
+
+        #region On ~/subscriptions
+
+        #region (protected internal) On GET    ~/subscriptions                   HTTP(Request/Response)
+
+        /// <summary>
+        /// An event sent whenever a GET ~/subscriptions HTTP request was received.
+        /// </summary>
+        public HTTPRequestLogEvent  OnGET_subscriptions__HTTPRequest   = new ();
+
+        /// <summary>
+        /// An event sent whenever a GET ~/subscriptions HTTP response was sent.
+        /// </summary>
+        public HTTPResponseLogEvent OnGET_subscriptions__HTTPResponse  = new ();
+
+
+
+        /// <summary>
+        /// An event sent whenever a GET ~/subscriptions HTTP request was received.
+        /// </summary>
+        /// <param name="Timestamp">The timestamp of the request.</param>
+        /// <param name="API">The HTTP API.</param>
+        /// <param name="Request">A HTTP request.</param>
+        protected internal Task GET_subscriptions__HTTPRequest(DateTime     Timestamp,
+                                                               HTTPAPI      API,
+                                                               HTTPRequest  Request)
+
+            => OnGET_subscriptions__HTTPRequest?.WhenAll(Timestamp,
+                                                         API,
+                                                         Request) ?? Task.CompletedTask;
+
+        /// <summary>
+        /// An event sent whenever a GET ~/subscriptions HTTP response was sent.
+        /// </summary>
+        /// <param name="Timestamp">The timestamp of the request.</param>
+        /// <param name="API">The HTTP API.</param>
+        /// <param name="Request">A HTTP request.</param>
+        /// <param name="Response">A HTTP response.</param>
+        protected internal Task GET_subscriptions__HTTPResponse(DateTime      Timestamp,
+                                                                HTTPAPI       API,
+                                                                HTTPRequest   Request,
+                                                                HTTPResponse  Response)
+
+            => OnGET_subscriptions__HTTPResponse?.WhenAll(Timestamp,
+                                                          API,
+                                                          Request,
+                                                          Response) ?? Task.CompletedTask;
+
+        #endregion
+
+        #region (protected internal) On POST   ~/subscriptions                   HTTP(Request/Response)
+
+        /// <summary>
+        /// An event sent whenever a POST ~/subscriptions HTTP request was received.
+        /// </summary>
+        public HTTPRequestLogEvent  OnPOST_subscriptions__HTTPRequest   = new ();
+
+        /// <summary>
+        /// An event sent whenever a POST ~/subscriptions HTTP response was sent.
+        /// </summary>
+        public HTTPResponseLogEvent OnPOST_subscriptions__HTTPResponse  = new ();
+
+
+
+        /// <summary>
+        /// An event sent whenever a POST ~/subscriptions HTTP request was received.
+        /// </summary>
+        /// <param name="Timestamp">The timestamp of the request.</param>
+        /// <param name="API">The HTTP API.</param>
+        /// <param name="Request">A HTTP request.</param>
+        protected internal Task POST_subscriptions__HTTPRequest(DateTime     Timestamp,
+                                                                HTTPAPI      API,
+                                                                HTTPRequest  Request)
+
+            => OnPOST_subscriptions__HTTPRequest?.WhenAll(Timestamp,
+                                                          API,
+                                                          Request) ?? Task.CompletedTask;
+
+        /// <summary>
+        /// An event sent whenever a POST ~/subscriptions HTTP response was sent.
+        /// </summary>
+        /// <param name="Timestamp">The timestamp of the request.</param>
+        /// <param name="API">The HTTP API.</param>
+        /// <param name="Request">A HTTP request.</param>
+        /// <param name="Response">A HTTP response.</param>
+        protected internal Task POST_subscriptions__HTTPResponse(DateTime      Timestamp,
+                                                                 HTTPAPI       API,
+                                                                 HTTPRequest   Request,
+                                                                 HTTPResponse  Response)
+
+            => OnPOST_subscriptions__HTTPResponse?.WhenAll(Timestamp,
+                                                           API,
+                                                           Request,
+                                                           Response) ?? Task.CompletedTask;
+
+        #endregion
+
+
+        #region (protected internal) On GET    ~/subscriptions/{subscriptionId}  HTTP(Request/Response)
+
+        /// <summary>
+        /// An event sent whenever a GET ~/subscriptions/{subscriptionId} HTTP request was received.
+        /// </summary>
+        public HTTPRequestLogEvent  OnGET_subscription__HTTPRequest   = new ();
+
+        /// <summary>
+        /// An event sent whenever a GET ~/subscriptions/{subscriptionId} HTTP response was sent.
+        /// </summary>
+        public HTTPResponseLogEvent OnGET_subscription__HTTPResponse  = new ();
+
+
+
+        /// <summary>
+        /// An event sent whenever a GET ~/subscriptions/{subscriptionId} HTTP request was received.
+        /// </summary>
+        /// <param name="Timestamp">The timestamp of the request.</param>
+        /// <param name="API">The HTTP API.</param>
+        /// <param name="Request">A HTTP request.</param>
+        protected internal Task GET_subscription__HTTPRequest(DateTime     Timestamp,
+                                                              HTTPAPI      API,
+                                                              HTTPRequest  Request)
+
+            => OnGET_subscription__HTTPRequest?.WhenAll(Timestamp,
+                                                        API,
+                                                        Request) ?? Task.CompletedTask;
+
+        /// <summary>
+        /// An event sent whenever a GET ~/subscriptions/{subscriptionId} HTTP response was sent.
+        /// </summary>
+        /// <param name="Timestamp">The timestamp of the request.</param>
+        /// <param name="API">The HTTP API.</param>
+        /// <param name="Request">A HTTP request.</param>
+        /// <param name="Response">A HTTP response.</param>
+        protected internal Task GET_subscription__HTTPResponse(DateTime      Timestamp,
+                                                               HTTPAPI       API,
+                                                               HTTPRequest   Request,
+                                                               HTTPResponse  Response)
+
+            => OnGET_subscription__HTTPResponse?.WhenAll(Timestamp,
+                                                         API,
+                                                         Request,
+                                                         Response) ?? Task.CompletedTask;
+
+        #endregion
+
+        #region (protected internal) On PUT    ~/subscriptions/{subscriptionId}  HTTP(Request/Response)
+
+        /// <summary>
+        /// An event sent whenever a PUT ~/subscriptions/{subscriptionId} HTTP request was received.
+        /// </summary>
+        public HTTPRequestLogEvent  OnPUT_subscription__HTTPRequest   = new ();
+
+        /// <summary>
+        /// An event sent whenever a PUT ~/subscriptions/{subscriptionId} HTTP response was sent.
+        /// </summary>
+        public HTTPResponseLogEvent OnPUT_subscription__HTTPResponse  = new ();
+
+
+
+        /// <summary>
+        /// An event sent whenever a PUT ~/subscriptions/{subscriptionId} HTTP request was received.
+        /// </summary>
+        /// <param name="Timestamp">The timestamp of the request.</param>
+        /// <param name="API">The HTTP API.</param>
+        /// <param name="Request">A HTTP request.</param>
+        protected internal Task PUT_subscription__HTTPRequest(DateTime     Timestamp,
+                                                              HTTPAPI      API,
+                                                              HTTPRequest  Request)
+
+            => OnPUT_subscription__HTTPRequest?.WhenAll(Timestamp,
+                                                        API,
+                                                        Request) ?? Task.CompletedTask;
+
+        /// <summary>
+        /// An event sent whenever a PUT ~/subscriptions/{subscriptionId} HTTP response was sent.
+        /// </summary>
+        /// <param name="Timestamp">The timestamp of the request.</param>
+        /// <param name="API">The HTTP API.</param>
+        /// <param name="Request">A HTTP request.</param>
+        /// <param name="Response">A HTTP response.</param>
+        protected internal Task PUT_subscription__HTTPResponse(DateTime      Timestamp,
+                                                               HTTPAPI       API,
+                                                               HTTPRequest   Request,
+                                                               HTTPResponse  Response)
+
+            => OnPUT_subscription__HTTPResponse?.WhenAll(Timestamp,
+                                                         API,
+                                                         Request,
+                                                         Response) ?? Task.CompletedTask;
+
+        #endregion
+
+        #region (protected internal) On DELETE ~/subscriptions/{subscriptionId}  HTTP(Request/Response)
+
+        /// <summary>
+        /// An event sent whenever a DELETE ~/subscriptions/{subscriptionId} HTTP request was received.
+        /// </summary>
+        public HTTPRequestLogEvent  OnDELETE_subscription__HTTPRequest   = new ();
+
+        /// <summary>
+        /// An event sent whenever a DELETE ~/subscriptions/{subscriptionId} HTTP response was sent.
+        /// </summary>
+        public HTTPResponseLogEvent OnDELETE_subscription__HTTPResponse  = new ();
+
+
+
+        /// <summary>
+        /// An event sent whenever a DELETE ~/subscriptions/{subscriptionId} HTTP request was received.
+        /// </summary>
+        /// <param name="Timestamp">The timestamp of the request.</param>
+        /// <param name="API">The HTTP API.</param>
+        /// <param name="Request">A HTTP request.</param>
+        protected internal Task DELETE_subscription__HTTPRequest(DateTime     Timestamp,
+                                                                 HTTPAPI      API,
+                                                                 HTTPRequest  Request)
+
+            => OnDELETE_subscription__HTTPRequest?.WhenAll(Timestamp,
+                                                           API,
+                                                           Request) ?? Task.CompletedTask;
+
+        /// <summary>
+        /// An event sent whenever a DELETE ~/subscriptions/{subscriptionId} HTTP response was sent.
+        /// </summary>
+        /// <param name="Timestamp">The timestamp of the request.</param>
+        /// <param name="API">The HTTP API.</param>
+        /// <param name="Request">A HTTP request.</param>
+        /// <param name="Response">A HTTP response.</param>
+        protected internal Task DELETE_subscription__HTTPResponse(DateTime      Timestamp,
+                                                                  HTTPAPI       API,
+                                                                  HTTPRequest   Request,
+                                                                  HTTPResponse  Response)
+
+            => OnDELETE_subscription__HTTPResponse?.WhenAll(Timestamp,
+                                                            API,
+                                                            Request,
+                                                            Response) ?? Task.CompletedTask;
+
+        #endregion
+
+        #endregion
+
+        #region On ~/vens
+
+        #region (protected internal) On GET    ~/vens                                 HTTP(Request/Response)
+
+        /// <summary>
+        /// An event sent whenever a GET ~/vens HTTP request was received.
+        /// </summary>
+        public HTTPRequestLogEvent  OnGET_vens__HTTPRequest   = new ();
+
+        /// <summary>
+        /// An event sent whenever a GET ~/vens HTTP response was sent.
+        /// </summary>
+        public HTTPResponseLogEvent OnGET_vens__HTTPResponse  = new ();
+
+
+
+        /// <summary>
+        /// An event sent whenever a GET ~/vens HTTP request was received.
+        /// </summary>
+        /// <param name="Timestamp">The timestamp of the request.</param>
+        /// <param name="API">The HTTP API.</param>
+        /// <param name="Request">A HTTP request.</param>
+        protected internal Task GET_vens__HTTPRequest(DateTime     Timestamp,
+                                                      HTTPAPI      API,
+                                                      HTTPRequest  Request)
+
+            => OnGET_vens__HTTPRequest?.WhenAll(Timestamp,
+                                                API,
+                                                Request) ?? Task.CompletedTask;
+
+        /// <summary>
+        /// An event sent whenever a GET ~/vens HTTP response was sent.
+        /// </summary>
+        /// <param name="Timestamp">The timestamp of the request.</param>
+        /// <param name="API">The HTTP API.</param>
+        /// <param name="Request">A HTTP request.</param>
+        /// <param name="Response">A HTTP response.</param>
+        protected internal Task GET_vens__HTTPResponse(DateTime      Timestamp,
+                                                       HTTPAPI       API,
+                                                       HTTPRequest   Request,
+                                                       HTTPResponse  Response)
+
+            => OnGET_vens__HTTPResponse?.WhenAll(Timestamp,
+                                                 API,
+                                                 Request,
+                                                 Response) ?? Task.CompletedTask;
+
+        #endregion
+
+        #region (protected internal) On POST   ~/vens                                 HTTP(Request/Response)
+
+        /// <summary>
+        /// An event sent whenever a POST ~/vens HTTP request was received.
+        /// </summary>
+        public HTTPRequestLogEvent  OnPOST_vens__HTTPRequest   = new ();
+
+        /// <summary>
+        /// An event sent whenever a POST ~/vens HTTP response was sent.
+        /// </summary>
+        public HTTPResponseLogEvent OnPOST_vens__HTTPResponse  = new ();
+
+
+
+        /// <summary>
+        /// An event sent whenever a POST ~/vens HTTP request was received.
+        /// </summary>
+        /// <param name="Timestamp">The timestamp of the request.</param>
+        /// <param name="API">The HTTP API.</param>
+        /// <param name="Request">A HTTP request.</param>
+        protected internal Task POST_vens__HTTPRequest(DateTime     Timestamp,
+                                                       HTTPAPI      API,
+                                                       HTTPRequest  Request)
+
+            => OnPOST_vens__HTTPRequest?.WhenAll(Timestamp,
+                                                 API,
+                                                 Request) ?? Task.CompletedTask;
+
+        /// <summary>
+        /// An event sent whenever a POST ~/vens HTTP response was sent.
+        /// </summary>
+        /// <param name="Timestamp">The timestamp of the request.</param>
+        /// <param name="API">The HTTP API.</param>
+        /// <param name="Request">A HTTP request.</param>
+        /// <param name="Response">A HTTP response.</param>
+        protected internal Task POST_vens__HTTPResponse(DateTime      Timestamp,
+                                                        HTTPAPI       API,
+                                                        HTTPRequest   Request,
+                                                        HTTPResponse  Response)
+
+            => OnPOST_vens__HTTPResponse?.WhenAll(Timestamp,
+                                                  API,
                                                   Request,
                                                   Response) ?? Task.CompletedTask;
 
         #endregion
 
 
-        #region (protected internal) SendAuthStartEVSERequest   (Request)
+        #region (protected internal) On GET    ~/vens/{venId}                         HTTP(Request/Response)
 
         /// <summary>
-        /// An event sent whenever a authenticate start EVSE request was received.
+        /// An event sent whenever a GET ~/vens/{venId} HTTP request was received.
         /// </summary>
-        public HTTPRequestLogEvent OnAuthStartEVSERequest = new ();
+        public HTTPRequestLogEvent  OnGET_ven__HTTPRequest   = new ();
 
         /// <summary>
-        /// An event sent whenever a authenticate start EVSE request was received.
+        /// An event sent whenever a GET ~/vens/{venId} HTTP response was sent.
+        /// </summary>
+        public HTTPResponseLogEvent OnGET_ven__HTTPResponse  = new ();
+
+
+
+        /// <summary>
+        /// An event sent whenever a GET ~/vens/{venId} HTTP request was received.
         /// </summary>
         /// <param name="Timestamp">The timestamp of the request.</param>
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
-        protected internal Task SendAuthStartEVSERequest(DateTime     Timestamp,
-                                                         HTTPAPI      API,
-                                                         HTTPRequest  Request)
+        protected internal Task GET_ven__HTTPRequest(DateTime     Timestamp,
+                                                     HTTPAPI      API,
+                                                     HTTPRequest  Request)
 
-            => OnAuthStartEVSERequest?.WhenAll(Timestamp,
-                                               API ?? this,
+            => OnGET_ven__HTTPRequest?.WhenAll(Timestamp,
+                                               API,
                                                Request) ?? Task.CompletedTask;
 
-        #endregion
-
-        #region (protected internal) SendAuthStartEVSEResponse  (Response)
-
         /// <summary>
-        /// An event sent whenever a authenticate start EVSE response was sent.
-        /// </summary>
-        public HTTPResponseLogEvent OnAuthStartEVSEResponse = new ();
-
-        /// <summary>
-        /// An event sent whenever a authenticate start EVSE response was sent.
+        /// An event sent whenever a GET ~/vens/{venId} HTTP response was sent.
         /// </summary>
         /// <param name="Timestamp">The timestamp of the request.</param>
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
         /// <param name="Response">A HTTP response.</param>
-        protected internal Task SendAuthStartEVSEResponse(DateTime      Timestamp,
-                                                          HTTPAPI       API,
-                                                          HTTPRequest   Request,
-                                                          HTTPResponse  Response)
+        protected internal Task GET_ven__HTTPResponse(DateTime      Timestamp,
+                                                      HTTPAPI       API,
+                                                      HTTPRequest   Request,
+                                                      HTTPResponse  Response)
 
-            => OnAuthStartEVSEResponse?.WhenAll(Timestamp,
-                                                API ?? this,
+            => OnGET_ven__HTTPResponse?.WhenAll(Timestamp,
+                                                API,
                                                 Request,
                                                 Response) ?? Task.CompletedTask;
 
         #endregion
 
-
-        #region (protected internal) SendAuthStopEVSERequest    (Request)
+        #region (protected internal) On PUT    ~/vens/{venId}                         HTTP(Request/Response)
 
         /// <summary>
-        /// An event sent whenever a authenticate stop EVSE request was received.
+        /// An event sent whenever a PUT ~/vens/{venId} HTTP request was received.
         /// </summary>
-        public HTTPRequestLogEvent OnAuthStopEVSERequest = new ();
+        public HTTPRequestLogEvent  OnPUT_ven__HTTPRequest   = new ();
 
         /// <summary>
-        /// An event sent whenever a authenticate stop EVSE request was received.
+        /// An event sent whenever a PUT ~/vens/{venId} HTTP response was sent.
+        /// </summary>
+        public HTTPResponseLogEvent OnPUT_ven__HTTPResponse  = new ();
+
+
+
+        /// <summary>
+        /// An event sent whenever a PUT ~/vens/{venId} HTTP request was received.
         /// </summary>
         /// <param name="Timestamp">The timestamp of the request.</param>
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
-        protected internal Task SendAuthStopEVSERequest(DateTime     Timestamp,
-                                                        HTTPAPI      API,
-                                                        HTTPRequest  Request)
+        protected internal Task PUT_ven__HTTPRequest(DateTime     Timestamp,
+                                                     HTTPAPI      API,
+                                                     HTTPRequest  Request)
 
-            => OnAuthStopEVSERequest?.WhenAll(Timestamp,
-                                              API ?? this,
-                                              Request) ?? Task.CompletedTask;
-
-        #endregion
-
-        #region (protected internal) SendAuthStopEVSEResponse   (Response)
+            => OnPUT_ven__HTTPRequest?.WhenAll(Timestamp,
+                                               API,
+                                               Request) ?? Task.CompletedTask;
 
         /// <summary>
-        /// An event sent whenever a authenticate stop EVSE response was sent.
-        /// </summary>
-        public HTTPResponseLogEvent OnAuthStopEVSEResponse = new ();
-
-        /// <summary>
-        /// An event sent whenever a authenticate stop EVSE response was sent.
+        /// An event sent whenever a PUT ~/vens/{venId} HTTP response was sent.
         /// </summary>
         /// <param name="Timestamp">The timestamp of the request.</param>
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
         /// <param name="Response">A HTTP response.</param>
-        protected internal Task SendAuthStopEVSEResponse(DateTime      Timestamp,
+        protected internal Task PUT_ven__HTTPResponse(DateTime      Timestamp,
+                                                      HTTPAPI       API,
+                                                      HTTPRequest   Request,
+                                                      HTTPResponse  Response)
+
+            => OnPUT_ven__HTTPResponse?.WhenAll(Timestamp,
+                                                API,
+                                                Request,
+                                                Response) ?? Task.CompletedTask;
+
+        #endregion
+
+        #region (protected internal) On DELETE ~/vens/{venId}                         HTTP(Request/Response)
+
+        /// <summary>
+        /// An event sent whenever a DELETE ~/vens/{venId} HTTP request was received.
+        /// </summary>
+        public HTTPRequestLogEvent  OnDELETE_ven__HTTPRequest   = new ();
+
+        /// <summary>
+        /// An event sent whenever a DELETE ~/vens/{venId} HTTP response was sent.
+        /// </summary>
+        public HTTPResponseLogEvent OnDELETE_ven__HTTPResponse  = new ();
+
+
+
+        /// <summary>
+        /// An event sent whenever a DELETE ~/vens/{venId} HTTP request was received.
+        /// </summary>
+        /// <param name="Timestamp">The timestamp of the request.</param>
+        /// <param name="API">The HTTP API.</param>
+        /// <param name="Request">A HTTP request.</param>
+        protected internal Task DELETE_ven__HTTPRequest(DateTime     Timestamp,
+                                                        HTTPAPI      API,
+                                                        HTTPRequest  Request)
+
+            => OnDELETE_ven__HTTPRequest?.WhenAll(Timestamp,
+                                                  API,
+                                                  Request) ?? Task.CompletedTask;
+
+        /// <summary>
+        /// An event sent whenever a DELETE ~/vens/{venId} HTTP response was sent.
+        /// </summary>
+        /// <param name="Timestamp">The timestamp of the request.</param>
+        /// <param name="API">The HTTP API.</param>
+        /// <param name="Request">A HTTP request.</param>
+        /// <param name="Response">A HTTP response.</param>
+        protected internal Task DELETE_ven__HTTPResponse(DateTime      Timestamp,
                                                          HTTPAPI       API,
                                                          HTTPRequest   Request,
                                                          HTTPResponse  Response)
 
-            => OnAuthStopEVSEResponse?.WhenAll(Timestamp,
-                                               API ?? this,
-                                               Request,
-                                               Response) ?? Task.CompletedTask;
+            => OnDELETE_ven__HTTPResponse?.WhenAll(Timestamp,
+                                                   API,
+                                                   Request,
+                                                   Response) ?? Task.CompletedTask;
 
         #endregion
 
 
-        #region (protected internal) SendCDRsRequest            (Request)
+        #region (protected internal) On GET    ~/vens/{venId}/resources               HTTP(Request/Response)
 
         /// <summary>
-        /// An event sent whenever a charge detail record was received.
+        /// An event sent whenever a GET ~/vens/{venId}/resources/{resourceId} HTTP request was received.
         /// </summary>
-        public HTTPRequestLogEvent OnSendCDRsRequest = new ();
+        public HTTPRequestLogEvent  OnGET_ven_resources__HTTPRequest   = new ();
 
         /// <summary>
-        /// An event sent whenever a charge detail record was received.
+        /// An event sent whenever a GET ~/vens/{venId}/resources/{resourceId} HTTP response was sent.
+        /// </summary>
+        public HTTPResponseLogEvent OnGET_ven_resources__HTTPResponse  = new ();
+
+
+
+        /// <summary>
+        /// An event sent whenever a GET ~/vens/{venId}/resources/{resourceId} HTTP request was received.
         /// </summary>
         /// <param name="Timestamp">The timestamp of the request.</param>
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
-        protected internal Task SendCDRsRequest(DateTime     Timestamp,
-                                                HTTPAPI      API,
-                                                HTTPRequest  Request)
+        protected internal Task GET_ven_resources__HTTPRequest(DateTime     Timestamp,
+                                                               HTTPAPI      API,
+                                                               HTTPRequest  Request)
 
-            => OnSendCDRsRequest?.WhenAll(Timestamp,
-                                          API ?? this,
-                                          Request) ?? Task.CompletedTask;
-
-        #endregion
-
-        #region (protected internal) SendCDRsResponse           (Response)
+            => OnGET_vens__HTTPRequest?.WhenAll(Timestamp,
+                                                API,
+                                                Request) ?? Task.CompletedTask;
 
         /// <summary>
-        /// An event sent whenever a charge detail record response was sent.
-        /// </summary>
-        public HTTPResponseLogEvent OnSendCDRsResponse = new ();
-
-        /// <summary>
-        /// An event sent whenever a charge detail record response was sent.
+        /// An event sent whenever a GET ~/vens/{venId}/resources/{resourceId} HTTP response was sent.
         /// </summary>
         /// <param name="Timestamp">The timestamp of the request.</param>
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
         /// <param name="Response">A HTTP response.</param>
-        protected internal Task SendCDRsResponse(DateTime      Timestamp,
-                                                 HTTPAPI       API,
-                                                 HTTPRequest   Request,
-                                                 HTTPResponse  Response)
+        protected internal Task GET_ven_resources__HTTPResponse(DateTime      Timestamp,
+                                                                HTTPAPI       API,
+                                                                HTTPRequest   Request,
+                                                                HTTPResponse  Response)
 
-            => OnSendCDRsResponse?.WhenAll(Timestamp,
-                                           API ?? this,
-                                           Request,
-                                           Response) ?? Task.CompletedTask;
+            => OnGET_vens__HTTPResponse?.WhenAll(Timestamp,
+                                                 API,
+                                                 Request,
+                                                 Response) ?? Task.CompletedTask;
+
+        #endregion
+
+        #region (protected internal) On POST   ~/vens/{venId}/resources               HTTP(Request/Response)
+
+        /// <summary>
+        /// An event sent whenever a POST ~/vens/{venId}/resources/{resourceId} HTTP request was received.
+        /// </summary>
+        public HTTPRequestLogEvent  OnPOST_ven_resources__HTTPRequest   = new ();
+
+        /// <summary>
+        /// An event sent whenever a POST ~/vens/{venId}/resources/{resourceId} HTTP response was sent.
+        /// </summary>
+        public HTTPResponseLogEvent OnPOST_ven_resources__HTTPResponse  = new ();
+
+
+
+        /// <summary>
+        /// An event sent whenever a POST ~/vens/{venId}/resources/{resourceId} HTTP request was received.
+        /// </summary>
+        /// <param name="Timestamp">The timestamp of the request.</param>
+        /// <param name="API">The HTTP API.</param>
+        /// <param name="Request">A HTTP request.</param>
+        protected internal Task POST_ven_resources__HTTPRequest(DateTime     Timestamp,
+                                                                HTTPAPI      API,
+                                                                HTTPRequest  Request)
+
+            => OnPOST_vens__HTTPRequest?.WhenAll(Timestamp,
+                                                 API,
+                                                 Request) ?? Task.CompletedTask;
+
+        /// <summary>
+        /// An event sent whenever a POST ~/vens/{venId}/resources/{resourceId} HTTP response was sent.
+        /// </summary>
+        /// <param name="Timestamp">The timestamp of the request.</param>
+        /// <param name="API">The HTTP API.</param>
+        /// <param name="Request">A HTTP request.</param>
+        /// <param name="Response">A HTTP response.</param>
+        protected internal Task POST_ven_resources__HTTPResponse(DateTime      Timestamp,
+                                                                 HTTPAPI       API,
+                                                                 HTTPRequest   Request,
+                                                                 HTTPResponse  Response)
+
+            => OnPOST_vens__HTTPResponse?.WhenAll(Timestamp,
+                                                  API,
+                                                  Request,
+                                                  Response) ?? Task.CompletedTask;
+
+        #endregion
+
+
+        #region (protected internal) On GET    ~/vens/{venId}/resources/{resourceId}  HTTP(Request/Response)
+
+        /// <summary>
+        /// An event sent whenever a GET ~/vens/{venId}/resources/{resourceId} HTTP request was received.
+        /// </summary>
+        public HTTPRequestLogEvent  OnGET_ven_resource__HTTPRequest   = new ();
+
+        /// <summary>
+        /// An event sent whenever a GET ~/vens/{venId}/resources/{resourceId} HTTP response was sent.
+        /// </summary>
+        public HTTPResponseLogEvent OnGET_ven_resource__HTTPResponse  = new ();
+
+
+
+        /// <summary>
+        /// An event sent whenever a GET ~/vens/{venId}/resources/{resourceId} HTTP request was received.
+        /// </summary>
+        /// <param name="Timestamp">The timestamp of the request.</param>
+        /// <param name="API">The HTTP API.</param>
+        /// <param name="Request">A HTTP request.</param>
+        protected internal Task GET_ven_resource__HTTPRequest(DateTime     Timestamp,
+                                                              HTTPAPI      API,
+                                                              HTTPRequest  Request)
+
+            => OnGET_ven_resource__HTTPRequest?.WhenAll(Timestamp,
+                                                        API,
+                                                        Request) ?? Task.CompletedTask;
+
+        /// <summary>
+        /// An event sent whenever a GET ~/vens/{venId}/resources/{resourceId} HTTP response was sent.
+        /// </summary>
+        /// <param name="Timestamp">The timestamp of the request.</param>
+        /// <param name="API">The HTTP API.</param>
+        /// <param name="Request">A HTTP request.</param>
+        /// <param name="Response">A HTTP response.</param>
+        protected internal Task GET_ven_resource__HTTPResponse(DateTime      Timestamp,
+                                                               HTTPAPI       API,
+                                                               HTTPRequest   Request,
+                                                               HTTPResponse  Response)
+
+            => OnGET_ven_resource__HTTPResponse?.WhenAll(Timestamp,
+                                                         API,
+                                                         Request,
+                                                         Response) ?? Task.CompletedTask;
+
+        #endregion
+
+        #region (protected internal) On PUT    ~/vens/{venId}/resources/{resourceId}  HTTP(Request/Response)
+
+        /// <summary>
+        /// An event sent whenever a PUT ~/vens/{venId}/resources/{resourceId} HTTP request was received.
+        /// </summary>
+        public HTTPRequestLogEvent  OnPUT_ven_resource__HTTPRequest   = new ();
+
+        /// <summary>
+        /// An event sent whenever a PUT ~/vens/{venId}/resources/{resourceId} HTTP response was sent.
+        /// </summary>
+        public HTTPResponseLogEvent OnPUT_ven_resource__HTTPResponse  = new ();
+
+
+
+        /// <summary>
+        /// An event sent whenever a PUT ~/vens/{venId}/resources/{resourceId} HTTP request was received.
+        /// </summary>
+        /// <param name="Timestamp">The timestamp of the request.</param>
+        /// <param name="API">The HTTP API.</param>
+        /// <param name="Request">A HTTP request.</param>
+        protected internal Task PUT_ven_resource__HTTPRequest(DateTime     Timestamp,
+                                                              HTTPAPI      API,
+                                                              HTTPRequest  Request)
+
+            => OnPUT_ven_resource__HTTPRequest?.WhenAll(Timestamp,
+                                                        API,
+                                                        Request) ?? Task.CompletedTask;
+
+        /// <summary>
+        /// An event sent whenever a PUT ~/vens/{venId}/resources/{resourceId} HTTP response was sent.
+        /// </summary>
+        /// <param name="Timestamp">The timestamp of the request.</param>
+        /// <param name="API">The HTTP API.</param>
+        /// <param name="Request">A HTTP request.</param>
+        /// <param name="Response">A HTTP response.</param>
+        protected internal Task PUT_ven_resource__HTTPResponse(DateTime      Timestamp,
+                                                               HTTPAPI       API,
+                                                               HTTPRequest   Request,
+                                                               HTTPResponse  Response)
+
+            => OnPUT_ven_resource__HTTPResponse?.WhenAll(Timestamp,
+                                                         API,
+                                                         Request,
+                                                         Response) ?? Task.CompletedTask;
+
+        #endregion
+
+        #region (protected internal) On DELETE ~/vens/{venId}/resources/{resourceId}  HTTP(Request/Response)
+
+        /// <summary>
+        /// An event sent whenever a DELETE ~/vens/{venId}/resources/{resourceId} HTTP request was received.
+        /// </summary>
+        public HTTPRequestLogEvent  OnDELETE_ven_resource__HTTPRequest   = new ();
+
+        /// <summary>
+        /// An event sent whenever a DELETE ~/vens/{venId}/resources/{resourceId} HTTP response was sent.
+        /// </summary>
+        public HTTPResponseLogEvent OnDELETE_ven_resource__HTTPResponse = new ();
+
+
+
+        /// <summary>
+        /// An event sent whenever a DELETE ~/vens/{venId}/resources/{resourceId} HTTP request was received.
+        /// </summary>
+        /// <param name="Timestamp">The timestamp of the request.</param>
+        /// <param name="API">The HTTP API.</param>
+        /// <param name="Request">A HTTP request.</param>
+        protected internal Task DELETE_ven_resource__HTTPRequest(DateTime     Timestamp,
+                                                                 HTTPAPI      API,
+                                                                 HTTPRequest  Request)
+
+            => OnDELETE_ven_resource__HTTPRequest?.WhenAll(Timestamp,
+                                                           API,
+                                                           Request) ?? Task.CompletedTask;
+
+        /// <summary>
+        /// An event sent whenever a DELETE ~/vens/{venId}/resources/{resourceId} HTTP response was sent.
+        /// </summary>
+        /// <param name="Timestamp">The timestamp of the request.</param>
+        /// <param name="API">The HTTP API.</param>
+        /// <param name="Request">A HTTP request.</param>
+        /// <param name="Response">A HTTP response.</param>
+        protected internal Task DELETE_ven_resource__HTTPResponse(DateTime      Timestamp,
+                                                                  HTTPAPI       API,
+                                                                  HTTPRequest   Request,
+                                                                  HTTPResponse  Response)
+
+            => OnDELETE_ven_resource__HTTPResponse?.WhenAll(Timestamp,
+                                                            API,
+                                                            Request,
+                                                            Response) ?? Task.CompletedTask;
+
+        #endregion
 
         #endregion
 
@@ -845,196 +1808,30 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <summary>
         /// Create a new OpenADR HTTP API.
         /// </summary>
-        /// <param name="HTTPHostname">The HTTP hostname for all URLs within this API.</param>
-        /// <param name="ExternalDNSName">The official URL/DNS name of this service, e.g. for sending e-mails.</param>
-        /// <param name="HTTPServerPort">A TCP port to listen on.</param>
         /// <param name="BasePath">When the API is served from an optional subdirectory path.</param>
         /// <param name="HTTPServerName">The default HTTP server name, used whenever no HTTP Host-header has been given.</param>
         /// 
         /// <param name="URLPathPrefix">A common prefix for all URLs.</param>
-        /// <param name="HTTPServiceName">The name of the HTTP service.</param>
-        /// <param name="APIVersionHashes">The API version hashes (git commit hash values).</param>
-        /// 
-        /// <param name="ServerCertificateSelector">An optional delegate to select a TLS server certificate.</param>
-        /// <param name="ClientCertificateValidator">An optional delegate to verify the TLS client certificate used for authentication.</param>
-        /// <param name="LocalCertificateSelector">An optional delegate to select the TLS client certificate used for authentication.</param>
-        /// <param name="AllowedTLSProtocols">The TLS protocol(s) allowed for this connection.</param>
-        /// 
-        /// <param name="TCPPort"></param>
-        /// <param name="UDPPort"></param>
-        /// 
-        /// <param name="APIRobotEMailAddress">An e-mail address for this API.</param>
-        /// <param name="APIRobotGPGPassphrase">A GPG passphrase for this API.</param>
-        /// <param name="SMTPClient">A SMTP client for sending e-mails.</param>
-        /// 
-        /// <param name="PasswordQualityCheck">A delegate to ensure a minimal password quality.</param>
-        /// <param name="CookieName">The name of the HTTP Cookie for authentication.</param>
-        /// <param name="UseSecureCookies">Force the web browser to send cookies only via HTTPS.</param>
-        /// 
-        /// <param name="ServerThreadName">The optional name of the TCP server thread.</param>
-        /// <param name="ServerThreadPriority">The optional priority of the TCP server thread.</param>
-        /// <param name="ServerThreadIsBackground">Whether the TCP server thread is a background thread or not.</param>
-        /// <param name="ConnectionIdBuilder">An optional delegate to build a connection identification based on IP socket information.</param>
-        /// <param name="ConnectionTimeout">The TCP client timeout for all incoming client connections in seconds (default: 30 sec).</param>
-        /// <param name="MaxClientConnections">The maximum number of concurrent TCP client connections (default: 4096).</param>
-        /// 
-        /// <param name="DisableMaintenanceTasks">Disable all maintenance tasks.</param>
-        /// <param name="MaintenanceInitialDelay">The initial delay of the maintenance tasks.</param>
-        /// <param name="MaintenanceEvery">The maintenance interval.</param>
-        /// 
-        /// <param name="DisableWardenTasks">Disable all warden tasks.</param>
-        /// <param name="WardenInitialDelay">The initial delay of the warden tasks.</param>
-        /// <param name="WardenCheckEvery">The warden interval.</param>
-        /// 
-        /// <param name="RemoteAuthServers">Servers for remote authorization.</param>
-        /// <param name="RemoteAuthAPIKeys">API keys for incoming remote authorizations.</param>
-        /// 
-        /// <param name="IsDevelopment">This HTTP API runs in development mode.</param>
-        /// <param name="DevelopmentServers">An enumeration of server names which will imply to run this service in development mode.</param>
-        /// <param name="SkipURLTemplates">Skip URL templates.</param>
-        /// <param name="DatabaseFileName">The name of the database file for this API.</param>
-        /// <param name="DisableNotifications">Disable external notifications.</param>
-        /// <param name="DisableLogging">Disable the log file.</param>
-        /// <param name="LoggingPath">The path for all logfiles.</param>
-        /// <param name="LogfileName">The name of the logfile.</param>
-        /// <param name="LogfileCreator">A delegate for creating the name of the logfile for this API.</param>
-        /// <param name="DNSClient">The DNS client of the API.</param>
-        public OpenADRAPI(HTTPHostname?                                              HTTPHostname                 = null,
-                          String?                                                    ExternalDNSName              = null,
-                          IPPort?                                                    HTTPServerPort               = null,
-                          HTTPPath?                                                  BasePath                     = null,
-                          String                                                     HTTPServerName               = DefaultHTTPServerName,
 
-                          HTTPPath?                                                  URLPathPrefix                = null,
-                          String                                                     HTTPServiceName              = DefaultHTTPServiceName,
-                          String?                                                    HTMLTemplate                 = null,
-                          JObject?                                                   APIVersionHashes             = null,
+        public OpenADRHTTPAPI(HTTPExtAPI                                  HTTPAPI,
+                              String?                                     HTTPServerName         = null,
+                              HTTPPath?                                   URLPathPrefix          = null,
+                              HTTPPath?                                   BasePath               = null,
 
-                          ServerCertificateSelectorDelegate?                         ServerCertificateSelector    = null,
-                          RemoteTLSClientCertificateValidationHandler<IHTTPServer>?  ClientCertificateValidator   = null,
-                          LocalCertificateSelectionHandler?                          LocalCertificateSelector     = null,
-                          SslProtocols?                                              AllowedTLSProtocols          = null,
-                          Boolean?                                                   ClientCertificateRequired    = null,
-                          Boolean?                                                   CheckCertificateRevocation   = null,
+                              Boolean                                     EventLoggingDisabled   = true,
 
-                          ServerThreadNameCreatorDelegate?                           ServerThreadNameCreator      = null,
-                          ServerThreadPriorityDelegate?                              ServerThreadPrioritySetter   = null,
-                          Boolean?                                                   ServerThreadIsBackground     = null,
-                          ConnectionIdBuilder?                                       ConnectionIdBuilder          = null,
-                          TimeSpan?                                                  ConnectionTimeout            = null,
-                          UInt32?                                                    MaxClientConnections         = null,
+                              String                                      HTTPRealm              = DefaultHTTPRealm,
+                              IEnumerable<KeyValuePair<String, String>>?  HTTPLogins             = null,
+                              Formatting                                  JSONFormatting         = Formatting.None,
+                              JObject?                                    APIVersionHashes       = null)
 
-                          IPPort?                                                    TCPPort                      = null,
-                          IPPort?                                                    UDPPort                      = null,
-
-                          Organization_Id?                                           AdminOrganizationId          = null,
-                          EMailAddress?                                              APIRobotEMailAddress         = null,
-                          String?                                                    APIRobotGPGPassphrase        = null,
-                          ISMTPClient?                                               SMTPClient                   = null,
-
-                          PasswordQualityCheckDelegate?                              PasswordQualityCheck         = null,
-                          HTTPCookieName?                                            CookieName                   = null,
-                          Boolean                                                    UseSecureCookies             = true,
-                          Languages?                                                 DefaultLanguage              = null,
-
-                          Boolean?                                                   DisableMaintenanceTasks      = null,
-                          TimeSpan?                                                  MaintenanceInitialDelay      = null,
-                          TimeSpan?                                                  MaintenanceEvery             = null,
-
-                          Boolean?                                                   DisableWardenTasks           = null,
-                          TimeSpan?                                                  WardenInitialDelay           = null,
-                          TimeSpan?                                                  WardenCheckEvery             = null,
-
-                          IEnumerable<URLWithAPIKey>?                                RemoteAuthServers            = null,
-                          IEnumerable<APIKey_Id>?                                    RemoteAuthAPIKeys            = null,
-
-                          Boolean?                                                   AllowsAnonymousReadAccesss   = true,
-
-                          Boolean?                                                   IsDevelopment                = null,
-                          IEnumerable<String>?                                       DevelopmentServers           = null,
-                          Boolean                                                    SkipURLTemplates             = false,
-                          String                                                     DatabaseFileName             = DefaultOpenADRAPI_DatabaseFileName,
-                          Boolean                                                    DisableNotifications         = false,
-                          Boolean                                                    DisableLogging               = false,
-                          String?                                                    LoggingPath                  = null,
-                          String                                                     LogfileName                  = DefaultOpenADRAPI_LogfileName,
-                          LogfileCreatorDelegate?                                    LogfileCreator               = null,
-                          DNSClient?                                                 DNSClient                    = null)
-
-            : base(HTTPHostname,
-                   ExternalDNSName,
-                   HTTPServerPort,
-                   BasePath,
-                   HTTPServerName,
-
+            : base(HTTPAPI,
+                   HTTPServerName ?? DefaultHTTPServerName,
                    URLPathPrefix,
-                   HTTPServiceName,
-                   HTMLTemplate,
-                   APIVersionHashes,
-
-                   ServerCertificateSelector,
-                   ClientCertificateValidator,
-                   LocalCertificateSelector,
-                   AllowedTLSProtocols,
-                   ClientCertificateRequired,
-                   CheckCertificateRevocation,
-
-                   ServerThreadNameCreator,
-                   ServerThreadPrioritySetter,
-                   ServerThreadIsBackground,
-                   ConnectionIdBuilder,
-                   ConnectionTimeout,
-                   MaxClientConnections,
-
-                   AdminOrganizationId,
-                   APIRobotEMailAddress,
-                   APIRobotGPGPassphrase,
-                   SMTPClient,
-
-                   PasswordQualityCheck,
-                   CookieName           ?? HTTPCookieName.Parse(nameof(OpenADRAPI)),
-                   UseSecureCookies,
-                   TimeSpan.FromDays(30),
-                   DefaultLanguage      ?? Languages.en,
-                   4,
-                   4,
-                   4,
-                   5,
-                   20,
-                   8,
-                   4,
-                   4,
-                   8,
-                   8,
-                   8,
-                   8,
-
-                   DisableMaintenanceTasks,
-                   MaintenanceInitialDelay,
-                   MaintenanceEvery,
-
-                   DisableWardenTasks,
-                   WardenInitialDelay,
-                   WardenCheckEvery,
-
-                   RemoteAuthServers,
-                   RemoteAuthAPIKeys,
-
-                   IsDevelopment,
-                   DevelopmentServers,
-                   SkipURLTemplates,
-                   DatabaseFileName     ?? DefaultOpenADRAPI_DatabaseFileName,
-                   DisableNotifications,
-                   DisableLogging,
-                   LoggingPath,
-                   LogfileName          ?? DefaultOpenADRAPI_LogfileName,
-                   LogfileCreator,
-                   DNSClient,
-                   false) // AutoStart
+                   BasePath,
+                   APIVersionHash: APIVersionHashes?[nameof(OpenADRHTTPAPI)]?.Value<String>()?.Trim())
 
         {
-
-            this.APIVersionHash  = APIVersionHashes?[nameof(OpenADRAPI)]?.Value<String>()?.Trim() ?? "";
 
             this.OpenADRAPIPath  = Path.Combine(this.LoggingPath, "OpenADRAPI");
 
@@ -1043,26 +1840,14 @@ namespace cloud.charging.open.protocols.OpenADRv3
                 Directory.CreateDirectory(OpenADRAPIPath);
             }
 
-         //   DebugLog     = HTTPServer.AddJSONEventSource(EventIdentification:      DebugLogId,
-         //                                                HTTPAPI:                  this,
-         //                                                URLTemplate:              this.URLPathPrefix + DebugLogId.ToString(),
-         //                                                MaxNumberOfCachedEvents:  1000,
-         //                                                RetryInterval :           TimeSpan.FromSeconds(5),
-         //                                                EnableLogging:            true,
-         //                                                LogfilePath:              this.OpenADRAPIPath);
-
             RegisterURLTemplates();
 
-            //this.HTMLTemplate = HTMLTemplate ?? GetResourceString("template.html");
-
-            DebugX.Log(nameof(OpenADRAPI) + " version '" + APIVersionHash + "' initialized...");
+            DebugX.Log($"OpenADR {Version.String} HTTP API {(APIVersionHash.IsNullOrEmpty() ? $" ({APIVersionHash})" : "")} initialized...");
 
         }
 
         #endregion
 
-
-        Boolean? AllowDowngrades = false;
 
         #region Programs
 
@@ -1096,69 +1881,58 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
             EventTrackingId ??= EventTracking_Id.New;
 
-            var programId = Program_Id.Parse(Program.Id.ToString());
+            var program = Program.FillMetadata(Program);
 
-            if (programs.TryGetValue(programId, out var party))
+            if (programs.TryAdd(program.Id!.Value, program))
             {
 
-                if (programs.TryAdd(programId, Program))
+                DebugX.Log($"OCPI {Version.String} Program '{Program.Id}': '{Program}' added...");
+
+                //Program.CommonAPI = this;
+
+                //await LogAsset(
+                //          CommonBaseAPI.addProgram,
+                //          Program.ToJSON(
+                //              true,
+                //              true,
+                //              CustomProgramSerializer,
+                //              CustomDisplayTextSerializer,
+                //              CustomPriceSerializer,
+                //              CustomProgramElementSerializer,
+                //              CustomPriceComponentSerializer,
+                //              CustomProgramRestrictionsSerializer,
+                //              CustomEnergyMixSerializer,
+                //              CustomEnergySourceSerializer,
+                //              CustomEnvironmentalImpactSerializer
+                //          ),
+                //          EventTrackingId,
+                //          CurrentUserId,
+                //          CancellationToken
+                //      );
+
+                if (!SkipNotifications)
                 {
 
-                    DebugX.Log($"OCPI {Version.String} Program '{Program.Id}': '{Program}' added...");
-
-                    //Program.CommonAPI = this;
-
-                    //await LogAsset(
-                    //          CommonBaseAPI.addProgram,
-                    //          Program.ToJSON(
-                    //              true,
-                    //              true,
-                    //              CustomProgramSerializer,
-                    //              CustomDisplayTextSerializer,
-                    //              CustomPriceSerializer,
-                    //              CustomProgramElementSerializer,
-                    //              CustomPriceComponentSerializer,
-                    //              CustomProgramRestrictionsSerializer,
-                    //              CustomEnergyMixSerializer,
-                    //              CustomEnergySourceSerializer,
-                    //              CustomEnvironmentalImpactSerializer
-                    //          ),
-                    //          EventTrackingId,
-                    //          CurrentUserId,
-                    //          CancellationToken
-                    //      );
-
-                    if (!SkipNotifications)
+                    var onProgramAdded = OnProgramAdded;
+                    if (onProgramAdded is not null)
                     {
-
-                        var OnProgramAddedLocal = OnProgramAdded;
-                        if (OnProgramAddedLocal is not null)
+                        try
                         {
-                            try
-                            {
-                                await OnProgramAddedLocal(Program);
-                            }
-                            catch (Exception e)
-                            {
-                                DebugX.LogT($"OpenADR {Version.String} {nameof(OpenADRAPI)} ", nameof(AddProgram), " ", nameof(OnProgramAdded), ": ",
-                                            Environment.NewLine, e.Message,
-                                            Environment.NewLine, e.StackTrace ?? "");
-                            }
+                            await onProgramAdded(Program);
                         }
-
+                        catch (Exception e)
+                        {
+                            DebugX.LogT($"OpenADR {Version.String} {nameof(OpenADRHTTPAPI)} ", nameof(AddProgram), " ", nameof(OnProgramAdded), ": ",
+                                        Environment.NewLine, e.Message,
+                                        Environment.NewLine, e.StackTrace ?? "");
+                        }
                     }
-
-                    return AddResult<Program>.Success(
-                               EventTrackingId,
-                               Program
-                           );
 
                 }
 
-                return AddResult<Program>.Failed(
+                return AddResult<Program>.Success(
                            EventTrackingId,
-                           Program,
-                           "TryAdd(Program.Id, Program) failed!"
+                           Program
                        );
 
             }
@@ -1166,7 +1940,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
             return AddResult<Program>.Failed(
                        EventTrackingId,
                        Program,
-                       "The party identification of the program is unknown!"
+                       "TryAdd(Program.Id, Program) failed!"
                    );
 
         }
@@ -1187,75 +1961,64 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
             EventTrackingId ??= EventTracking_Id.New;
 
-            var programId = Program_Id.Parse(Program.Id.ToString());
+            var program = Program.FillMetadata(Program);
 
-            if (programs.TryGetValue(programId, out var party))
+            if (programs.TryAdd(program.Id!.Value, program))
             {
 
-                if (programs.TryAdd(programId, Program))
+                //Program.CommonAPI = this;
+
+                //await LogAsset(
+                //          CommonBaseAPI.addProgramIfNotExists,
+                //          Program.ToJSON(
+                //              true,
+                //              true,
+                //              CustomProgramSerializer,
+                //              CustomDisplayTextSerializer,
+                //              CustomPriceSerializer,
+                //              CustomProgramElementSerializer,
+                //              CustomPriceComponentSerializer,
+                //              CustomProgramRestrictionsSerializer,
+                //              CustomEnergyMixSerializer,
+                //              CustomEnergySourceSerializer,
+                //              CustomEnvironmentalImpactSerializer
+                //          ),
+                //          EventTrackingId,
+                //          CurrentUserId,
+                //          CancellationToken
+                //      );
+
+                if (!SkipNotifications)
                 {
 
-                    //Program.CommonAPI = this;
-
-                    //await LogAsset(
-                    //          CommonBaseAPI.addProgramIfNotExists,
-                    //          Program.ToJSON(
-                    //              true,
-                    //              true,
-                    //              CustomProgramSerializer,
-                    //              CustomDisplayTextSerializer,
-                    //              CustomPriceSerializer,
-                    //              CustomProgramElementSerializer,
-                    //              CustomPriceComponentSerializer,
-                    //              CustomProgramRestrictionsSerializer,
-                    //              CustomEnergyMixSerializer,
-                    //              CustomEnergySourceSerializer,
-                    //              CustomEnvironmentalImpactSerializer
-                    //          ),
-                    //          EventTrackingId,
-                    //          CurrentUserId,
-                    //          CancellationToken
-                    //      );
-
-                    if (!SkipNotifications)
+                    var onProgramAdded = OnProgramAdded;
+                    if (onProgramAdded is not null)
                     {
-
-                        var OnProgramAddedLocal = OnProgramAdded;
-                        if (OnProgramAddedLocal is not null)
+                        try
                         {
-                            try
-                            {
-                                await OnProgramAddedLocal(Program);
-                            }
-                            catch (Exception e)
-                            {
-                                DebugX.LogT($"OpenADR {Version.String} {nameof(OpenADRAPI)} ", nameof(AddProgramIfNotExists), " ", nameof(OnProgramAdded), ": ",
-                                            Environment.NewLine, e.Message,
-                                            Environment.NewLine, e.StackTrace ?? "");
-                            }
+                            await onProgramAdded(Program);
                         }
-
+                        catch (Exception e)
+                        {
+                            DebugX.LogT($"OpenADR {Version.String} {nameof(OpenADRHTTPAPI)} ", nameof(AddProgramIfNotExists), " ", nameof(OnProgramAdded), ": ",
+                                        Environment.NewLine, e.Message,
+                                        Environment.NewLine, e.StackTrace ?? "");
+                        }
                     }
-
-                    return AddResult<Program>.Success(
-                               EventTrackingId,
-                               Program
-                           );
 
                 }
 
-                return AddResult<Program>.NoOperation(
+                return AddResult<Program>.Success(
                            EventTrackingId,
-                           Program,
-                           "The given program already exists."
+                           Program
                        );
 
             }
 
-            return AddResult<Program>.Failed(
+            return AddResult<Program>.NoOperation(
                        EventTrackingId,
                        Program,
-                       "The party identification of the program is unknown!"
+                       "The given program already exists."
                    );
 
         }
@@ -1277,151 +2040,76 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
             EventTrackingId ??= EventTracking_Id.New;
 
-            var programId = Program_Id.Parse(Program.Id.ToString());
+            var program = Program.FillMetadata(Program);
 
-            if (programs.TryGetValue(programId, out var party))
+            #region Update an existing program
+
+            if (programs.TryGetValue(program.Id!.Value,
+                                     out var existingProgram))
             {
 
-                #region Update an existing program
-
-                if (programs.TryGetValue(programId,
-                                         out var existingProgram))
+                if ((AllowDowngrades ?? this.AllowDowngrades) == false &&
+                    Program.LastModification <= existingProgram.LastModification)
                 {
-
-                    if ((AllowDowngrades ?? this.AllowDowngrades) == false &&
-                        Program.LastModification <= existingProgram.LastModification)
-                    {
-                        return AddOrUpdateResult<Program>.Failed(
-                                   EventTrackingId,
-                                   Program,
-                                   "The 'lastUpdated' timestamp of the new program must be newer then the timestamp of the existing program!"
-                               );
-                    }
-
-                    if (programs.TryUpdate(programId,
-                                           Program,
-                                           existingProgram))
-                    {
-
-                      //  Program.CommonAPI = this;
-
-                      //  await LogAsset(
-                      //            CommonBaseAPI.addOrUpdateProgram,
-                      //            Program.ToJSON(
-                      //                true,
-                      //                true,
-                      //                CustomProgramSerializer,
-                      //                CustomDisplayTextSerializer,
-                      //                CustomPriceSerializer,
-                      //                CustomProgramElementSerializer,
-                      //                CustomPriceComponentSerializer,
-                      //                CustomProgramRestrictionsSerializer,
-                      //                CustomEnergyMixSerializer,
-                      //                CustomEnergySourceSerializer,
-                      //                CustomEnvironmentalImpactSerializer
-                      //            ),
-                      //            EventTrackingId,
-                      //            CurrentUserId,
-                      //            CancellationToken
-                      //        );
-
-                        if (!SkipNotifications)
-                        {
-
-                            var OnProgramChangedLocal = OnProgramChanged;
-                            if (OnProgramChangedLocal is not null)
-                            {
-                                try
-                                {
-                                    await OnProgramChangedLocal(Program);
-                                }
-                                catch (Exception e)
-                                {
-                                    DebugX.LogT($"OpenADR {Version.String} {nameof(OpenADRAPI)} ", nameof(AddOrUpdateProgram), " ", nameof(OnProgramChanged), ": ",
-                                                Environment.NewLine, e.Message,
-                                                Environment.NewLine, e.StackTrace ?? "");
-                                }
-                            }
-
-                        }
-
-                        return AddOrUpdateResult<Program>.Updated(
-                                   EventTrackingId,
-                                   Program
-                               );
-
-                    }
 
                     return AddOrUpdateResult<Program>.Failed(
                                EventTrackingId,
                                Program,
-                               "Updating the given program failed!"
+                               "The 'lastUpdated' timestamp of the new program must be newer then the timestamp of the existing program!"
                            );
 
                 }
 
-                #endregion
-
-                #region Add a new program
-
-                if (programs.TryAdd(programId, Program))
+                if (programs.TryUpdate(program.Id!.Value,
+                                       Program,
+                                       existingProgram))
                 {
 
-                  //  Program.CommonAPI = this;
+                //  Program.CommonAPI = this;
 
-                  //  await LogAsset(
-                  //            CommonBaseAPI.addOrUpdateProgram,
-                  //            Program.ToJSON(
-                  //                true,
-                  //                true,
-                  //                CustomProgramSerializer,
-                  //                CustomDisplayTextSerializer,
-                  //                CustomPriceSerializer,
-                  //                CustomProgramElementSerializer,
-                  //                CustomPriceComponentSerializer,
-                  //                CustomProgramRestrictionsSerializer,
-                  //                CustomEnergyMixSerializer,
-                  //                CustomEnergySourceSerializer,
-                  //                CustomEnvironmentalImpactSerializer
-                  //            ),
-                  //            EventTrackingId,
-                  //            CurrentUserId,
-                  //            CancellationToken
-                  //        );
+                //  await LogAsset(
+                //            CommonBaseAPI.addOrUpdateProgram,
+                //            Program.ToJSON(
+                //                true,
+                //                true,
+                //                CustomProgramSerializer,
+                //                CustomDisplayTextSerializer,
+                //                CustomPriceSerializer,
+                //                CustomProgramElementSerializer,
+                //                CustomPriceComponentSerializer,
+                //                CustomProgramRestrictionsSerializer,
+                //                CustomEnergyMixSerializer,
+                //                CustomEnergySourceSerializer,
+                //                CustomEnvironmentalImpactSerializer
+                //            ),
+                //            EventTrackingId,
+                //            CurrentUserId,
+                //            CancellationToken
+                //        );
 
-                    if (!SkipNotifications)
+                if (!SkipNotifications)
+                {
+
+                    var onProgramChanged = OnProgramChanged;
+                    if (onProgramChanged is not null)
                     {
-
-                        var OnProgramAddedLocal = OnProgramAdded;
-                        if (OnProgramAddedLocal is not null)
+                        try
                         {
-                            try
-                            {
-                                await OnProgramAddedLocal(Program);
-                            }
-                            catch (Exception e)
-                            {
-                                DebugX.LogT($"OpenADR {Version.String} {nameof(OpenADRAPI)} ", nameof(AddOrUpdateProgram), " ", nameof(OnProgramAdded), ": ",
-                                            Environment.NewLine, e.Message,
-                                            Environment.NewLine, e.StackTrace ?? "");
-                            }
+                            await onProgramChanged(Program);
                         }
-
+                        catch (Exception e)
+                        {
+                            DebugX.LogT($"OpenADR {Version.String} {nameof(OpenADRHTTPAPI)} ", nameof(AddOrUpdateProgram), " ", nameof(OnProgramChanged), ": ",
+                                        Environment.NewLine, e.Message,
+                                        Environment.NewLine, e.StackTrace ?? "");
+                        }
                     }
-
-                    return AddOrUpdateResult<Program>.Created(
-                               EventTrackingId,
-                               Program
-                           );
 
                 }
 
-                #endregion
-
-                return AddOrUpdateResult<Program>.Failed(
+                return AddOrUpdateResult<Program>.Updated(
                            EventTrackingId,
-                           Program,
-                           "Adding the given program failed because of concurrency issues!"
+                           Program
                        );
 
             }
@@ -1429,7 +2117,73 @@ namespace cloud.charging.open.protocols.OpenADRv3
             return AddOrUpdateResult<Program>.Failed(
                        EventTrackingId,
                        Program,
-                       "The party identification of the program is unknown!"
+                       "Updating the given program failed!"
+                   );
+
+            }
+
+            #endregion
+
+            #region Add a new program
+
+            if (programs.TryAdd(program.Id!.Value, Program))
+            {
+
+                //  Program.CommonAPI = this;
+
+                //  await LogAsset(
+                //            CommonBaseAPI.addOrUpdateProgram,
+                //            Program.ToJSON(
+                //                true,
+                //                true,
+                //                CustomProgramSerializer,
+                //                CustomDisplayTextSerializer,
+                //                CustomPriceSerializer,
+                //                CustomProgramElementSerializer,
+                //                CustomPriceComponentSerializer,
+                //                CustomProgramRestrictionsSerializer,
+                //                CustomEnergyMixSerializer,
+                //                CustomEnergySourceSerializer,
+                //                CustomEnvironmentalImpactSerializer
+                //            ),
+                //            EventTrackingId,
+                //            CurrentUserId,
+                //            CancellationToken
+                //        );
+
+                if (!SkipNotifications)
+                {
+
+                    var onProgramAdded = OnProgramAdded;
+                    if (onProgramAdded is not null)
+                    {
+                        try
+                        {
+                            await onProgramAdded(Program);
+                        }
+                        catch (Exception e)
+                        {
+                            DebugX.LogT($"OpenADR {Version.String} {nameof(OpenADRHTTPAPI)} ", nameof(AddOrUpdateProgram), " ", nameof(OnProgramAdded), ": ",
+                                        Environment.NewLine, e.Message,
+                                        Environment.NewLine, e.StackTrace ?? "");
+                        }
+                    }
+
+                }
+
+                return AddOrUpdateResult<Program>.Created(
+                           EventTrackingId,
+                           Program
+                       );
+
+            }
+
+            #endregion
+
+            return AddOrUpdateResult<Program>.Failed(
+                       EventTrackingId,
+                       Program,
+                       "Adding the given program failed because of concurrency issues!"
                    );
 
         }
@@ -1451,93 +2205,91 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
             EventTrackingId ??= EventTracking_Id.New;
 
-            var programId = Program_Id.Parse(Program.Id.ToString());
+            #region Initial checks
 
-            if (programs.TryGetValue(programId, out var party))
+            if (!Program.Id.HasValue)
+                return UpdateResult<Program>.Failed(
+                            EventTrackingId,
+                            Program,
+                            $"The given program identification is mandatory!"
+                        );
+
+            if (!programs.TryGetValue(Program.Id!.Value, out var existingProgram))
+                return UpdateResult<Program>.Failed(
+                            EventTrackingId,
+                            Program,
+                            $"The given program identification '{Program.Id}' is unknown!"
+                        );
+
+            #endregion
+
+            #region Validate AllowDowngrades
+
+            if ((AllowDowngrades ?? this.AllowDowngrades) == false &&
+                Program.LastModification <= existingProgram.LastModification)
             {
-
-                if (!programs.TryGetValue(programId, out var existingProgram))
-                    return UpdateResult<Program>.Failed(
-                               EventTrackingId,
-                               Program,
-                               $"The given program identification '{Program.Id}' is unknown!"
-                           );
-
-                #region Validate AllowDowngrades
-
-                if ((AllowDowngrades ?? this.AllowDowngrades) == false &&
-                    Program.LastModification <= existingProgram.LastModification)
-                {
-
-                    return UpdateResult<Program>.Failed(
-                               EventTrackingId,
-                               Program,
-                               "The 'lastUpdated' timestamp of the new program must be newer then the timestamp of the existing program!"
-                           );
-
-                }
-
-                #endregion
-
-
-                if (programs.TryUpdate(programId,
-                                       Program,
-                                       existingProgram))
-                {
-
-                    //Program.CommonAPI = this;
-
-                    //await LogAsset(
-                    //          CommonBaseAPI.updateProgram,
-                    //          Program.ToJSON(
-                    //              true,
-                    //              true,
-                    //              CustomProgramSerializer,
-                    //              CustomDisplayTextSerializer,
-                    //              CustomPriceSerializer,
-                    //              CustomProgramElementSerializer,
-                    //              CustomPriceComponentSerializer,
-                    //              CustomProgramRestrictionsSerializer,
-                    //              CustomEnergyMixSerializer,
-                    //              CustomEnergySourceSerializer,
-                    //              CustomEnvironmentalImpactSerializer
-                    //          ),
-                    //          EventTrackingId,
-                    //          CurrentUserId,
-                    //          CancellationToken
-                    //      );
-
-                    if (!SkipNotifications)
-                    {
-
-                        var OnProgramChangedLocal = OnProgramChanged;
-                        if (OnProgramChangedLocal is not null)
-                        {
-                            try
-                            {
-                                await OnProgramChangedLocal(Program);
-                            }
-                            catch (Exception e)
-                            {
-                                DebugX.LogT($"OpenADR {Version.String} {nameof(OpenADRAPI)} ", nameof(UpdateProgram), " ", nameof(OnProgramChanged), ": ",
-                                            Environment.NewLine, e.Message,
-                                            Environment.NewLine, e.StackTrace ?? "");
-                            }
-                        }
-
-                    }
-
-                    return UpdateResult<Program>.Success(
-                               EventTrackingId,
-                               Program
-                           );
-
-                }
 
                 return UpdateResult<Program>.Failed(
                            EventTrackingId,
                            Program,
-                           "Programs.TryUpdate(Program.Id, Program, Program) failed!"
+                           "The 'lastUpdated' timestamp of the new program must be newer then the timestamp of the existing program!"
+                       );
+
+            }
+
+            #endregion
+
+
+            if (programs.TryUpdate(Program.Id!.Value,
+                                   Program,
+                                   existingProgram))
+            {
+
+                //Program.CommonAPI = this;
+
+                //await LogAsset(
+                //          CommonBaseAPI.updateProgram,
+                //          Program.ToJSON(
+                //              true,
+                //              true,
+                //              CustomProgramSerializer,
+                //              CustomDisplayTextSerializer,
+                //              CustomPriceSerializer,
+                //              CustomProgramElementSerializer,
+                //              CustomPriceComponentSerializer,
+                //              CustomProgramRestrictionsSerializer,
+                //              CustomEnergyMixSerializer,
+                //              CustomEnergySourceSerializer,
+                //              CustomEnvironmentalImpactSerializer
+                //          ),
+                //          EventTrackingId,
+                //          CurrentUserId,
+                //          CancellationToken
+                //      );
+
+                if (!SkipNotifications)
+                {
+
+                    var onProgramChanged = OnProgramChanged;
+                    if (onProgramChanged is not null)
+                    {
+                        try
+                        {
+                            await onProgramChanged(Program);
+                        }
+                        catch (Exception e)
+                        {
+                            DebugX.LogT($"OpenADR {Version.String} {nameof(OpenADRHTTPAPI)} ", nameof(UpdateProgram), " ", nameof(OnProgramChanged), ": ",
+                                        Environment.NewLine, e.Message,
+                                        Environment.NewLine, e.StackTrace ?? "");
+                        }
+                    }
+
+                }
+
+                return UpdateResult<Program>.Success(
+                           EventTrackingId,
+                           Program
                        );
 
             }
@@ -1545,7 +2297,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
             return UpdateResult<Program>.Failed(
                        EventTrackingId,
                        Program,
-                       "The party identification of the program is unknown!"
+                       "Programs.TryUpdate(Program.Id, Program, Program) failed!"
                    );
 
         }
@@ -1571,9 +2323,18 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
             EventTrackingId ??= EventTracking_Id.New;
 
-            var programId = Program_Id.Parse(Program.Id.ToString());
+            #region Initial checks
 
-            if (programs.TryRemove(programId, out var programVersions))
+            if (!Program.Id.HasValue)
+                return RemoveResult<Program>.Failed(
+                            EventTrackingId,
+                            Program,
+                            $"The given program identification is mandatory!"
+                        );
+
+            #endregion
+
+            if (programs.TryRemove(Program.Id!.Value, out var programVersions))
             {
 
                 //await LogAsset(
@@ -1610,7 +2371,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
             return RemoveResult<Program>.Failed(
                        EventTrackingId,
                        Program,
-                       "The identification of the program is unknown!"
+                       $"The given program identification '{Program.Id}' is unknown!"
                    );
 
         }
@@ -1672,7 +2433,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
             return RemoveResult<Program>.Failed(
                        EventTrackingId,
-                       "The identification of the program is unknown!"
+                       $"The given program identification '{ProgramId}' is unknown!"
                    );
 
         }
@@ -1716,7 +2477,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                 }
 
                 foreach (var program in removedPrograms)
-                    programs.TryRemove(Program_Id.Parse(program.Id.ToString()), out _);
+                    programs.TryRemove(Program_Id.Parse(program.Id!.Value.ToString()), out _);
 
             }
 
@@ -1775,12 +2536,12 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
             foreach (var program in programs.Values)
             {
-                if (IncludeProgramIds(Program_Id.Parse(program.Id.ToString())))
+                if (IncludeProgramIds(Program_Id.Parse(program.Id!.Value.ToString())))
                     removedPrograms.Add(program);
             }
 
             foreach (var program in removedPrograms)
-                programs.TryRemove(Program_Id.Parse(program.Id.ToString()), out _);
+                programs.TryRemove(Program_Id.Parse(program.Id!.Value.ToString()), out _);
 
 
             //await LogAsset(
@@ -1820,6 +2581,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
         #region ProgramExists (ProgramId)
 
         public Boolean ProgramExists(Program_Id ProgramId)
+
             => programs.ContainsKey(ProgramId);
 
         #endregion
@@ -1892,7 +2654,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
         protected override Stream? GetResourceStream(String ResourceName)
 
             => GetResourceStream(ResourceName,
-                                 new Tuple<String, Assembly>(OpenADRAPI.HTTPRoot, typeof(OpenADRAPI).Assembly),
+                                 new Tuple<String, Assembly>(OpenADRHTTPAPI.HTTPRoot, typeof(OpenADRHTTPAPI).Assembly),
                                  new Tuple<String, Assembly>(HTTPAPI.   HTTPRoot, typeof(HTTPAPI).   Assembly));
 
         #endregion
@@ -1902,7 +2664,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
         protected override MemoryStream? GetResourceMemoryStream(String ResourceName)
 
             => GetResourceMemoryStream(ResourceName,
-                                       new Tuple<String, Assembly>(OpenADRAPI.HTTPRoot, typeof(OpenADRAPI).Assembly),
+                                       new Tuple<String, Assembly>(OpenADRHTTPAPI.HTTPRoot, typeof(OpenADRHTTPAPI).Assembly),
                                        new Tuple<String, Assembly>(HTTPAPI.   HTTPRoot, typeof(HTTPAPI).   Assembly));
 
         #endregion
@@ -1912,7 +2674,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
         protected override String GetResourceString(String ResourceName)
 
             => GetResourceString(ResourceName,
-                                 new Tuple<String, Assembly>(OpenADRAPI.HTTPRoot, typeof(OpenADRAPI).Assembly),
+                                 new Tuple<String, Assembly>(OpenADRHTTPAPI.HTTPRoot, typeof(OpenADRHTTPAPI).Assembly),
                                  new Tuple<String, Assembly>(HTTPAPI.   HTTPRoot, typeof(HTTPAPI).   Assembly));
 
         #endregion
@@ -1922,7 +2684,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
         protected override Byte[] GetResourceBytes(String ResourceName)
 
             => GetResourceBytes(ResourceName,
-                                new Tuple<String, Assembly>(OpenADRAPI.HTTPRoot, typeof(OpenADRAPI).Assembly),
+                                new Tuple<String, Assembly>(OpenADRHTTPAPI.HTTPRoot, typeof(OpenADRHTTPAPI).Assembly),
                                 new Tuple<String, Assembly>(HTTPAPI.   HTTPRoot, typeof(HTTPAPI).   Assembly));
 
         #endregion
@@ -1932,7 +2694,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
         protected override String MixWithHTMLTemplate(String ResourceName)
 
             => MixWithHTMLTemplate(ResourceName,
-                                   new Tuple<String, Assembly>(OpenADRAPI.HTTPRoot, typeof(OpenADRAPI).Assembly),
+                                   new Tuple<String, Assembly>(OpenADRHTTPAPI.HTTPRoot, typeof(OpenADRHTTPAPI).Assembly),
                                    new Tuple<String, Assembly>(HTTPAPI.   HTTPRoot, typeof(HTTPAPI).   Assembly));
 
         #endregion
@@ -1946,7 +2708,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
             => MixWithHTMLTemplate(Template,
                                    ResourceName,
                                    [
-                                       new Tuple<String, Assembly>(OpenADRAPI.HTTPRoot, typeof(OpenADRAPI).Assembly),
+                                       new Tuple<String, Assembly>(OpenADRHTTPAPI.HTTPRoot, typeof(OpenADRHTTPAPI).Assembly),
                                        new Tuple<String, Assembly>(HTTPAPI.   HTTPRoot, typeof(HTTPAPI).   Assembly)
                                    ],
                                    Content);
@@ -1958,13 +2720,13 @@ namespace cloud.charging.open.protocols.OpenADRv3
         private void RegisterURLTemplates()
         {
 
-            HTTPServer.AddAuth(request => {
+            HTTPBaseAPI.HTTPServer.AddAuth(request => {
 
                 #region Allow some URLs for anonymous access...
 
                 if (request.Path.Equals(URLPathPrefix))
                 {
-                    return Anonymous;
+                    return HTTPExtAPI.Anonymous;
                 }
 
                 #endregion
@@ -1978,7 +2740,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
             #region OPTIONS  ~/programs
 
-            AddMethodCallback(
+            HTTPBaseAPI.AddMethodCallback(
 
                 HTTPHostname.Any,
                 HTTPMethod.OPTIONS,
@@ -1988,7 +2750,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                     Task.FromResult(
                         new HTTPResponse.Builder(request) {
                             HTTPStatusCode              = HTTPStatusCode.OK,
-                            Server                      = HTTPServer.DefaultServerName,
+                            Server                      = HTTPServiceName,
                             Date                        = Timestamp.Now,
                             Allow                       = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.POST ],
                             AccessControlAllowOrigin    = "*",
@@ -2005,13 +2767,15 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
             #region GET      ~/programs
 
-            AddMethodCallback(
+            HTTPBaseAPI.AddMethodCallback(
 
                 HTTPHostname.Any,
                 HTTPMethod.GET,
                 URLPathPrefix + "programs",
                 HTTPContentType.Application.JSON_UTF8,
-                HTTPDelegate: request => {
+                HTTPRequestLogger:   GET_programs__HTTPRequest,
+                HTTPResponseLogger:  GET_programs__HTTPResponse,
+                HTTPDelegate:        request => {
 
                     #region Check access token
 
@@ -2042,14 +2806,14 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
                     var matchFilter       = request.QueryString.CreateStringFilter<Program>(
                                                 "match",
-                                                (program, pattern) => program.ProgramName.     Contains(pattern) ||
-                                                                      program.ProgramLongName?.Contains(pattern) == true
+                                                (program, pattern) => program.ProgramName.      Contains(pattern)         ||
+                                                                      program.ProgramLongName?. Contains(pattern) == true ||
+                                                                      program.RetailerName?.    Contains(pattern) == true ||
+                                                                      program.RetailerLongName?.Contains(pattern) == true
                                             );
 
-                                                                      //ToDo: Filter to NOT show all locations to everyone!
-                    var allPrograms       = GetPrograms().//location => Request.AccessInfo.Value.Roles.Any(role => role.CountryCode == location.CountryCode &&
-                                                                      //                                                       role.PartyId     == location.PartyId)).
-                                                       ToArray();
+                                            //ToDo: Filter to NOT show all programs to everyone!
+                    var allPrograms       = GetPrograms().ToArray();
 
                     var filteredPrograms  = allPrograms.Where(matchFilter).
                                                         Where(program => !from.HasValue || program.LastModification >  from.Value).
@@ -2060,17 +2824,19 @@ namespace cloud.charging.open.protocols.OpenADRv3
                     return Task.FromResult(
                                new HTTPResponse.Builder(request) {
                                    HTTPStatusCode              = HTTPStatusCode.OK,
-                                   Allow                       = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.POST ],
                                    Content                     = new JArray(
                                                                      filteredPrograms.
                                                                          OrderBy(program => program.Created).
                                                                          SkipTakeFilter(skip, limit).
-                                                                         Select (program => program.ToJSON(CustomProgramSerializer,
-                                                                                                           CustomIntervalPeriodSerializer,
-                                                                                                           CustomEventPayloadDescriptorSerializer,
-                                                                                                           CustomReportPayloadDescriptorSerializer,
-                                                                                                           CustomValuesMapSerializer))
+                                                                         Select (program => program.ToJSON(
+                                                                                                CustomProgramSerializer,
+                                                                                                CustomIntervalPeriodSerializer,
+                                                                                                CustomEventPayloadDescriptorSerializer,
+                                                                                                CustomReportPayloadDescriptorSerializer,
+                                                                                                CustomValuesMapSerializer
+                                                                                            ))
                                                                  ).ToUTF8Bytes(),
+                                   Allow                       = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.POST ],
                                    AccessControlAllowOrigin    = "*",
                                    AccessControlAllowMethods   = [ "OPTIONS", "GET", "POST" ],
                                    AccessControlAllowHeaders   = [ "Content-Type", "Accept", "Authorization"],
@@ -2097,13 +2863,15 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
             #region POST     ~/programs
 
-            AddMethodCallback(
+            HTTPBaseAPI.AddMethodCallback(
 
                 HTTPHostname.Any,
                 HTTPMethod.POST,
                 URLPathPrefix + "programs",
                 HTTPContentType.Application.JSON_UTF8,
-                HTTPDelegate: async request => {
+                HTTPRequestLogger:   POST_programs__HTTPRequest,
+                HTTPResponseLogger:  POST_programs__HTTPResponse,
+                HTTPDelegate:        async request => {
 
                     #region Check access token
 
@@ -2197,9 +2965,9 @@ namespace cloud.charging.open.protocols.OpenADRv3
             // ------------------------------------------------------------
             // curl -v -X OPTIONS http://127.0.0.1:5500/programs/program1
             // ------------------------------------------------------------
-            AddMethodCallback(
+            HTTPBaseAPI.AddMethodCallback(
 
-                Hostname,
+                HTTPHostname.Any,
                 HTTPMethod.OPTIONS,
                 URLPathPrefix + "programs/{programId}",
                 HTTPDelegate: request =>
@@ -2207,7 +2975,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                     Task.FromResult(
                         new HTTPResponse.Builder(request) {
                             HTTPStatusCode              = HTTPStatusCode.OK,
-                            Server                      = HTTPServer.DefaultServerName,
+                            Server                      = HTTPServiceName,
                             Date                        = Timestamp.Now,
                             Allow                       = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE],
                             AccessControlAllowOrigin    = "*",
@@ -2226,13 +2994,15 @@ namespace cloud.charging.open.protocols.OpenADRv3
             // -------------------------------------------------------------------------------
             // curl -v -H "Accept: application/json" http://127.0.0.1:5500/programs/program1
             // -------------------------------------------------------------------------------
-            AddMethodCallback(
+            HTTPBaseAPI.AddMethodCallback(
 
-                Hostname,
+                HTTPHostname.Any,
                 HTTPMethod.GET,
                 URLPathPrefix + "programs/{programId}",
                 HTTPContentType.Application.JSON_UTF8,
-                HTTPDelegate: async request => {
+                HTTPRequestLogger:   GET_program__HTTPRequest,
+                HTTPResponseLogger:  GET_program__HTTPResponse,
+                HTTPDelegate:        request => {
 
                     #region Check access token
 
@@ -2258,34 +3028,44 @@ namespace cloud.charging.open.protocols.OpenADRv3
                     if (!request.ParseProgramId(out var programId,
                                                 out var httpResponseBuilder))
                     {
-                        return httpResponseBuilder;
+                        return Task.FromResult(httpResponseBuilder.AsImmutable);
                     }
 
-                    if (!programs.TryGetValue(programId.Value, out var program))
+                    if (!TryGetProgram(programId, out var program))
                     {
 
-                        return new HTTPResponse.Builder(request) {
-                                   HTTPStatusCode             = HTTPStatusCode.NotFound,
-                                   AccessControlAllowHeaders  = [ "Authorization" ],
-                                   Connection                 = ConnectionType.Close
-                               };
+                        return Task.FromResult(
+                                   new HTTPResponse.Builder(request) {
+                                       HTTPStatusCode             = HTTPStatusCode.NotFound,
+                                       AccessControlAllowHeaders  = [ "Authorization" ],
+                                       Connection                 = ConnectionType.Close
+                                   }.AsImmutable
+                               );
 
                     }
 
                     #endregion
 
 
-                    return new HTTPResponse.Builder(request) {
-                               HTTPStatusCode             = HTTPStatusCode.OK,
-                               Server                     = HTTPServer.DefaultServerName,
-                               Date                       = Timestamp.Now,
-                               Allow                      = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE],
-                               AccessControlAllowOrigin   = "*",
-                               AccessControlAllowMethods  = [ "OPTIONS", "GET", "PUT", "DELETE" ],
-                               ContentType                = HTTPContentType.Application.JSON_UTF8,
-                               Content                    = new JArray().ToUTF8Bytes(),
-                               Connection                 = ConnectionType.Close
-                           }.AsImmutable;
+                    return Task.FromResult(
+                               new HTTPResponse.Builder(request) {
+                                   HTTPStatusCode             = HTTPStatusCode.OK,
+                                   Server                     = HTTPServiceName,
+                                   Date                       = Timestamp.Now,
+                                   Allow                      = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE],
+                                   AccessControlAllowOrigin   = "*",
+                                   AccessControlAllowMethods  = [ "OPTIONS", "GET", "PUT", "DELETE" ],
+                                   ContentType                = HTTPContentType.Application.JSON_UTF8,
+                                   Content                    = program.ToJSON(
+                                                                    CustomProgramSerializer,
+                                                                    CustomIntervalPeriodSerializer,
+                                                                    CustomEventPayloadDescriptorSerializer,
+                                                                    CustomReportPayloadDescriptorSerializer,
+                                                                    CustomValuesMapSerializer
+                                                                ).ToUTF8Bytes(),
+                                   Connection                 = ConnectionType.Close
+                               }.AsImmutable
+                           );
 
                 }
 
@@ -2298,13 +3078,15 @@ namespace cloud.charging.open.protocols.OpenADRv3
             // -------------------------------------------------------------------------------
             // curl -v -H "Accept: application/json" http://127.0.0.1:5500/programs/program1
             // -------------------------------------------------------------------------------
-            AddMethodCallback(
+            HTTPBaseAPI.AddMethodCallback(
 
-                Hostname,
+                HTTPHostname.Any,
                 HTTPMethod.PUT,
                 URLPathPrefix + "programs/{programId}",
                 HTTPContentType.Application.JSON_UTF8,
-                HTTPDelegate: async request => {
+                HTTPRequestLogger:   PUT_program__HTTPRequest,
+                HTTPResponseLogger:  PUT_program__HTTPResponse,
+                HTTPDelegate:        async request => {
 
                     #region Check access token
 
@@ -2377,7 +3159,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                     #endregion
 
 
-                    var result = await AddOrUpdateProgram(
+                    var result = await UpdateProgram(
                                            newOrUpdatedProgram,
                                            EventTrackingId:    request.EventTrackingId,
                                            CurrentUserId:      null, //request.LocalAccessInfo?.UserId,
@@ -2389,7 +3171,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
                         ? new HTTPResponse.Builder(request) {
                                    HTTPStatusCode             = HTTPStatusCode.OK,
-                                   Server                     = HTTPServer.DefaultServerName,
+                                   Server                     = HTTPServiceName,
                                    Date                       = Timestamp.Now,
                                    Allow                      = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE],
                                    AccessControlAllowOrigin   = "*",
@@ -2401,7 +3183,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
                         : new HTTPResponse.Builder(request) {
                                    HTTPStatusCode             = HTTPStatusCode.Conflict,
-                                   Server                     = HTTPServer.DefaultServerName,
+                                   Server                     = HTTPServiceName,
                                    Date                       = Timestamp.Now,
                                    Allow                      = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE],
                                    AccessControlAllowOrigin   = "*",
@@ -2425,13 +3207,15 @@ namespace cloud.charging.open.protocols.OpenADRv3
             // -------------------------------------------------------------------------------
             // curl -v -H "Accept: application/json" http://127.0.0.1:5500/programs/program1
             // -------------------------------------------------------------------------------
-            AddMethodCallback(
+            HTTPBaseAPI.AddMethodCallback(
 
-                Hostname,
+                HTTPHostname.Any,
                 HTTPMethod.DELETE,
                 URLPathPrefix + "programs/{programId}",
                 HTTPContentType.Application.JSON_UTF8,
-                HTTPDelegate: async request => {
+                HTTPRequestLogger:   DELETE_program__HTTPRequest,
+                HTTPResponseLogger:  DELETE_program__HTTPResponse,
+                HTTPDelegate:        async request => {
 
                     #region Check access token
 
@@ -2464,7 +3248,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
 
                     var result = await RemoveProgram(
-                                           programId.Value,
+                                           programId,
                                            EventTrackingId:    request.EventTrackingId,
                                            CurrentUserId:      null, //request.LocalAccessInfo?.UserId,
                                            CancellationToken:  request.CancellationToken
@@ -2475,7 +3259,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
                         ? new HTTPResponse.Builder(request) {
                               HTTPStatusCode             = HTTPStatusCode.OK,
-                              Server                     = HTTPServer.DefaultServerName,
+                              Server                     = HTTPServiceName,
                               Date                       = Timestamp.Now,
                               Allow                      = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE],
                               AccessControlAllowOrigin   = "*",
@@ -2487,7 +3271,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
                         : new HTTPResponse.Builder(request) {
                               HTTPStatusCode             = HTTPStatusCode.NotFound,
-                              Server                     = HTTPServer.DefaultServerName,
+                              Server                     = HTTPServiceName,
                               Date                       = Timestamp.Now,
                               Allow                      = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE],
                               AccessControlAllowOrigin   = "*",
@@ -2508,7 +3292,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
             #region OPTIONS  ~/reports
 
-            AddMethodCallback(
+            HTTPBaseAPI.AddMethodCallback(
 
                 HTTPHostname.Any,
                 HTTPMethod.OPTIONS,
@@ -2518,7 +3302,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                     Task.FromResult(
                         new HTTPResponse.Builder(request) {
                             HTTPStatusCode              = HTTPStatusCode.OK,
-                            Server                      = HTTPServer.DefaultServerName,
+                            Server                      = HTTPServiceName,
                             Date                        = Timestamp.Now,
                             Allow                       = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.POST ],
                             AccessControlAllowOrigin    = "*",
@@ -2534,7 +3318,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
             #region GET      ~/reports
 
-            AddMethodCallback(
+            HTTPBaseAPI.AddMethodCallback(
 
                 HTTPHostname.Any,
                 HTTPMethod.GET,
@@ -2581,7 +3365,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
             #region POST     ~/reports
 
-            AddMethodCallback(
+            HTTPBaseAPI.AddMethodCallback(
 
                 HTTPHostname.Any,
                 HTTPMethod.POST,
@@ -2635,9 +3419,9 @@ namespace cloud.charging.open.protocols.OpenADRv3
             // ----------------------------------------------------------
             // curl -v -X OPTIONS http://127.0.0.1:5500/reports/versions
             // ----------------------------------------------------------
-            AddMethodCallback(
+            HTTPBaseAPI.AddMethodCallback(
 
-                Hostname,
+                HTTPHostname.Any,
                 HTTPMethod.OPTIONS,
                 URLPathPrefix + "reports/{reportId}",
                 HTTPDelegate: request =>
@@ -2645,7 +3429,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                     Task.FromResult(
                         new HTTPResponse.Builder(request) {
                             HTTPStatusCode              = HTTPStatusCode.OK,
-                            Server                      = HTTPServer.DefaultServerName,
+                            Server                      = HTTPServiceName,
                             Date                        = Timestamp.Now,
                             Allow                       = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE],
                             AccessControlAllowOrigin    = "*",
@@ -2663,7 +3447,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
             // -------------------------------------------------------------------------------
             // curl -v -H "Accept: application/json" http://127.0.0.1:5500/reports/versions
             // -------------------------------------------------------------------------------
-            AddMethodCallback(Hostname,
+            HTTPBaseAPI.AddMethodCallback(HTTPHostname.Any,
                               HTTPMethod.GET,
                               URLPathPrefix + "reports/{reportId}",
                               HTTPContentType.Application.JSON_UTF8,
@@ -2675,7 +3459,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                                   return Task.FromResult(
                                       new HTTPResponse.Builder(request) {
                                           HTTPStatusCode                = HTTPStatusCode.OK,
-                                          Server                        = HTTPServer.DefaultServerName,
+                                          Server                        = HTTPServiceName,
                                           Date                          = Timestamp.Now,
                                           AccessControlAllowOrigin      = "*",
                                           AccessControlAllowMethods     = [ "GET", "OPTIONS" ],
@@ -2696,7 +3480,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
             // -------------------------------------------------------------------------------
             // curl -v -H "Accept: application/json" http://127.0.0.1:5500/reports/versions
             // -------------------------------------------------------------------------------
-            AddMethodCallback(Hostname,
+            HTTPBaseAPI.AddMethodCallback(HTTPHostname.Any,
                               HTTPMethod.PUT,
                               URLPathPrefix + "reports/{reportId}",
                               HTTPContentType.Application.JSON_UTF8,
@@ -2708,7 +3492,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                                   return Task.FromResult(
                                       new HTTPResponse.Builder(request) {
                                           HTTPStatusCode                = HTTPStatusCode.OK,
-                                          Server                        = HTTPServer.DefaultServerName,
+                                          Server                        = HTTPServiceName,
                                           Date                          = Timestamp.Now,
                                           AccessControlAllowOrigin      = "*",
                                           AccessControlAllowMethods     = [ "GET", "OPTIONS" ],
@@ -2729,7 +3513,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
             // -------------------------------------------------------------------------------
             // curl -v -H "Accept: application/json" http://127.0.0.1:5500/reports/versions
             // -------------------------------------------------------------------------------
-            AddMethodCallback(Hostname,
+            HTTPBaseAPI.AddMethodCallback(HTTPHostname.Any,
                               HTTPMethod.DELETE,
                               URLPathPrefix + "reports/{reportId}",
                               HTTPContentType.Application.JSON_UTF8,
@@ -2741,7 +3525,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                                   return Task.FromResult(
                                       new HTTPResponse.Builder(request) {
                                           HTTPStatusCode                = HTTPStatusCode.OK,
-                                          Server                        = HTTPServer.DefaultServerName,
+                                          Server                        = HTTPServiceName,
                                           Date                          = Timestamp.Now,
                                           AccessControlAllowOrigin      = "*",
                                           AccessControlAllowMethods     = [ "GET", "OPTIONS" ],
@@ -2764,7 +3548,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
             #region OPTIONS  ~/events
 
-            AddMethodCallback(
+            HTTPBaseAPI.AddMethodCallback(
 
                 HTTPHostname.Any,
                 HTTPMethod.OPTIONS,
@@ -2774,7 +3558,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                     Task.FromResult(
                         new HTTPResponse.Builder(request) {
                             HTTPStatusCode              = HTTPStatusCode.OK,
-                            Server                      = HTTPServer.DefaultServerName,
+                            Server                      = HTTPServiceName,
                             Date                        = Timestamp.Now,
                             Allow                       = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.POST ],
                             AccessControlAllowOrigin    = "*",
@@ -2790,7 +3574,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
             #region GET      ~/events
 
-            AddMethodCallback(
+            HTTPBaseAPI.AddMethodCallback(
 
                 HTTPHostname.Any,
                 HTTPMethod.GET,
@@ -2837,7 +3621,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
             #region POST     ~/events
 
-            AddMethodCallback(
+            HTTPBaseAPI.AddMethodCallback(
 
                 HTTPHostname.Any,
                 HTTPMethod.POST,
@@ -2891,9 +3675,9 @@ namespace cloud.charging.open.protocols.OpenADRv3
             // ----------------------------------------------------------
             // curl -v -X OPTIONS http://127.0.0.1:5500/events/versions
             // ----------------------------------------------------------
-            AddMethodCallback(
+            HTTPBaseAPI.AddMethodCallback(
 
-                Hostname,
+                HTTPHostname.Any,
                 HTTPMethod.OPTIONS,
                 URLPathPrefix + "events/{eventId}",
                 HTTPDelegate: request =>
@@ -2901,7 +3685,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                     Task.FromResult(
                         new HTTPResponse.Builder(request) {
                             HTTPStatusCode              = HTTPStatusCode.OK,
-                            Server                      = HTTPServer.DefaultServerName,
+                            Server                      = HTTPServiceName,
                             Date                        = Timestamp.Now,
                             Allow                       = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE],
                             AccessControlAllowOrigin    = "*",
@@ -2919,7 +3703,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
             // -------------------------------------------------------------------------------
             // curl -v -H "Accept: application/json" http://127.0.0.1:5500/events/versions
             // -------------------------------------------------------------------------------
-            AddMethodCallback(Hostname,
+            HTTPBaseAPI.AddMethodCallback(HTTPHostname.Any,
                               HTTPMethod.GET,
                               URLPathPrefix + "events/{eventId}",
                               HTTPContentType.Application.JSON_UTF8,
@@ -2931,7 +3715,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                                   return Task.FromResult(
                                       new HTTPResponse.Builder(request) {
                                           HTTPStatusCode                = HTTPStatusCode.OK,
-                                          Server                        = HTTPServer.DefaultServerName,
+                                          Server                        = HTTPServiceName,
                                           Date                          = Timestamp.Now,
                                           AccessControlAllowOrigin      = "*",
                                           AccessControlAllowMethods     = [ "GET", "OPTIONS" ],
@@ -2952,7 +3736,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
             // -------------------------------------------------------------------------------
             // curl -v -H "Accept: application/json" http://127.0.0.1:5500/events/versions
             // -------------------------------------------------------------------------------
-            AddMethodCallback(Hostname,
+            HTTPBaseAPI.AddMethodCallback(HTTPHostname.Any,
                               HTTPMethod.PUT,
                               URLPathPrefix + "events/{eventId}",
                               HTTPContentType.Application.JSON_UTF8,
@@ -2964,7 +3748,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                                   return Task.FromResult(
                                       new HTTPResponse.Builder(request) {
                                           HTTPStatusCode                = HTTPStatusCode.OK,
-                                          Server                        = HTTPServer.DefaultServerName,
+                                          Server                        = HTTPServiceName,
                                           Date                          = Timestamp.Now,
                                           AccessControlAllowOrigin      = "*",
                                           AccessControlAllowMethods     = [ "GET", "OPTIONS" ],
@@ -2985,7 +3769,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
             // -------------------------------------------------------------------------------
             // curl -v -H "Accept: application/json" http://127.0.0.1:5500/events/versions
             // -------------------------------------------------------------------------------
-            AddMethodCallback(Hostname,
+            HTTPBaseAPI.AddMethodCallback(HTTPHostname.Any,
                               HTTPMethod.DELETE,
                               URLPathPrefix + "events/{eventId}",
                               HTTPContentType.Application.JSON_UTF8,
@@ -2997,7 +3781,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                                   return Task.FromResult(
                                       new HTTPResponse.Builder(request) {
                                           HTTPStatusCode                = HTTPStatusCode.OK,
-                                          Server                        = HTTPServer.DefaultServerName,
+                                          Server                        = HTTPServiceName,
                                           Date                          = Timestamp.Now,
                                           AccessControlAllowOrigin      = "*",
                                           AccessControlAllowMethods     = [ "GET", "OPTIONS" ],
@@ -3020,7 +3804,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
             #region OPTIONS  ~/subscriptions
 
-            AddMethodCallback(
+            HTTPBaseAPI.AddMethodCallback(
 
                 HTTPHostname.Any,
                 HTTPMethod.OPTIONS,
@@ -3030,7 +3814,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                     Task.FromResult(
                         new HTTPResponse.Builder(request) {
                             HTTPStatusCode              = HTTPStatusCode.OK,
-                            Server                      = HTTPServer.DefaultServerName,
+                            Server                      = HTTPServiceName,
                             Date                        = Timestamp.Now,
                             Allow                       = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.POST ],
                             AccessControlAllowOrigin    = "*",
@@ -3046,7 +3830,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
             #region GET      ~/subscriptions
 
-            AddMethodCallback(
+            HTTPBaseAPI.AddMethodCallback(
 
                 HTTPHostname.Any,
                 HTTPMethod.GET,
@@ -3093,7 +3877,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
             #region POST     ~/subscriptions
 
-            AddMethodCallback(
+            HTTPBaseAPI.AddMethodCallback(
 
                 HTTPHostname.Any,
                 HTTPMethod.POST,
@@ -3147,9 +3931,9 @@ namespace cloud.charging.open.protocols.OpenADRv3
             // ----------------------------------------------------------
             // curl -v -X OPTIONS http://127.0.0.1:5500/subscriptions/versions
             // ----------------------------------------------------------
-            AddMethodCallback(
+            HTTPBaseAPI.AddMethodCallback(
 
-                Hostname,
+                HTTPHostname.Any,
                 HTTPMethod.OPTIONS,
                 URLPathPrefix + "subscriptions/{subscriptionId}",
                 HTTPDelegate: request =>
@@ -3157,7 +3941,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                     Task.FromResult(
                         new HTTPResponse.Builder(request) {
                             HTTPStatusCode              = HTTPStatusCode.OK,
-                            Server                      = HTTPServer.DefaultServerName,
+                            Server                      = HTTPServiceName,
                             Date                        = Timestamp.Now,
                             Allow                       = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE],
                             AccessControlAllowOrigin    = "*",
@@ -3175,7 +3959,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
             // -------------------------------------------------------------------------------
             // curl -v -H "Accept: application/json" http://127.0.0.1:5500/subscriptions/versions
             // -------------------------------------------------------------------------------
-            AddMethodCallback(Hostname,
+            HTTPBaseAPI.AddMethodCallback(HTTPHostname.Any,
                               HTTPMethod.GET,
                               URLPathPrefix + "subscriptions/{subscriptionId}",
                               HTTPContentType.Application.JSON_UTF8,
@@ -3187,7 +3971,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                                   return Task.FromResult(
                                       new HTTPResponse.Builder(request) {
                                           HTTPStatusCode                = HTTPStatusCode.OK,
-                                          Server                        = HTTPServer.DefaultServerName,
+                                          Server                        = HTTPServiceName,
                                           Date                          = Timestamp.Now,
                                           AccessControlAllowOrigin      = "*",
                                           AccessControlAllowMethods     = [ "GET", "OPTIONS" ],
@@ -3208,7 +3992,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
             // -------------------------------------------------------------------------------
             // curl -v -H "Accept: application/json" http://127.0.0.1:5500/subscriptions/versions
             // -------------------------------------------------------------------------------
-            AddMethodCallback(Hostname,
+            HTTPBaseAPI.AddMethodCallback(HTTPHostname.Any,
                               HTTPMethod.PUT,
                               URLPathPrefix + "subscriptions/{subscriptionId}",
                               HTTPContentType.Application.JSON_UTF8,
@@ -3220,7 +4004,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                                   return Task.FromResult(
                                       new HTTPResponse.Builder(request) {
                                           HTTPStatusCode                = HTTPStatusCode.OK,
-                                          Server                        = HTTPServer.DefaultServerName,
+                                          Server                        = HTTPServiceName,
                                           Date                          = Timestamp.Now,
                                           AccessControlAllowOrigin      = "*",
                                           AccessControlAllowMethods     = [ "GET", "OPTIONS" ],
@@ -3241,7 +4025,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
             // -------------------------------------------------------------------------------
             // curl -v -H "Accept: application/json" http://127.0.0.1:5500/subscriptions/versions
             // -------------------------------------------------------------------------------
-            AddMethodCallback(Hostname,
+            HTTPBaseAPI.AddMethodCallback(HTTPHostname.Any,
                               HTTPMethod.DELETE,
                               URLPathPrefix + "subscriptions/{subscriptionId}",
                               HTTPContentType.Application.JSON_UTF8,
@@ -3253,7 +4037,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                                   return Task.FromResult(
                                       new HTTPResponse.Builder(request) {
                                           HTTPStatusCode                = HTTPStatusCode.OK,
-                                          Server                        = HTTPServer.DefaultServerName,
+                                          Server                        = HTTPServiceName,
                                           Date                          = Timestamp.Now,
                                           AccessControlAllowOrigin      = "*",
                                           AccessControlAllowMethods     = [ "GET", "OPTIONS" ],
@@ -3276,7 +4060,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
             #region OPTIONS  ~/vens
 
-            AddMethodCallback(
+            HTTPBaseAPI.AddMethodCallback(
 
                 HTTPHostname.Any,
                 HTTPMethod.OPTIONS,
@@ -3286,7 +4070,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                     Task.FromResult(
                         new HTTPResponse.Builder(request) {
                             HTTPStatusCode              = HTTPStatusCode.OK,
-                            Server                      = HTTPServer.DefaultServerName,
+                            Server                      = HTTPServiceName,
                             Date                        = Timestamp.Now,
                             Allow                       = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.POST ],
                             AccessControlAllowOrigin    = "*",
@@ -3302,7 +4086,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
             #region GET      ~/vens
 
-            AddMethodCallback(
+            HTTPBaseAPI.AddMethodCallback(
 
                 HTTPHostname.Any,
                 HTTPMethod.GET,
@@ -3349,7 +4133,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
             #region POST     ~/vens
 
-            AddMethodCallback(
+            HTTPBaseAPI.AddMethodCallback(
 
                 HTTPHostname.Any,
                 HTTPMethod.POST,
@@ -3403,9 +4187,9 @@ namespace cloud.charging.open.protocols.OpenADRv3
             // ----------------------------------------------------------
             // curl -v -X OPTIONS http://127.0.0.1:5500/vens/versions
             // ----------------------------------------------------------
-            AddMethodCallback(
+            HTTPBaseAPI.AddMethodCallback(
 
-                Hostname,
+                HTTPHostname.Any,
                 HTTPMethod.OPTIONS,
                 URLPathPrefix + "vens/{venId}",
                 HTTPDelegate: request =>
@@ -3413,7 +4197,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                     Task.FromResult(
                         new HTTPResponse.Builder(request) {
                             HTTPStatusCode              = HTTPStatusCode.OK,
-                            Server                      = HTTPServer.DefaultServerName,
+                            Server                      = HTTPServiceName,
                             Date                        = Timestamp.Now,
                             Allow                       = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE],
                             AccessControlAllowOrigin    = "*",
@@ -3431,7 +4215,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
             // -------------------------------------------------------------------------------
             // curl -v -H "Accept: application/json" http://127.0.0.1:5500/vens/versions
             // -------------------------------------------------------------------------------
-            AddMethodCallback(Hostname,
+            HTTPBaseAPI.AddMethodCallback(HTTPHostname.Any,
                               HTTPMethod.GET,
                               URLPathPrefix + "vens/{venId}",
                               HTTPContentType.Application.JSON_UTF8,
@@ -3443,7 +4227,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                                   return Task.FromResult(
                                       new HTTPResponse.Builder(request) {
                                           HTTPStatusCode                = HTTPStatusCode.OK,
-                                          Server                        = HTTPServer.DefaultServerName,
+                                          Server                        = HTTPServiceName,
                                           Date                          = Timestamp.Now,
                                           AccessControlAllowOrigin      = "*",
                                           AccessControlAllowMethods     = [ "GET", "OPTIONS" ],
@@ -3464,7 +4248,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
             // -------------------------------------------------------------------------------
             // curl -v -H "Accept: application/json" http://127.0.0.1:5500/vens/versions
             // -------------------------------------------------------------------------------
-            AddMethodCallback(Hostname,
+            HTTPBaseAPI.AddMethodCallback(HTTPHostname.Any,
                               HTTPMethod.PUT,
                               URLPathPrefix + "vens/{venId}",
                               HTTPContentType.Application.JSON_UTF8,
@@ -3476,7 +4260,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                                   return Task.FromResult(
                                       new HTTPResponse.Builder(request) {
                                           HTTPStatusCode                = HTTPStatusCode.OK,
-                                          Server                        = HTTPServer.DefaultServerName,
+                                          Server                        = HTTPServiceName,
                                           Date                          = Timestamp.Now,
                                           AccessControlAllowOrigin      = "*",
                                           AccessControlAllowMethods     = [ "GET", "OPTIONS" ],
@@ -3497,7 +4281,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
             // -------------------------------------------------------------------------------
             // curl -v -H "Accept: application/json" http://127.0.0.1:5500/vens/versions
             // -------------------------------------------------------------------------------
-            AddMethodCallback(Hostname,
+            HTTPBaseAPI.AddMethodCallback(HTTPHostname.Any,
                               HTTPMethod.DELETE,
                               URLPathPrefix + "vens/{venId}",
                               HTTPContentType.Application.JSON_UTF8,
@@ -3509,7 +4293,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                                   return Task.FromResult(
                                       new HTTPResponse.Builder(request) {
                                           HTTPStatusCode                = HTTPStatusCode.OK,
-                                          Server                        = HTTPServer.DefaultServerName,
+                                          Server                        = HTTPServiceName,
                                           Date                          = Timestamp.Now,
                                           AccessControlAllowOrigin      = "*",
                                           AccessControlAllowMethods     = [ "GET", "OPTIONS" ],
@@ -3531,7 +4315,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
             #region OPTIONS  ~/vens/{venId}/resources
 
-            AddMethodCallback(
+            HTTPBaseAPI.AddMethodCallback(
 
                 HTTPHostname.Any,
                 HTTPMethod.OPTIONS,
@@ -3541,7 +4325,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                     Task.FromResult(
                         new HTTPResponse.Builder(request) {
                             HTTPStatusCode              = HTTPStatusCode.OK,
-                            Server                      = HTTPServer.DefaultServerName,
+                            Server                      = HTTPServiceName,
                             Date                        = Timestamp.Now,
                             Allow                       = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.POST ],
                             AccessControlAllowOrigin    = "*",
@@ -3557,7 +4341,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
             #region GET      ~/vens/{venId}/resources
 
-            AddMethodCallback(
+            HTTPBaseAPI.AddMethodCallback(
 
                 HTTPHostname.Any,
                 HTTPMethod.GET,
@@ -3604,7 +4388,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
             #region POST     ~/vens/{venId}/resources
 
-            AddMethodCallback(
+            HTTPBaseAPI.AddMethodCallback(
 
                 HTTPHostname.Any,
                 HTTPMethod.POST,
@@ -3658,9 +4442,9 @@ namespace cloud.charging.open.protocols.OpenADRv3
             // ----------------------------------------------------------
             // curl -v -X OPTIONS http://127.0.0.1:5500/vens/ven1/resources/res1
             // ----------------------------------------------------------
-            AddMethodCallback(
+            HTTPBaseAPI.AddMethodCallback(
 
-                Hostname,
+                HTTPHostname.Any,
                 HTTPMethod.OPTIONS,
                 URLPathPrefix + "vens/{venId}/resources/{resourceId}",
                 HTTPDelegate: request =>
@@ -3668,7 +4452,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                     Task.FromResult(
                         new HTTPResponse.Builder(request) {
                             HTTPStatusCode              = HTTPStatusCode.OK,
-                            Server                      = HTTPServer.DefaultServerName,
+                            Server                      = HTTPServiceName,
                             Date                        = Timestamp.Now,
                             Allow                       = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE],
                             AccessControlAllowOrigin    = "*",
@@ -3686,7 +4470,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
             // -------------------------------------------------------------------------------
             // curl -v -H "Accept: application/json" http://127.0.0.1:5500/vens/ven1/resources/res1
             // -------------------------------------------------------------------------------
-            AddMethodCallback(Hostname,
+            HTTPBaseAPI.AddMethodCallback(HTTPHostname.Any,
                               HTTPMethod.GET,
                               URLPathPrefix + "vens/{venId}/resources/{resourceId}",
                               HTTPContentType.Application.JSON_UTF8,
@@ -3698,7 +4482,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                                   return Task.FromResult(
                                       new HTTPResponse.Builder(request) {
                                           HTTPStatusCode                = HTTPStatusCode.OK,
-                                          Server                        = HTTPServer.DefaultServerName,
+                                          Server                        = HTTPServiceName,
                                           Date                          = Timestamp.Now,
                                           AccessControlAllowOrigin      = "*",
                                           AccessControlAllowMethods     = [ "GET", "OPTIONS" ],
@@ -3719,7 +4503,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
             // -------------------------------------------------------------------------------
             // curl -v -H "Accept: application/json" http://127.0.0.1:5500/vens/ven1/resources/res1
             // -------------------------------------------------------------------------------
-            AddMethodCallback(Hostname,
+            HTTPBaseAPI.AddMethodCallback(HTTPHostname.Any,
                               HTTPMethod.PUT,
                               URLPathPrefix + "vens/{venId}/resources/{resourceId}",
                               HTTPContentType.Application.JSON_UTF8,
@@ -3731,7 +4515,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                                   return Task.FromResult(
                                       new HTTPResponse.Builder(request) {
                                           HTTPStatusCode                = HTTPStatusCode.OK,
-                                          Server                        = HTTPServer.DefaultServerName,
+                                          Server                        = HTTPServiceName,
                                           Date                          = Timestamp.Now,
                                           AccessControlAllowOrigin      = "*",
                                           AccessControlAllowMethods     = [ "GET", "OPTIONS" ],
@@ -3752,7 +4536,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
             // -------------------------------------------------------------------------------
             // curl -v -H "Accept: application/json" http://127.0.0.1:5500/vens/ven1/resources/res1
             // -------------------------------------------------------------------------------
-            AddMethodCallback(Hostname,
+            HTTPBaseAPI.AddMethodCallback(HTTPHostname.Any,
                               HTTPMethod.DELETE,
                               URLPathPrefix + "vens/{venId}/resources/{resourceId}",
                               HTTPContentType.Application.JSON_UTF8,
@@ -3764,7 +4548,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                                   return Task.FromResult(
                                       new HTTPResponse.Builder(request) {
                                           HTTPStatusCode                = HTTPStatusCode.OK,
-                                          Server                        = HTTPServer.DefaultServerName,
+                                          Server                        = HTTPServiceName,
                                           Date                          = Timestamp.Now,
                                           AccessControlAllowOrigin      = "*",
                                           AccessControlAllowMethods     = [ "GET", "OPTIONS" ],

@@ -97,7 +97,7 @@ namespace cloud.charging.open.protocols.OpenADRv3.Node
 
         public HTTPAPI?                     HTTPAPI                                  { get; }
 
-        public OpenADRAPI?                  OpenADRAPI                               { get; }
+        public OpenADRHTTPAPI?                  OpenADRAPI                               { get; }
         public HTTPPath?                    OpenADRAPI_Path                          { get; }
 
         public WebAPI?                      WebAPI                                   { get; }
@@ -115,53 +115,53 @@ namespace cloud.charging.open.protocols.OpenADRv3.Node
         /// </summary>
         /// <param name="Id">The unique identification of this OpenADR node.</param>
         /// <param name="Description">An optional multi-language description of the OpenADR node.</param>
-        public AOpenADRNode(NetworkingNode_Id                 Id,
-                            String                            VendorName,
-                            String                            Model,
-                            String?                           SerialNumber                            = null,
-                            String?                           SoftwareVersion                         = null,
-                            I18NString?                       Description                             = null,
-                            CustomData?                       CustomData                              = null,
+        public AOpenADRNode(NetworkingNode_Id                    Id,
+                            String                               VendorName,
+                            String                               Model,
+                            String?                              SerialNumber                            = null,
+                            String?                              SoftwareVersion                         = null,
+                            I18NString?                          Description                             = null,
+                            CustomData?                          CustomData                              = null,
 
-                            AsymmetricCipherKeyPair?          ClientCAKeyPair                         = null,
-                            BCx509.X509Certificate?           ClientCACertificate                     = null,
+                            AsymmetricCipherKeyPair?             ClientCAKeyPair                         = null,
+                            BCx509.X509Certificate?              ClientCACertificate                     = null,
 
-                            SignaturePolicy?                  SignaturePolicy                         = null,
-                            SignaturePolicy?                  ForwardingSignaturePolicy               = null,
+                            SignaturePolicy?                     SignaturePolicy                         = null,
+                            SignaturePolicy?                     ForwardingSignaturePolicy               = null,
 
-                            Func<AOpenADRNode, HTTPAPI>?      HTTPAPI                                 = null,
-                            Boolean                           HTTPAPI_Disabled                        = false,
-                            IPPort?                           HTTPAPI_Port                            = null,
-                            String?                           HTTPAPI_ServerName                      = null,
-                            String?                           HTTPAPI_ServiceName                     = null,
-                            EMailAddress?                     HTTPAPI_RobotEMailAddress               = null,
-                            String?                           HTTPAPI_RobotGPGPassphrase              = null,
-                            Boolean                           HTTPAPI_EventLoggingDisabled            = false,
+                            Func<AOpenADRNode, HTTPAPI>?         HTTPAPI                                 = null,
+                            Boolean                              HTTPAPI_Disabled                        = false,
+                            IPPort?                              HTTPAPI_Port                            = null,
+                            String?                              HTTPAPI_ServerName                      = null,
+                            String?                              HTTPAPI_ServiceName                     = null,
+                            EMailAddress?                        HTTPAPI_RobotEMailAddress               = null,
+                            String?                              HTTPAPI_RobotGPGPassphrase              = null,
+                            Boolean                              HTTPAPI_EventLoggingDisabled            = false,
 
-                            Func<AOpenADRNode, OpenADRAPI>?   OpenADRAPI                              = null,
-                            Boolean                           OpenADRAPI_Disabled                     = false,
-                            HTTPPath?                         OpenADRAPI_Path                         = null,
-                            String?                           OpenADRAPI_FileSystemPath               = null,
+                            Func<AOpenADRNode, OpenADRHTTPAPI>?  OpenADRAPI                              = null,
+                            Boolean                              OpenADRAPI_Disabled                     = false,
+                            HTTPPath?                            OpenADRAPI_Path                         = null,
+                            String?                              OpenADRAPI_FileSystemPath               = null,
 
-                            Func<AOpenADRNode, WebAPI>?       WebAPI                                  = null,
-                            Boolean                           WebAPI_Disabled                         = false,
-                            HTTPPath?                         WebAPI_Path                             = null,
+                            Func<AOpenADRNode, WebAPI>?          WebAPI                                  = null,
+                            Boolean                              WebAPI_Disabled                         = false,
+                            HTTPPath?                            WebAPI_Path                             = null,
 
-                            Func<AOpenADRNode, NTSServer>?    NTSServerBuilder                        = null,
-                            Boolean                           NTSServer_Disabled                      = true,
+                            Func<AOpenADRNode, NTSServer>?       NTSServerBuilder                        = null,
+                            Boolean                              NTSServer_Disabled                      = true,
 
-                            WebSocketServer?                  ControlWebSocketServer                  = null,
+                            WebSocketServer?                     ControlWebSocketServer                  = null,
 
-                            TimeSpan?                         DefaultRequestTimeout                   = null,
+                            TimeSpan?                            DefaultRequestTimeout                   = null,
 
-                            Boolean                           DisableSendHeartbeats                   = false,
-                            TimeSpan?                         SendHeartbeatsEvery                     = null,
+                            Boolean                              DisableSendHeartbeats                   = false,
+                            TimeSpan?                            SendHeartbeatsEvery                     = null,
 
-                            Boolean                           DisableMaintenanceTasks                 = false,
-                            TimeSpan?                         MaintenanceEvery                        = null,
+                            Boolean                              DisableMaintenanceTasks                 = false,
+                            TimeSpan?                            MaintenanceEvery                        = null,
 
-                            ISMTPClient?                      SMTPClient                              = null,
-                            DNSClient?                        DNSClient                               = null)
+                            ISMTPClient?                         SMTPClient                              = null,
+                            DNSClient?                           DNSClient                               = null)
 
             : base(Id,
                    Description,
@@ -215,6 +215,8 @@ namespace cloud.charging.open.protocols.OpenADRv3.Node
             this.OpenADRAPI_Path                        = OpenADRAPI_Path ?? HTTPPath.Parse("OpenADR");
 
             if (this.HTTPExtAPI is not null)
+            {
+
                 this.HTTPAPI                            = !HTTPAPI_Disabled
                                                               ? HTTPAPI?.Invoke(this)    ?? new HTTPAPI(
                                                                                                 this,
@@ -223,45 +225,46 @@ namespace cloud.charging.open.protocols.OpenADRv3.Node
                                                                                             )
                                                               : null;
 
-            if (this.HTTPAPI is not null)
-            {
+                if (this.HTTPAPI is not null)
+                {
 
-                #region HTTP API Security Settings
+                    #region HTTP API Security Settings
 
-                this.HTTPAPI.HTTPBaseAPI.HTTPServer.AddAuth(request => {
+                    this.HTTPAPI.HTTPBaseAPI.HTTPServer.AddAuth(request => {
 
-                    // Allow some URLs for anonymous access...
-                    if (request.Path.StartsWith(this.HTTPAPI.URLPathPrefix + this.WebAPI_Path))
+                        // Allow some URLs for anonymous access...
+                        if (request.Path.StartsWith(this.HTTPAPI.URLPathPrefix + this.WebAPI_Path))
+                        {
+                            return HTTPExtAPI.Anonymous;
+                        }
+
+                        return null;
+
+                    });
+
+                    #endregion
+
+
+                    if (!OpenADRAPI_Disabled)
                     {
-                        return HTTPExtAPI.Anonymous;
+
+                        this.OpenADRAPI = OpenADRAPI?.Invoke(this) ?? new OpenADRHTTPAPI(
+                                                                          HTTPExtAPI,
+                                                                          URLPathPrefix: this.OpenADRAPI_Path
+                                                                      );
+
                     }
 
-                    return null;
+                    if (!WebAPI_Disabled)
+                    {
 
-                });
+                        this.WebAPI                     = WebAPI?.Invoke(this)          ?? new WebAPI(
+                                                                                               this,
+                                                                                               this.HTTPAPI.HTTPBaseAPI,
+                                                                                               URLPathPrefix:   this.WebAPI_Path
+                                                                                           );
 
-                #endregion
-
-
-                if (!OpenADRAPI_Disabled)
-                {
-
-                    this.OpenADRAPI = OpenADRAPI?.Invoke(this) ?? new OpenADRAPI(
-                                                                      //this,
-                                                                      //this.HTTPAPI.HTTPServer,
-                                                                      URLPathPrefix:   this.OpenADRAPI_Path
-                                                                  );
-
-                }
-
-                if (!WebAPI_Disabled)
-                {
-
-                    this.WebAPI                     = WebAPI?.Invoke(this)          ?? new WebAPI(
-                                                                                           this,
-                                                                                           this.HTTPAPI.HTTPBaseAPI,
-                                                                                           URLPathPrefix:   this.WebAPI_Path
-                                                                                       );
+                    }
 
                 }
 

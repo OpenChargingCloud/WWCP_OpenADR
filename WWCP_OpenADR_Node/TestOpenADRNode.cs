@@ -85,7 +85,7 @@ namespace cloud.charging.open.protocols.OpenADRv3.Node
                                String?                           HTTPAPI_RobotGPGPassphrase              = null,
                                Boolean                           HTTPAPI_EventLoggingDisabled            = false,
 
-                               Func<AOpenADRNode, OpenADRAPI>?   OpenADRAPI                              = null,
+                               Func<AOpenADRNode, OpenADRHTTPAPI>?   OpenADRAPI                              = null,
                                Boolean                           OpenADRAPI_Disabled                     = false,
                                HTTPPath?                         OpenADRAPI_Path                         = null,
                                String?                           OpenADRAPI_FileSystemPath               = null,

@@ -823,6 +823,45 @@ namespace cloud.charging.open.protocols.OpenADRv3
         #endregion
 
 
+        #region (static) FillMetadata(Program)
+
+        /// <summary>
+        /// Fill the metadata of this program.
+        /// </summary>
+        public static Program FillMetadata(Program Program)
+        {
+
+            var now = Timestamp.Now;
+
+            return new (
+
+                       Program.ProgramName,
+
+                       Program.ProgramLongName,
+                       Program.RetailerName,
+                       Program.RetailerLongName,
+                       Program.ProgramType,
+                       Program.Country,
+                       Program.PrincipalSubdivision,
+                       Program.TimeZoneOffset,
+                       Program.IntervalPeriod,
+                       Program.ProgramDescriptions,
+                       Program.BindingEvents,
+                       Program.LocalPrice,
+                       Program.PayloadDescriptors,
+                       Program.Targets,
+
+                       Program.Id               ?? Program_Id.NewRandom,
+                       Program.Created          ?? now,
+                       Program.LastModification ?? now
+
+                   );
+
+        }
+
+        #endregion
+
+
         #region Operator overloading
 
         #region Operator == (Program1, Program2)

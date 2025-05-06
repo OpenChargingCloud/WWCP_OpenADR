@@ -166,6 +166,7 @@ namespace cloud.charging.open.protocols.OpenADRv3.Node
 
             RegisterURITemplates();
 
+            //DebugX.Log($"OpenADR Networking Node HTTP API version '{APIVersionHash}' initialized...");
             //DebugX.Log($"OpenADR Networking Node HTTP API started on {HTTPBaseAPI.HTTPServer.IPPorts.AggregateWith(", ")}");
 
         }
