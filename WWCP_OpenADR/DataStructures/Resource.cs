@@ -405,6 +405,35 @@ namespace cloud.charging.open.protocols.OpenADRv3
         #endregion
 
 
+        #region (static) FillMetadata(Resource)
+
+        /// <summary>
+        /// Fill the metadata of this resource.
+        /// </summary>
+        /// <param name="Resource">A resource.</param>
+        public static Resource FillMetadata(Resource Resource)
+        {
+
+            var now = Timestamp.Now;
+
+            return new (
+
+                       Resource.ResourceName,
+                       Resource.VirtualEndNodeId,
+                       Resource.Attributes,
+                       Resource.Targets,
+
+                       Resource.Id               ?? Resource_Id.NewRandom,
+                       Resource.Created          ?? now,
+                       Resource.LastModification ?? now
+
+                   );
+
+        }
+
+        #endregion
+
+
         #region Operator overloading
 
         #region Operator == (Resource1, Resource2)

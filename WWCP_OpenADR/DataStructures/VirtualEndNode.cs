@@ -410,6 +410,35 @@ namespace cloud.charging.open.protocols.OpenADRv3
         #endregion
 
 
+        #region (static) FillMetadata(VirtualEndNode)
+
+        /// <summary>
+        /// Fill the metadata of this virtual end node.
+        /// </summary>
+        /// <param name="VirtualEndNode">A virtual end node.</param>
+        public static VirtualEndNode FillMetadata(VirtualEndNode VirtualEndNode)
+        {
+
+            var now = Timestamp.Now;
+
+            return new (
+
+                       VirtualEndNode.VenName,
+                       VirtualEndNode.Attributes,
+                       VirtualEndNode.Targets,
+                       VirtualEndNode.Resources,
+
+                       VirtualEndNode.Id               ?? VirtualEndNode_Id.NewRandom,
+                       VirtualEndNode.Created          ?? now,
+                       VirtualEndNode.LastModification ?? now
+
+                   );
+
+        }
+
+        #endregion
+
+
         #region Operator overloading
 
         #region Operator == (VirtualEndNode1, VirtualEndNode2)

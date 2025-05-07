@@ -2126,7 +2126,8 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
             #region Add a new program
 
-            if (programs.TryAdd(program.Id!.Value, Program))
+            if (programs.TryAdd(program.Id!.Value,
+                                Program))
             {
 
                 //  Program.CommonAPI = this;
@@ -2334,7 +2335,8 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
             #endregion
 
-            if (programs.TryRemove(Program.Id!.Value, out var programVersions))
+            if (programs.TryRemove(Program.Id!.Value,
+                                   out var programVersions))
             {
 
                 //await LogAsset(
@@ -2397,7 +2399,8 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
             EventTrackingId ??= EventTracking_Id.New;
 
-            if (programs.TryRemove(ProgramId, out var programVersions))
+            if (programs.TryRemove(ProgramId,
+                                   out var programVersions))
             {
 
                 //await LogAsset(
@@ -2637,6 +2640,3200 @@ namespace cloud.charging.open.protocols.OpenADRv3
             }
 
             return selectedPrograms;
+
+        }
+
+        #endregion
+
+        #endregion
+
+        #region Reports
+
+        private readonly ConcurrentDictionary<Report_Id, Report> reports = [];
+
+        #region Events
+
+        public delegate Task OnReportAddedDelegate(Report Report);
+
+        public event OnReportAddedDelegate?    OnReportAdded;
+
+
+        public delegate Task OnReportChangedDelegate(Report Report);
+
+        public event OnReportChangedDelegate?  OnReportChanged;
+
+        #endregion
+
+
+        #region AddReport            (Report, ...)
+
+        public async Task<AddResult<Report>>
+
+            AddReport(Report             Report,
+                      Boolean            SkipNotifications   = false,
+                      EventTracking_Id?  EventTrackingId     = null,
+                      User_Id?           CurrentUserId       = null,
+                      CancellationToken  CancellationToken   = default)
+
+        {
+
+            EventTrackingId ??= EventTracking_Id.New;
+
+            var report = Report.FillMetadata(Report);
+
+            if (reports.TryAdd(report.Id!.Value, report))
+            {
+
+                DebugX.Log($"OpenADR {Version.String} Report '{Report.Id}': '{Report}' added...");
+
+                //Report.CommonAPI = this;
+
+                //await LogAsset(
+                //          CommonBaseAPI.addReport,
+                //          Report.ToJSON(
+                //              true,
+                //              true,
+                //              CustomReportSerializer,
+                //              CustomDisplayTextSerializer,
+                //              CustomPriceSerializer,
+                //              CustomReportElementSerializer,
+                //              CustomPriceComponentSerializer,
+                //              CustomReportRestrictionsSerializer,
+                //              CustomEnergyMixSerializer,
+                //              CustomEnergySourceSerializer,
+                //              CustomEnvironmentalImpactSerializer
+                //          ),
+                //          EventTrackingId,
+                //          CurrentUserId,
+                //          CancellationToken
+                //      );
+
+                if (!SkipNotifications)
+                {
+
+                    var onReportAdded = OnReportAdded;
+                    if (onReportAdded is not null)
+                    {
+                        try
+                        {
+                            await onReportAdded(Report);
+                        }
+                        catch (Exception e)
+                        {
+                            DebugX.LogT($"OpenADR {Version.String} {nameof(OpenADRHTTPAPI)} ", nameof(AddReport), " ", nameof(OnReportAdded), ": ",
+                                        Environment.NewLine, e.Message,
+                                        Environment.NewLine, e.StackTrace ?? "");
+                        }
+                    }
+
+                }
+
+                return AddResult<Report>.Success(
+                           EventTrackingId,
+                           Report
+                       );
+
+            }
+
+            return AddResult<Report>.Failed(
+                       EventTrackingId,
+                       Report,
+                       "TryAdd(Report.Id, Report) failed!"
+                   );
+
+        }
+
+        #endregion
+
+        #region AddReportIfNotExists (Report, ...)
+
+        public async Task<AddResult<Report>>
+
+            AddReportIfNotExists(Report             Report,
+                                 Boolean            SkipNotifications   = false,
+                                 EventTracking_Id?  EventTrackingId     = null,
+                                 User_Id?           CurrentUserId       = null,
+                                 CancellationToken  CancellationToken   = default)
+
+        {
+
+            EventTrackingId ??= EventTracking_Id.New;
+
+            var report = Report.FillMetadata(Report);
+
+            if (reports.TryAdd(report.Id!.Value, report))
+            {
+
+                //Report.CommonAPI = this;
+
+                //await LogAsset(
+                //          CommonBaseAPI.addReportIfNotExists,
+                //          Report.ToJSON(
+                //              true,
+                //              true,
+                //              CustomReportSerializer,
+                //              CustomDisplayTextSerializer,
+                //              CustomPriceSerializer,
+                //              CustomReportElementSerializer,
+                //              CustomPriceComponentSerializer,
+                //              CustomReportRestrictionsSerializer,
+                //              CustomEnergyMixSerializer,
+                //              CustomEnergySourceSerializer,
+                //              CustomEnvironmentalImpactSerializer
+                //          ),
+                //          EventTrackingId,
+                //          CurrentUserId,
+                //          CancellationToken
+                //      );
+
+                if (!SkipNotifications)
+                {
+
+                    var onReportAdded = OnReportAdded;
+                    if (onReportAdded is not null)
+                    {
+                        try
+                        {
+                            await onReportAdded(Report);
+                        }
+                        catch (Exception e)
+                        {
+                            DebugX.LogT($"OpenADR {Version.String} {nameof(OpenADRHTTPAPI)} ", nameof(AddReportIfNotExists), " ", nameof(OnReportAdded), ": ",
+                                        Environment.NewLine, e.Message,
+                                        Environment.NewLine, e.StackTrace ?? "");
+                        }
+                    }
+
+                }
+
+                return AddResult<Report>.Success(
+                           EventTrackingId,
+                           Report
+                       );
+
+            }
+
+            return AddResult<Report>.NoOperation(
+                       EventTrackingId,
+                       Report,
+                       "The given report already exists."
+                   );
+
+        }
+
+        #endregion
+
+        #region AddOrUpdateReport    (Report, AllowDowngrades = false, ...)
+
+        public async Task<AddOrUpdateResult<Report>>
+
+            AddOrUpdateReport(Report             Report,
+                              Boolean?           AllowDowngrades     = false,
+                              Boolean            SkipNotifications   = false,
+                              EventTracking_Id?  EventTrackingId     = null,
+                              User_Id?           CurrentUserId       = null,
+                              CancellationToken  CancellationToken   = default)
+
+        {
+
+            EventTrackingId ??= EventTracking_Id.New;
+
+            var report = Report.FillMetadata(Report);
+
+            #region Update an existing report
+
+            if (reports.TryGetValue(report.Id!.Value,
+                                     out var existingReport))
+            {
+
+                if ((AllowDowngrades ?? this.AllowDowngrades) == false &&
+                    Report.LastModification <= existingReport.LastModification)
+                {
+
+                    return AddOrUpdateResult<Report>.Failed(
+                               EventTrackingId,
+                               Report,
+                               "The 'lastUpdated' timestamp of the new report must be newer then the timestamp of the existing report!"
+                           );
+
+                }
+
+                if (reports.TryUpdate(report.Id!.Value,
+                                       Report,
+                                       existingReport))
+                {
+
+                //  Report.CommonAPI = this;
+
+                //  await LogAsset(
+                //            CommonBaseAPI.addOrUpdateReport,
+                //            Report.ToJSON(
+                //                true,
+                //                true,
+                //                CustomReportSerializer,
+                //                CustomDisplayTextSerializer,
+                //                CustomPriceSerializer,
+                //                CustomReportElementSerializer,
+                //                CustomPriceComponentSerializer,
+                //                CustomReportRestrictionsSerializer,
+                //                CustomEnergyMixSerializer,
+                //                CustomEnergySourceSerializer,
+                //                CustomEnvironmentalImpactSerializer
+                //            ),
+                //            EventTrackingId,
+                //            CurrentUserId,
+                //            CancellationToken
+                //        );
+
+                if (!SkipNotifications)
+                {
+
+                    var onReportChanged = OnReportChanged;
+                    if (onReportChanged is not null)
+                    {
+                        try
+                        {
+                            await onReportChanged(Report);
+                        }
+                        catch (Exception e)
+                        {
+                            DebugX.LogT($"OpenADR {Version.String} {nameof(OpenADRHTTPAPI)} ", nameof(AddOrUpdateReport), " ", nameof(OnReportChanged), ": ",
+                                        Environment.NewLine, e.Message,
+                                        Environment.NewLine, e.StackTrace ?? "");
+                        }
+                    }
+
+                }
+
+                return AddOrUpdateResult<Report>.Updated(
+                           EventTrackingId,
+                           Report
+                       );
+
+            }
+
+            return AddOrUpdateResult<Report>.Failed(
+                       EventTrackingId,
+                       Report,
+                       "Updating the given report failed!"
+                   );
+
+            }
+
+            #endregion
+
+            #region Add a new report
+
+            if (reports.TryAdd(report.Id!.Value,
+                                Report))
+            {
+
+                //  Report.CommonAPI = this;
+
+                //  await LogAsset(
+                //            CommonBaseAPI.addOrUpdateReport,
+                //            Report.ToJSON(
+                //                true,
+                //                true,
+                //                CustomReportSerializer,
+                //                CustomDisplayTextSerializer,
+                //                CustomPriceSerializer,
+                //                CustomReportElementSerializer,
+                //                CustomPriceComponentSerializer,
+                //                CustomReportRestrictionsSerializer,
+                //                CustomEnergyMixSerializer,
+                //                CustomEnergySourceSerializer,
+                //                CustomEnvironmentalImpactSerializer
+                //            ),
+                //            EventTrackingId,
+                //            CurrentUserId,
+                //            CancellationToken
+                //        );
+
+                if (!SkipNotifications)
+                {
+
+                    var onReportAdded = OnReportAdded;
+                    if (onReportAdded is not null)
+                    {
+                        try
+                        {
+                            await onReportAdded(Report);
+                        }
+                        catch (Exception e)
+                        {
+                            DebugX.LogT($"OpenADR {Version.String} {nameof(OpenADRHTTPAPI)} ", nameof(AddOrUpdateReport), " ", nameof(OnReportAdded), ": ",
+                                        Environment.NewLine, e.Message,
+                                        Environment.NewLine, e.StackTrace ?? "");
+                        }
+                    }
+
+                }
+
+                return AddOrUpdateResult<Report>.Created(
+                           EventTrackingId,
+                           Report
+                       );
+
+            }
+
+            #endregion
+
+            return AddOrUpdateResult<Report>.Failed(
+                       EventTrackingId,
+                       Report,
+                       "Adding the given report failed because of concurrency issues!"
+                   );
+
+        }
+
+        #endregion
+
+        #region UpdateReport         (Report, AllowDowngrades = false, ...)
+
+        public async Task<UpdateResult<Report>>
+
+            UpdateReport(Report             Report,
+                         Boolean?           AllowDowngrades     = false,
+                         Boolean            SkipNotifications   = false,
+                         EventTracking_Id?  EventTrackingId     = null,
+                         User_Id?           CurrentUserId       = null,
+                         CancellationToken  CancellationToken   = default)
+
+        {
+
+            EventTrackingId ??= EventTracking_Id.New;
+
+            #region Initial checks
+
+            if (!Report.Id.HasValue)
+                return UpdateResult<Report>.Failed(
+                            EventTrackingId,
+                            Report,
+                            $"The given report identification is mandatory!"
+                        );
+
+            if (!reports.TryGetValue(Report.Id!.Value, out var existingReport))
+                return UpdateResult<Report>.Failed(
+                            EventTrackingId,
+                            Report,
+                            $"The given report identification '{Report.Id}' is unknown!"
+                        );
+
+            #endregion
+
+            #region Validate AllowDowngrades
+
+            if ((AllowDowngrades ?? this.AllowDowngrades) == false &&
+                Report.LastModification <= existingReport.LastModification)
+            {
+
+                return UpdateResult<Report>.Failed(
+                           EventTrackingId,
+                           Report,
+                           "The 'lastUpdated' timestamp of the new report must be newer then the timestamp of the existing report!"
+                       );
+
+            }
+
+            #endregion
+
+
+            if (reports.TryUpdate(Report.Id!.Value,
+                                   Report,
+                                   existingReport))
+            {
+
+                //Report.CommonAPI = this;
+
+                //await LogAsset(
+                //          CommonBaseAPI.updateReport,
+                //          Report.ToJSON(
+                //              true,
+                //              true,
+                //              CustomReportSerializer,
+                //              CustomDisplayTextSerializer,
+                //              CustomPriceSerializer,
+                //              CustomReportElementSerializer,
+                //              CustomPriceComponentSerializer,
+                //              CustomReportRestrictionsSerializer,
+                //              CustomEnergyMixSerializer,
+                //              CustomEnergySourceSerializer,
+                //              CustomEnvironmentalImpactSerializer
+                //          ),
+                //          EventTrackingId,
+                //          CurrentUserId,
+                //          CancellationToken
+                //      );
+
+                if (!SkipNotifications)
+                {
+
+                    var onReportChanged = OnReportChanged;
+                    if (onReportChanged is not null)
+                    {
+                        try
+                        {
+                            await onReportChanged(Report);
+                        }
+                        catch (Exception e)
+                        {
+                            DebugX.LogT($"OpenADR {Version.String} {nameof(OpenADRHTTPAPI)} ", nameof(UpdateReport), " ", nameof(OnReportChanged), ": ",
+                                        Environment.NewLine, e.Message,
+                                        Environment.NewLine, e.StackTrace ?? "");
+                        }
+                    }
+
+                }
+
+                return UpdateResult<Report>.Success(
+                           EventTrackingId,
+                           Report
+                       );
+
+            }
+
+            return UpdateResult<Report>.Failed(
+                       EventTrackingId,
+                       Report,
+                       "Reports.TryUpdate(Report.Id, Report, Report) failed!"
+                   );
+
+        }
+
+        #endregion
+
+        #region RemoveReport         (Report, ...)
+
+        /// <summary>
+        /// Remove the given report.
+        /// </summary>
+        /// <param name="Report">A report.</param>
+        /// <param name="SkipNotifications">Skip sending notifications.</param>
+        public async Task<RemoveResult<Report>>
+
+            RemoveReport(Report             Report,
+                         Boolean            SkipNotifications   = false,
+                         EventTracking_Id?  EventTrackingId     = null,
+                         User_Id?           CurrentUserId       = null,
+                         CancellationToken  CancellationToken   = default)
+
+        {
+
+            EventTrackingId ??= EventTracking_Id.New;
+
+            #region Initial checks
+
+            if (!Report.Id.HasValue)
+                return RemoveResult<Report>.Failed(
+                            EventTrackingId,
+                            Report,
+                            $"The given report identification is mandatory!"
+                        );
+
+            #endregion
+
+            if (reports.TryRemove(Report.Id!.Value,
+                                   out var reportVersions))
+            {
+
+                //await LogAsset(
+                //          CommonBaseAPI.removeReport,
+                //          new JArray(
+                //              reportVersions.Select(report =>
+                //                  report.ToJSON(
+                //                      true,
+                //                      true,
+                //                      CustomReportSerializer,
+                //                      CustomDisplayTextSerializer,
+                //                      CustomPriceSerializer,
+                //                      CustomReportElementSerializer,
+                //                      CustomPriceComponentSerializer,
+                //                      CustomReportRestrictionsSerializer,
+                //                      CustomEnergyMixSerializer,
+                //                      CustomEnergySourceSerializer,
+                //                      CustomEnvironmentalImpactSerializer
+                //                  )
+                //              )
+                //          ),
+                //          EventTrackingId,
+                //          CurrentUserId,
+                //          CancellationToken
+                //      );
+
+                return RemoveResult<Report>.Success(
+                           EventTrackingId,
+                           reportVersions
+                       );
+
+            }
+
+            return RemoveResult<Report>.Failed(
+                       EventTrackingId,
+                       Report,
+                       $"The given report identification '{Report.Id}' is unknown!"
+                   );
+
+        }
+
+        #endregion
+
+        #region RemoveReport         (ReportId, ...)
+
+        /// <summary>
+        /// Remove the given report.
+        /// </summary>
+        /// <param name="ReportId">An unique report identification.</param>
+        /// <param name="SkipNotifications">Skip sending notifications.</param>
+        public async Task<RemoveResult<Report>>
+
+            RemoveReport(Report_Id          ReportId,
+                         Boolean            SkipNotifications   = false,
+                         EventTracking_Id?  EventTrackingId     = null,
+                         User_Id?           CurrentUserId       = null,
+                         CancellationToken  CancellationToken   = default)
+
+        {
+
+            EventTrackingId ??= EventTracking_Id.New;
+
+            if (reports.TryRemove(ReportId,
+                                   out var reportVersions))
+            {
+
+                //await LogAsset(
+                //          CommonBaseAPI.removeReport,
+                //          new JArray(
+                //              reportVersions.Select(
+                //                  report => report.ToJSON(
+                //                                true,
+                //                                true,
+                //                                CustomReportSerializer,
+                //                                CustomDisplayTextSerializer,
+                //                                CustomPriceSerializer,
+                //                                CustomReportElementSerializer,
+                //                                CustomPriceComponentSerializer,
+                //                                CustomReportRestrictionsSerializer,
+                //                                CustomEnergyMixSerializer,
+                //                                CustomEnergySourceSerializer,
+                //                                CustomEnvironmentalImpactSerializer
+                //                            )
+                //                  )
+                //          ),
+                //          EventTrackingId,
+                //          CurrentUserId,
+                //          CancellationToken
+                //      );
+
+                return RemoveResult<Report>.Success(
+                           EventTrackingId,
+                           reportVersions
+                       );
+
+            }
+
+            return RemoveResult<Report>.Failed(
+                       EventTrackingId,
+                       $"The given report identification '{ReportId}' is unknown!"
+                   );
+
+        }
+
+        #endregion
+
+        #region RemoveAllReports     (IncludeReports = null, ...)
+
+        /// <summary>
+        /// Remove all matching reports.
+        /// </summary>
+        /// <param name="IncludeReports">A report filter.</param>
+        /// <param name="SkipNotifications">Skip sending notifications.</param>
+        public async Task<RemoveResult<IEnumerable<Report>>>
+
+            RemoveAllReports(Func<Report, Boolean>?  IncludeReports      = null,
+                             Boolean                 SkipNotifications   = false,
+                             EventTracking_Id?       EventTrackingId     = null,
+                             User_Id?                CurrentUserId       = null,
+                             CancellationToken       CancellationToken   = default)
+
+        {
+
+            EventTrackingId ??= EventTracking_Id.New;
+
+            var removedReports = new List<Report>();
+
+            if (IncludeReports is null)
+            {
+                removedReports.AddRange(reports.Values);
+                reports.Clear();
+            }
+
+            else
+            {
+
+                foreach (var report in reports.Values)
+                {
+                    if (IncludeReports(report))
+                        removedReports.Add(report);
+                }
+
+                foreach (var report in removedReports)
+                    reports.TryRemove(Report_Id.Parse(report.Id!.Value.ToString()), out _);
+
+            }
+
+            //await LogAsset(
+            //          CommonBaseAPI.removeAllReports,
+            //          new JArray(
+            //              removedReports.Select(
+            //                  report => report.ToJSON(
+            //                                true,
+            //                                true,
+            //                                CustomReportSerializer,
+            //                                CustomDisplayTextSerializer,
+            //                                CustomPriceSerializer,
+            //                                CustomReportElementSerializer,
+            //                                CustomPriceComponentSerializer,
+            //                                CustomReportRestrictionsSerializer,
+            //                                CustomEnergyMixSerializer,
+            //                                CustomEnergySourceSerializer,
+            //                                CustomEnvironmentalImpactSerializer
+            //                            )
+            //                  )
+            //          ),
+            //          EventTrackingId,
+            //          CurrentUserId,
+            //          CancellationToken
+            //      );
+
+            return RemoveResult<IEnumerable<Report>>.Success(
+                       EventTrackingId,
+                       removedReports
+                   );
+
+        }
+
+        #endregion
+
+        #region RemoveAllReports     (IncludeReportIds, ...)
+
+        /// <summary>
+        /// Remove all matching reports.
+        /// </summary>
+        /// <param name="IncludeReportIds">The report identification filter.</param>
+        /// <param name="SkipNotifications">Skip sending notifications.</param>
+        /// <param name="SkipNotifications">Skip sending notifications.</param>
+        public async Task<RemoveResult<IEnumerable<Report>>>
+
+            RemoveAllReports(Func<Report_Id, Boolean>  IncludeReportIds,
+                             Boolean                   SkipNotifications   = false,
+                             EventTracking_Id?         EventTrackingId     = null,
+                             User_Id?                  CurrentUserId       = null,
+                             CancellationToken         CancellationToken   = default)
+        {
+
+            EventTrackingId ??= EventTracking_Id.New;
+
+            var removedReports = new List<Report>();
+
+            foreach (var report in reports.Values)
+            {
+                if (IncludeReportIds(Report_Id.Parse(report.Id!.Value.ToString())))
+                    removedReports.Add(report);
+            }
+
+            foreach (var report in removedReports)
+                reports.TryRemove(Report_Id.Parse(report.Id!.Value.ToString()), out _);
+
+
+            //await LogAsset(
+            //          CommonBaseAPI.removeAllReports,
+            //          new JArray(
+            //              removedReports.Select(
+            //                  report => report.ToJSON(
+            //                                true,
+            //                                true,
+            //                                CustomReportSerializer,
+            //                                CustomDisplayTextSerializer,
+            //                                CustomPriceSerializer,
+            //                                CustomReportElementSerializer,
+            //                                CustomPriceComponentSerializer,
+            //                                CustomReportRestrictionsSerializer,
+            //                                CustomEnergyMixSerializer,
+            //                                CustomEnergySourceSerializer,
+            //                                CustomEnvironmentalImpactSerializer
+            //                            )
+            //                  )
+            //          ),
+            //          EventTrackingId,
+            //          CurrentUserId,
+            //          CancellationToken
+            //      );
+
+            return RemoveResult<IEnumerable<Report>>.Success(
+                       EventTrackingId,
+                       removedReports
+                   );
+
+        }
+
+        #endregion
+
+
+        #region ReportExists (ReportId)
+
+        public Boolean ReportExists(Report_Id ReportId)
+
+            => reports.ContainsKey(ReportId);
+
+        #endregion
+
+        #region GetReport    (ReportId)
+
+        public Report? GetReport(Report_Id ReportId)
+        {
+
+            if (reports.TryGetValue(ReportId, out var report))
+                return report;
+
+            return null;
+
+        }
+
+        #endregion
+
+        #region TryGetReport (ReportId, out Report)
+
+        public Boolean TryGetReport(Report_Id                        ReportId,
+                                    [NotNullWhen(true)] out Report?  Report)
+        {
+
+            if (reports.TryGetValue(ReportId, out var report))
+            {
+                Report = report;
+                return true;
+            }
+
+            Report = null;
+            return false;
+
+        }
+
+        #endregion
+
+        #region GetReports   (IncludeReport = null)
+
+        public IEnumerable<Report> GetReports(Func<Report, Boolean>? IncludeReport = null)
+        {
+
+            if (IncludeReport is null)
+                return reports.Values;
+
+
+            var selectedReports = new List<Report>();
+
+            foreach (var report in reports.Values)
+            {
+                if (IncludeReport(report))
+                    selectedReports.Add(report);
+            }
+
+            return selectedReports;
+
+        }
+
+        #endregion
+
+        #endregion
+
+        #region Events
+
+        private readonly ConcurrentDictionary<Event_Id, Event> events = [];
+
+        #region Events
+
+        public delegate Task OnEventAddedDelegate(Event Event);
+
+        public event OnEventAddedDelegate?    OnEventAdded;
+
+
+        public delegate Task OnEventChangedDelegate(Event Event);
+
+        public event OnEventChangedDelegate?  OnEventChanged;
+
+        #endregion
+
+
+        #region AddEvent            (Event, ...)
+
+        public async Task<AddResult<Event>>
+
+            AddEvent(Event              Event,
+                     Boolean            SkipNotifications   = false,
+                     EventTracking_Id?  EventTrackingId     = null,
+                     User_Id?           CurrentUserId       = null,
+                     CancellationToken  CancellationToken   = default)
+
+        {
+
+            EventTrackingId ??= EventTracking_Id.New;
+
+            var @event = Event.FillMetadata(Event);
+
+            if (events.TryAdd(@event.Id!.Value, @event))
+            {
+
+                DebugX.Log($"OpenADR {Version.String} Event '{Event.Id}': '{Event}' added...");
+
+                //Event.CommonAPI = this;
+
+                //await LogAsset(
+                //          CommonBaseAPI.addEvent,
+                //          Event.ToJSON(
+                //              true,
+                //              true,
+                //              CustomEventSerializer,
+                //              CustomDisplayTextSerializer,
+                //              CustomPriceSerializer,
+                //              CustomEventElementSerializer,
+                //              CustomPriceComponentSerializer,
+                //              CustomEventRestrictionsSerializer,
+                //              CustomEnergyMixSerializer,
+                //              CustomEnergySourceSerializer,
+                //              CustomEnvironmentalImpactSerializer
+                //          ),
+                //          EventTrackingId,
+                //          CurrentUserId,
+                //          CancellationToken
+                //      );
+
+                if (!SkipNotifications)
+                {
+
+                    var onEventAdded = OnEventAdded;
+                    if (onEventAdded is not null)
+                    {
+                        try
+                        {
+                            await onEventAdded(Event);
+                        }
+                        catch (Exception e)
+                        {
+                            DebugX.LogT($"OpenADR {Version.String} {nameof(OpenADRHTTPAPI)} ", nameof(AddEvent), " ", nameof(OnEventAdded), ": ",
+                                        Environment.NewLine, e.Message,
+                                        Environment.NewLine, e.StackTrace ?? "");
+                        }
+                    }
+
+                }
+
+                return AddResult<Event>.Success(
+                           EventTrackingId,
+                           Event
+                       );
+
+            }
+
+            return AddResult<Event>.Failed(
+                       EventTrackingId,
+                       Event,
+                       "TryAdd(Event.Id, Event) failed!"
+                   );
+
+        }
+
+        #endregion
+
+        #region AddEventIfNotExists (Event, ...)
+
+        public async Task<AddResult<Event>>
+
+            AddEventIfNotExists(Event              Event,
+                                Boolean            SkipNotifications   = false,
+                                EventTracking_Id?  EventTrackingId     = null,
+                                User_Id?           CurrentUserId       = null,
+                                CancellationToken  CancellationToken   = default)
+
+        {
+
+            EventTrackingId ??= EventTracking_Id.New;
+
+            var @event = Event.FillMetadata(Event);
+
+            if (events.TryAdd(@event.Id!.Value, @event))
+            {
+
+                //Event.CommonAPI = this;
+
+                //await LogAsset(
+                //          CommonBaseAPI.addEventIfNotExists,
+                //          Event.ToJSON(
+                //              true,
+                //              true,
+                //              CustomEventSerializer,
+                //              CustomDisplayTextSerializer,
+                //              CustomPriceSerializer,
+                //              CustomEventElementSerializer,
+                //              CustomPriceComponentSerializer,
+                //              CustomEventRestrictionsSerializer,
+                //              CustomEnergyMixSerializer,
+                //              CustomEnergySourceSerializer,
+                //              CustomEnvironmentalImpactSerializer
+                //          ),
+                //          EventTrackingId,
+                //          CurrentUserId,
+                //          CancellationToken
+                //      );
+
+                if (!SkipNotifications)
+                {
+
+                    var onEventAdded = OnEventAdded;
+                    if (onEventAdded is not null)
+                    {
+                        try
+                        {
+                            await onEventAdded(Event);
+                        }
+                        catch (Exception e)
+                        {
+                            DebugX.LogT($"OpenADR {Version.String} {nameof(OpenADRHTTPAPI)} ", nameof(AddEventIfNotExists), " ", nameof(OnEventAdded), ": ",
+                                        Environment.NewLine, e.Message,
+                                        Environment.NewLine, e.StackTrace ?? "");
+                        }
+                    }
+
+                }
+
+                return AddResult<Event>.Success(
+                           EventTrackingId,
+                           Event
+                       );
+
+            }
+
+            return AddResult<Event>.NoOperation(
+                       EventTrackingId,
+                       Event,
+                       "The given event already exists."
+                   );
+
+        }
+
+        #endregion
+
+        #region AddOrUpdateEvent    (Event, AllowDowngrades = false, ...)
+
+        public async Task<AddOrUpdateResult<Event>>
+
+            AddOrUpdateEvent(Event              Event,
+                             Boolean?           AllowDowngrades     = false,
+                             Boolean            SkipNotifications   = false,
+                             EventTracking_Id?  EventTrackingId     = null,
+                             User_Id?           CurrentUserId       = null,
+                             CancellationToken  CancellationToken   = default)
+
+        {
+
+            EventTrackingId ??= EventTracking_Id.New;
+
+            var @event = Event.FillMetadata(Event);
+
+            #region Update an existing event
+
+            if (events.TryGetValue(@event.Id!.Value,
+                                   out var existingEvent))
+            {
+
+                if ((AllowDowngrades ?? this.AllowDowngrades) == false &&
+                    Event.LastModification <= existingEvent.LastModification)
+                {
+
+                    return AddOrUpdateResult<Event>.Failed(
+                               EventTrackingId,
+                               Event,
+                               "The 'lastUpdated' timestamp of the new event must be newer then the timestamp of the existing event!"
+                           );
+
+                }
+
+                if (events.TryUpdate(@event.Id!.Value,
+                                     Event,
+                                     existingEvent))
+                {
+
+                //  Event.CommonAPI = this;
+
+                //  await LogAsset(
+                //            CommonBaseAPI.addOrUpdateEvent,
+                //            Event.ToJSON(
+                //                true,
+                //                true,
+                //                CustomEventSerializer,
+                //                CustomDisplayTextSerializer,
+                //                CustomPriceSerializer,
+                //                CustomEventElementSerializer,
+                //                CustomPriceComponentSerializer,
+                //                CustomEventRestrictionsSerializer,
+                //                CustomEnergyMixSerializer,
+                //                CustomEnergySourceSerializer,
+                //                CustomEnvironmentalImpactSerializer
+                //            ),
+                //            EventTrackingId,
+                //            CurrentUserId,
+                //            CancellationToken
+                //        );
+
+                if (!SkipNotifications)
+                {
+
+                    var onEventChanged = OnEventChanged;
+                    if (onEventChanged is not null)
+                    {
+                        try
+                        {
+                            await onEventChanged(Event);
+                        }
+                        catch (Exception e)
+                        {
+                            DebugX.LogT($"OpenADR {Version.String} {nameof(OpenADRHTTPAPI)} ", nameof(AddOrUpdateEvent), " ", nameof(OnEventChanged), ": ",
+                                        Environment.NewLine, e.Message,
+                                        Environment.NewLine, e.StackTrace ?? "");
+                        }
+                    }
+
+                }
+
+                return AddOrUpdateResult<Event>.Updated(
+                           EventTrackingId,
+                           Event
+                       );
+
+            }
+
+            return AddOrUpdateResult<Event>.Failed(
+                       EventTrackingId,
+                       Event,
+                       "Updating the given event failed!"
+                   );
+
+            }
+
+            #endregion
+
+            #region Add a new event
+
+            if (events.TryAdd(@event.Id!.Value,
+                              Event))
+            {
+
+                //  Event.CommonAPI = this;
+
+                //  await LogAsset(
+                //            CommonBaseAPI.addOrUpdateEvent,
+                //            Event.ToJSON(
+                //                true,
+                //                true,
+                //                CustomEventSerializer,
+                //                CustomDisplayTextSerializer,
+                //                CustomPriceSerializer,
+                //                CustomEventElementSerializer,
+                //                CustomPriceComponentSerializer,
+                //                CustomEventRestrictionsSerializer,
+                //                CustomEnergyMixSerializer,
+                //                CustomEnergySourceSerializer,
+                //                CustomEnvironmentalImpactSerializer
+                //            ),
+                //            EventTrackingId,
+                //            CurrentUserId,
+                //            CancellationToken
+                //        );
+
+                if (!SkipNotifications)
+                {
+
+                    var onEventAdded = OnEventAdded;
+                    if (onEventAdded is not null)
+                    {
+                        try
+                        {
+                            await onEventAdded(Event);
+                        }
+                        catch (Exception e)
+                        {
+                            DebugX.LogT($"OpenADR {Version.String} {nameof(OpenADRHTTPAPI)} ", nameof(AddOrUpdateEvent), " ", nameof(OnEventAdded), ": ",
+                                        Environment.NewLine, e.Message,
+                                        Environment.NewLine, e.StackTrace ?? "");
+                        }
+                    }
+
+                }
+
+                return AddOrUpdateResult<Event>.Created(
+                           EventTrackingId,
+                           Event
+                       );
+
+            }
+
+            #endregion
+
+            return AddOrUpdateResult<Event>.Failed(
+                       EventTrackingId,
+                       Event,
+                       "Adding the given event failed because of concurrency issues!"
+                   );
+
+        }
+
+        #endregion
+
+        #region UpdateEvent         (Event, AllowDowngrades = false, ...)
+
+        public async Task<UpdateResult<Event>>
+
+            UpdateEvent(Event              Event,
+                        Boolean?           AllowDowngrades     = false,
+                        Boolean            SkipNotifications   = false,
+                        EventTracking_Id?  EventTrackingId     = null,
+                        User_Id?           CurrentUserId       = null,
+                        CancellationToken  CancellationToken   = default)
+
+        {
+
+            EventTrackingId ??= EventTracking_Id.New;
+
+            #region Initial checks
+
+            if (!Event.Id.HasValue)
+                return UpdateResult<Event>.Failed(
+                            EventTrackingId,
+                            Event,
+                            $"The given event identification is mandatory!"
+                        );
+
+            if (!events.TryGetValue(Event.Id!.Value, out var existingEvent))
+                return UpdateResult<Event>.Failed(
+                            EventTrackingId,
+                            Event,
+                            $"The given event identification '{Event.Id}' is unknown!"
+                        );
+
+            #endregion
+
+            #region Validate AllowDowngrades
+
+            if ((AllowDowngrades ?? this.AllowDowngrades) == false &&
+                Event.LastModification <= existingEvent.LastModification)
+            {
+
+                return UpdateResult<Event>.Failed(
+                           EventTrackingId,
+                           Event,
+                           "The 'lastUpdated' timestamp of the new event must be newer then the timestamp of the existing event!"
+                       );
+
+            }
+
+            #endregion
+
+
+            if (events.TryUpdate(Event.Id!.Value,
+                                 Event,
+                                 existingEvent))
+            {
+
+                //Event.CommonAPI = this;
+
+                //await LogAsset(
+                //          CommonBaseAPI.updateEvent,
+                //          Event.ToJSON(
+                //              true,
+                //              true,
+                //              CustomEventSerializer,
+                //              CustomDisplayTextSerializer,
+                //              CustomPriceSerializer,
+                //              CustomEventElementSerializer,
+                //              CustomPriceComponentSerializer,
+                //              CustomEventRestrictionsSerializer,
+                //              CustomEnergyMixSerializer,
+                //              CustomEnergySourceSerializer,
+                //              CustomEnvironmentalImpactSerializer
+                //          ),
+                //          EventTrackingId,
+                //          CurrentUserId,
+                //          CancellationToken
+                //      );
+
+                if (!SkipNotifications)
+                {
+
+                    var onEventChanged = OnEventChanged;
+                    if (onEventChanged is not null)
+                    {
+                        try
+                        {
+                            await onEventChanged(Event);
+                        }
+                        catch (Exception e)
+                        {
+                            DebugX.LogT($"OpenADR {Version.String} {nameof(OpenADRHTTPAPI)} ", nameof(UpdateEvent), " ", nameof(OnEventChanged), ": ",
+                                        Environment.NewLine, e.Message,
+                                        Environment.NewLine, e.StackTrace ?? "");
+                        }
+                    }
+
+                }
+
+                return UpdateResult<Event>.Success(
+                           EventTrackingId,
+                           Event
+                       );
+
+            }
+
+            return UpdateResult<Event>.Failed(
+                       EventTrackingId,
+                       Event,
+                       "Events.TryUpdate(Event.Id, Event, Event) failed!"
+                   );
+
+        }
+
+        #endregion
+
+        #region RemoveEvent         (Event, ...)
+
+        /// <summary>
+        /// Remove the given event.
+        /// </summary>
+        /// <param name="Event">A event.</param>
+        /// <param name="SkipNotifications">Skip sending notifications.</param>
+        public async Task<RemoveResult<Event>>
+
+            RemoveEvent(Event              Event,
+                        Boolean            SkipNotifications   = false,
+                        EventTracking_Id?  EventTrackingId     = null,
+                        User_Id?           CurrentUserId       = null,
+                        CancellationToken  CancellationToken   = default)
+
+        {
+
+            EventTrackingId ??= EventTracking_Id.New;
+
+            #region Initial checks
+
+            if (!Event.Id.HasValue)
+                return RemoveResult<Event>.Failed(
+                            EventTrackingId,
+                            Event,
+                            $"The given event identification is mandatory!"
+                        );
+
+            #endregion
+
+            if (events.TryRemove(Event.Id!.Value,
+                                 out var eventVersions))
+            {
+
+                //await LogAsset(
+                //          CommonBaseAPI.removeEvent,
+                //          new JArray(
+                //              eventVersions.Select(event =>
+                //                  event.ToJSON(
+                //                      true,
+                //                      true,
+                //                      CustomEventSerializer,
+                //                      CustomDisplayTextSerializer,
+                //                      CustomPriceSerializer,
+                //                      CustomEventElementSerializer,
+                //                      CustomPriceComponentSerializer,
+                //                      CustomEventRestrictionsSerializer,
+                //                      CustomEnergyMixSerializer,
+                //                      CustomEnergySourceSerializer,
+                //                      CustomEnvironmentalImpactSerializer
+                //                  )
+                //              )
+                //          ),
+                //          EventTrackingId,
+                //          CurrentUserId,
+                //          CancellationToken
+                //      );
+
+                return RemoveResult<Event>.Success(
+                           EventTrackingId,
+                           eventVersions
+                       );
+
+            }
+
+            return RemoveResult<Event>.Failed(
+                       EventTrackingId,
+                       Event,
+                       $"The given event identification '{Event.Id}' is unknown!"
+                   );
+
+        }
+
+        #endregion
+
+        #region RemoveEvent         (EventId, ...)
+
+        /// <summary>
+        /// Remove the given event.
+        /// </summary>
+        /// <param name="EventId">An unique event identification.</param>
+        /// <param name="SkipNotifications">Skip sending notifications.</param>
+        public async Task<RemoveResult<Event>>
+
+            RemoveEvent(Event_Id           EventId,
+                        Boolean            SkipNotifications   = false,
+                        EventTracking_Id?  EventTrackingId     = null,
+                        User_Id?           CurrentUserId       = null,
+                        CancellationToken  CancellationToken   = default)
+
+        {
+
+            EventTrackingId ??= EventTracking_Id.New;
+
+            if (events.TryRemove(EventId,
+                                 out var eventVersions))
+            {
+
+                //await LogAsset(
+                //          CommonBaseAPI.removeEvent,
+                //          new JArray(
+                //              eventVersions.Select(
+                //                  event => event.ToJSON(
+                //                                true,
+                //                                true,
+                //                                CustomEventSerializer,
+                //                                CustomDisplayTextSerializer,
+                //                                CustomPriceSerializer,
+                //                                CustomEventElementSerializer,
+                //                                CustomPriceComponentSerializer,
+                //                                CustomEventRestrictionsSerializer,
+                //                                CustomEnergyMixSerializer,
+                //                                CustomEnergySourceSerializer,
+                //                                CustomEnvironmentalImpactSerializer
+                //                            )
+                //                  )
+                //          ),
+                //          EventTrackingId,
+                //          CurrentUserId,
+                //          CancellationToken
+                //      );
+
+                return RemoveResult<Event>.Success(
+                           EventTrackingId,
+                           eventVersions
+                       );
+
+            }
+
+            return RemoveResult<Event>.Failed(
+                       EventTrackingId,
+                       $"The given event identification '{EventId}' is unknown!"
+                   );
+
+        }
+
+        #endregion
+
+        #region RemoveAllEvents     (IncludeEvents = null, ...)
+
+        /// <summary>
+        /// Remove all matching events.
+        /// </summary>
+        /// <param name="IncludeEvents">A event filter.</param>
+        /// <param name="SkipNotifications">Skip sending notifications.</param>
+        public async Task<RemoveResult<IEnumerable<Event>>>
+
+            RemoveAllEvents(Func<Event, Boolean>?    IncludeEvents       = null,
+                            Boolean                  SkipNotifications   = false,
+                            EventTracking_Id?        EventTrackingId     = null,
+                            User_Id?                 CurrentUserId       = null,
+                            CancellationToken        CancellationToken   = default)
+
+        {
+
+            EventTrackingId ??= EventTracking_Id.New;
+
+            var removedEvents = new List<Event>();
+
+            if (IncludeEvents is null)
+            {
+                removedEvents.AddRange(events.Values);
+                events.Clear();
+            }
+
+            else
+            {
+
+                foreach (var @event in events.Values)
+                {
+                    if (IncludeEvents(@event))
+                        removedEvents.Add(@event);
+                }
+
+                foreach (var @event in removedEvents)
+                    events.TryRemove(Event_Id.Parse(@event.Id!.Value.ToString()), out _);
+
+            }
+
+            //await LogAsset(
+            //          CommonBaseAPI.removeAllEvents,
+            //          new JArray(
+            //              removedEvents.Select(
+            //                  event => event.ToJSON(
+            //                                true,
+            //                                true,
+            //                                CustomEventSerializer,
+            //                                CustomDisplayTextSerializer,
+            //                                CustomPriceSerializer,
+            //                                CustomEventElementSerializer,
+            //                                CustomPriceComponentSerializer,
+            //                                CustomEventRestrictionsSerializer,
+            //                                CustomEnergyMixSerializer,
+            //                                CustomEnergySourceSerializer,
+            //                                CustomEnvironmentalImpactSerializer
+            //                            )
+            //                  )
+            //          ),
+            //          EventTrackingId,
+            //          CurrentUserId,
+            //          CancellationToken
+            //      );
+
+            return RemoveResult<IEnumerable<Event>>.Success(
+                       EventTrackingId,
+                       removedEvents
+                   );
+
+        }
+
+        #endregion
+
+        #region RemoveAllEvents     (IncludeEventIds, ...)
+
+        /// <summary>
+        /// Remove all matching events.
+        /// </summary>
+        /// <param name="IncludeEventIds">The event identification filter.</param>
+        /// <param name="SkipNotifications">Skip sending notifications.</param>
+        public async Task<RemoveResult<IEnumerable<Event>>>
+
+            RemoveAllEvents(Func<Event_Id, Boolean>  IncludeEventIds,
+                            Boolean                  SkipNotifications   = false,
+                            EventTracking_Id?        EventTrackingId     = null,
+                            User_Id?                 CurrentUserId       = null,
+                            CancellationToken        CancellationToken   = default)
+        {
+
+            EventTrackingId ??= EventTracking_Id.New;
+
+            var removedEvents = new List<Event>();
+
+            foreach (var @event in events.Values)
+            {
+                if (IncludeEventIds(Event_Id.Parse(@event.Id!.Value.ToString())))
+                    removedEvents.Add(@event);
+            }
+
+            foreach (var @event in removedEvents)
+                events.TryRemove(Event_Id.Parse(@event.Id!.Value.ToString()), out _);
+
+
+            //await LogAsset(
+            //          CommonBaseAPI.removeAllEvents,
+            //          new JArray(
+            //              removedEvents.Select(
+            //                  event => event.ToJSON(
+            //                                true,
+            //                                true,
+            //                                CustomEventSerializer,
+            //                                CustomDisplayTextSerializer,
+            //                                CustomPriceSerializer,
+            //                                CustomEventElementSerializer,
+            //                                CustomPriceComponentSerializer,
+            //                                CustomEventRestrictionsSerializer,
+            //                                CustomEnergyMixSerializer,
+            //                                CustomEnergySourceSerializer,
+            //                                CustomEnvironmentalImpactSerializer
+            //                            )
+            //                  )
+            //          ),
+            //          EventTrackingId,
+            //          CurrentUserId,
+            //          CancellationToken
+            //      );
+
+            return RemoveResult<IEnumerable<Event>>.Success(
+                       EventTrackingId,
+                       removedEvents
+                   );
+
+        }
+
+        #endregion
+
+
+        #region EventExists (EventId)
+
+        public Boolean EventExists(Event_Id EventId)
+
+            => events.ContainsKey(EventId);
+
+        #endregion
+
+        #region GetEvent    (EventId)
+
+        public Event? GetEvent(Event_Id EventId)
+        {
+
+            if (events.TryGetValue(EventId, out var @event))
+                return @event;
+
+            return null;
+
+        }
+
+        #endregion
+
+        #region TryGetEvent (EventId, out Event)
+
+        public Boolean TryGetEvent(Event_Id                        EventId,
+                                   [NotNullWhen(true)] out Event?  Event)
+        {
+
+            if (events.TryGetValue(EventId, out var @event))
+            {
+                Event = @event;
+                return true;
+            }
+
+            Event = null;
+            return false;
+
+        }
+
+        #endregion
+
+        #region GetEvents   (IncludeEvent = null)
+
+        public IEnumerable<Event> GetEvents(Func<Event, Boolean>? IncludeEvent = null)
+        {
+
+            if (IncludeEvent is null)
+                return events.Values;
+
+
+            var selectedEvents = new List<Event>();
+
+            foreach (var @event in events.Values)
+            {
+                if (IncludeEvent(@event))
+                    selectedEvents.Add(@event);
+            }
+
+            return selectedEvents;
+
+        }
+
+        #endregion
+
+        #endregion
+
+        #region Subscriptions
+
+        private readonly ConcurrentDictionary<Subscription_Id, Subscription> subscriptions = [];
+
+        #region Events
+
+        public delegate Task OnSubscriptionAddedDelegate(Subscription Subscription);
+
+        public event OnSubscriptionAddedDelegate?    OnSubscriptionAdded;
+
+
+        public delegate Task OnSubscriptionChangedDelegate(Subscription Subscription);
+
+        public event OnSubscriptionChangedDelegate?  OnSubscriptionChanged;
+
+        #endregion
+
+
+        #region AddSubscription            (Subscription, ...)
+
+        public async Task<AddResult<Subscription>>
+
+            AddSubscription(Subscription       Subscription,
+                            Boolean            SkipNotifications   = false,
+                            EventTracking_Id?  EventTrackingId     = null,
+                            User_Id?           CurrentUserId       = null,
+                            CancellationToken  CancellationToken   = default)
+
+        {
+
+            EventTrackingId ??= EventTracking_Id.New;
+
+            var subscription = Subscription.FillMetadata(Subscription);
+
+            if (subscriptions.TryAdd(subscription.Id!.Value, subscription))
+            {
+
+                DebugX.Log($"OpenADR {Version.String} Subscription '{Subscription.Id}': '{Subscription}' added...");
+
+                //Subscription.CommonAPI = this;
+
+                //await LogAsset(
+                //          CommonBaseAPI.addSubscription,
+                //          Subscription.ToJSON(
+                //              true,
+                //              true,
+                //              CustomSubscriptionSerializer,
+                //              CustomDisplayTextSerializer,
+                //              CustomPriceSerializer,
+                //              CustomSubscriptionElementSerializer,
+                //              CustomPriceComponentSerializer,
+                //              CustomSubscriptionRestrictionsSerializer,
+                //              CustomEnergyMixSerializer,
+                //              CustomEnergySourceSerializer,
+                //              CustomEnvironmentalImpactSerializer
+                //          ),
+                //          EventTrackingId,
+                //          CurrentUserId,
+                //          CancellationToken
+                //      );
+
+                if (!SkipNotifications)
+                {
+
+                    var onSubscriptionAdded = OnSubscriptionAdded;
+                    if (onSubscriptionAdded is not null)
+                    {
+                        try
+                        {
+                            await onSubscriptionAdded(Subscription);
+                        }
+                        catch (Exception e)
+                        {
+                            DebugX.LogT($"OpenADR {Version.String} {nameof(OpenADRHTTPAPI)} ", nameof(AddSubscription), " ", nameof(OnSubscriptionAdded), ": ",
+                                        Environment.NewLine, e.Message,
+                                        Environment.NewLine, e.StackTrace ?? "");
+                        }
+                    }
+
+                }
+
+                return AddResult<Subscription>.Success(
+                           EventTrackingId,
+                           Subscription
+                       );
+
+            }
+
+            return AddResult<Subscription>.Failed(
+                       EventTrackingId,
+                       Subscription,
+                       "TryAdd(Subscription.Id, Subscription) failed!"
+                   );
+
+        }
+
+        #endregion
+
+        #region AddSubscriptionIfNotExists (Subscription, ...)
+
+        public async Task<AddResult<Subscription>>
+
+            AddSubscriptionIfNotExists(Subscription       Subscription,
+                                       Boolean            SkipNotifications   = false,
+                                       EventTracking_Id?  EventTrackingId     = null,
+                                       User_Id?           CurrentUserId       = null,
+                                       CancellationToken  CancellationToken   = default)
+
+        {
+
+            EventTrackingId ??= EventTracking_Id.New;
+
+            var subscription = Subscription.FillMetadata(Subscription);
+
+            if (subscriptions.TryAdd(subscription.Id!.Value, subscription))
+            {
+
+                //Subscription.CommonAPI = this;
+
+                //await LogAsset(
+                //          CommonBaseAPI.addSubscriptionIfNotExists,
+                //          Subscription.ToJSON(
+                //              true,
+                //              true,
+                //              CustomSubscriptionSerializer,
+                //              CustomDisplayTextSerializer,
+                //              CustomPriceSerializer,
+                //              CustomSubscriptionElementSerializer,
+                //              CustomPriceComponentSerializer,
+                //              CustomSubscriptionRestrictionsSerializer,
+                //              CustomEnergyMixSerializer,
+                //              CustomEnergySourceSerializer,
+                //              CustomEnvironmentalImpactSerializer
+                //          ),
+                //          EventTrackingId,
+                //          CurrentUserId,
+                //          CancellationToken
+                //      );
+
+                if (!SkipNotifications)
+                {
+
+                    var onSubscriptionAdded = OnSubscriptionAdded;
+                    if (onSubscriptionAdded is not null)
+                    {
+                        try
+                        {
+                            await onSubscriptionAdded(Subscription);
+                        }
+                        catch (Exception e)
+                        {
+                            DebugX.LogT($"OpenADR {Version.String} {nameof(OpenADRHTTPAPI)} ", nameof(AddSubscriptionIfNotExists), " ", nameof(OnSubscriptionAdded), ": ",
+                                        Environment.NewLine, e.Message,
+                                        Environment.NewLine, e.StackTrace ?? "");
+                        }
+                    }
+
+                }
+
+                return AddResult<Subscription>.Success(
+                           EventTrackingId,
+                           Subscription
+                       );
+
+            }
+
+            return AddResult<Subscription>.NoOperation(
+                       EventTrackingId,
+                       Subscription,
+                       "The given subscription already exists."
+                   );
+
+        }
+
+        #endregion
+
+        #region AddOrUpdateSubscription    (Subscription, AllowDowngrades = false, ...)
+
+        public async Task<AddOrUpdateResult<Subscription>>
+
+            AddOrUpdateSubscription(Subscription       Subscription,
+                                    Boolean?           AllowDowngrades     = false,
+                                    Boolean            SkipNotifications   = false,
+                                    EventTracking_Id?  EventTrackingId     = null,
+                                    User_Id?           CurrentUserId       = null,
+                                    CancellationToken  CancellationToken   = default)
+
+        {
+
+            EventTrackingId ??= EventTracking_Id.New;
+
+            var subscription = Subscription.FillMetadata(Subscription);
+
+            #region Update an existing subscription
+
+            if (subscriptions.TryGetValue(subscription.Id!.Value,
+                                          out var existingSubscription))
+            {
+
+                if ((AllowDowngrades ?? this.AllowDowngrades) == false &&
+                    Subscription.LastModification <= existingSubscription.LastModification)
+                {
+
+                    return AddOrUpdateResult<Subscription>.Failed(
+                               EventTrackingId,
+                               Subscription,
+                               "The 'lastUpdated' timestamp of the new subscription must be newer then the timestamp of the existing subscription!"
+                           );
+
+                }
+
+                if (subscriptions.TryUpdate(subscription.Id!.Value,
+                                            Subscription,
+                                            existingSubscription))
+                {
+
+                //  Subscription.CommonAPI = this;
+
+                //  await LogAsset(
+                //            CommonBaseAPI.addOrUpdateSubscription,
+                //            Subscription.ToJSON(
+                //                true,
+                //                true,
+                //                CustomSubscriptionSerializer,
+                //                CustomDisplayTextSerializer,
+                //                CustomPriceSerializer,
+                //                CustomSubscriptionElementSerializer,
+                //                CustomPriceComponentSerializer,
+                //                CustomSubscriptionRestrictionsSerializer,
+                //                CustomEnergyMixSerializer,
+                //                CustomEnergySourceSerializer,
+                //                CustomEnvironmentalImpactSerializer
+                //            ),
+                //            EventTrackingId,
+                //            CurrentUserId,
+                //            CancellationToken
+                //        );
+
+                if (!SkipNotifications)
+                {
+
+                    var onSubscriptionChanged = OnSubscriptionChanged;
+                    if (onSubscriptionChanged is not null)
+                    {
+                        try
+                        {
+                            await onSubscriptionChanged(Subscription);
+                        }
+                        catch (Exception e)
+                        {
+                            DebugX.LogT($"OpenADR {Version.String} {nameof(OpenADRHTTPAPI)} ", nameof(AddOrUpdateSubscription), " ", nameof(OnSubscriptionChanged), ": ",
+                                        Environment.NewLine, e.Message,
+                                        Environment.NewLine, e.StackTrace ?? "");
+                        }
+                    }
+
+                }
+
+                return AddOrUpdateResult<Subscription>.Updated(
+                           EventTrackingId,
+                           Subscription
+                       );
+
+            }
+
+            return AddOrUpdateResult<Subscription>.Failed(
+                       EventTrackingId,
+                       Subscription,
+                       "Updating the given subscription failed!"
+                   );
+
+            }
+
+            #endregion
+
+            #region Add a new subscription
+
+            if (subscriptions.TryAdd(subscription.Id!.Value,
+                                     Subscription))
+            {
+
+                //  Subscription.CommonAPI = this;
+
+                //  await LogAsset(
+                //            CommonBaseAPI.addOrUpdateSubscription,
+                //            Subscription.ToJSON(
+                //                true,
+                //                true,
+                //                CustomSubscriptionSerializer,
+                //                CustomDisplayTextSerializer,
+                //                CustomPriceSerializer,
+                //                CustomSubscriptionElementSerializer,
+                //                CustomPriceComponentSerializer,
+                //                CustomSubscriptionRestrictionsSerializer,
+                //                CustomEnergyMixSerializer,
+                //                CustomEnergySourceSerializer,
+                //                CustomEnvironmentalImpactSerializer
+                //            ),
+                //            EventTrackingId,
+                //            CurrentUserId,
+                //            CancellationToken
+                //        );
+
+                if (!SkipNotifications)
+                {
+
+                    var onSubscriptionAdded = OnSubscriptionAdded;
+                    if (onSubscriptionAdded is not null)
+                    {
+                        try
+                        {
+                            await onSubscriptionAdded(Subscription);
+                        }
+                        catch (Exception e)
+                        {
+                            DebugX.LogT($"OpenADR {Version.String} {nameof(OpenADRHTTPAPI)} ", nameof(AddOrUpdateSubscription), " ", nameof(OnSubscriptionAdded), ": ",
+                                        Environment.NewLine, e.Message,
+                                        Environment.NewLine, e.StackTrace ?? "");
+                        }
+                    }
+
+                }
+
+                return AddOrUpdateResult<Subscription>.Created(
+                           EventTrackingId,
+                           Subscription
+                       );
+
+            }
+
+            #endregion
+
+            return AddOrUpdateResult<Subscription>.Failed(
+                       EventTrackingId,
+                       Subscription,
+                       "Adding the given subscription failed because of concurrency issues!"
+                   );
+
+        }
+
+        #endregion
+
+        #region UpdateSubscription         (Subscription, AllowDowngrades = false, ...)
+
+        public async Task<UpdateResult<Subscription>>
+
+            UpdateSubscription(Subscription       Subscription,
+                               Boolean?           AllowDowngrades     = false,
+                               Boolean            SkipNotifications   = false,
+                               EventTracking_Id?  EventTrackingId     = null,
+                               User_Id?           CurrentUserId       = null,
+                               CancellationToken  CancellationToken   = default)
+
+        {
+
+            EventTrackingId ??= EventTracking_Id.New;
+
+            #region Initial checks
+
+            if (!Subscription.Id.HasValue)
+                return UpdateResult<Subscription>.Failed(
+                            EventTrackingId,
+                            Subscription,
+                            $"The given subscription identification is mandatory!"
+                        );
+
+            if (!subscriptions.TryGetValue(Subscription.Id!.Value, out var existingSubscription))
+                return UpdateResult<Subscription>.Failed(
+                            EventTrackingId,
+                            Subscription,
+                            $"The given subscription identification '{Subscription.Id}' is unknown!"
+                        );
+
+            #endregion
+
+            #region Validate AllowDowngrades
+
+            if ((AllowDowngrades ?? this.AllowDowngrades) == false &&
+                Subscription.LastModification <= existingSubscription.LastModification)
+            {
+
+                return UpdateResult<Subscription>.Failed(
+                           EventTrackingId,
+                           Subscription,
+                           "The 'lastUpdated' timestamp of the new subscription must be newer then the timestamp of the existing subscription!"
+                       );
+
+            }
+
+            #endregion
+
+
+            if (subscriptions.TryUpdate(Subscription.Id!.Value,
+                                        Subscription,
+                                        existingSubscription))
+            {
+
+                //Subscription.CommonAPI = this;
+
+                //await LogAsset(
+                //          CommonBaseAPI.updateSubscription,
+                //          Subscription.ToJSON(
+                //              true,
+                //              true,
+                //              CustomSubscriptionSerializer,
+                //              CustomDisplayTextSerializer,
+                //              CustomPriceSerializer,
+                //              CustomSubscriptionElementSerializer,
+                //              CustomPriceComponentSerializer,
+                //              CustomSubscriptionRestrictionsSerializer,
+                //              CustomEnergyMixSerializer,
+                //              CustomEnergySourceSerializer,
+                //              CustomEnvironmentalImpactSerializer
+                //          ),
+                //          EventTrackingId,
+                //          CurrentUserId,
+                //          CancellationToken
+                //      );
+
+                if (!SkipNotifications)
+                {
+
+                    var onSubscriptionChanged = OnSubscriptionChanged;
+                    if (onSubscriptionChanged is not null)
+                    {
+                        try
+                        {
+                            await onSubscriptionChanged(Subscription);
+                        }
+                        catch (Exception e)
+                        {
+                            DebugX.LogT($"OpenADR {Version.String} {nameof(OpenADRHTTPAPI)} ", nameof(UpdateSubscription), " ", nameof(OnSubscriptionChanged), ": ",
+                                        Environment.NewLine, e.Message,
+                                        Environment.NewLine, e.StackTrace ?? "");
+                        }
+                    }
+
+                }
+
+                return UpdateResult<Subscription>.Success(
+                           EventTrackingId,
+                           Subscription
+                       );
+
+            }
+
+            return UpdateResult<Subscription>.Failed(
+                       EventTrackingId,
+                       Subscription,
+                       "Subscriptions.TryUpdate(Subscription.Id, Subscription, Subscription) failed!"
+                   );
+
+        }
+
+        #endregion
+
+        #region RemoveSubscription         (Subscription, ...)
+
+        /// <summary>
+        /// Remove the given subscription.
+        /// </summary>
+        /// <param name="Subscription">A subscription.</param>
+        /// <param name="SkipNotifications">Skip sending notifications.</param>
+        public async Task<RemoveResult<Subscription>>
+
+            RemoveSubscription(Subscription       Subscription,
+                               Boolean            SkipNotifications   = false,
+                               EventTracking_Id?  EventTrackingId     = null,
+                               User_Id?           CurrentUserId       = null,
+                               CancellationToken  CancellationToken   = default)
+
+        {
+
+            EventTrackingId ??= EventTracking_Id.New;
+
+            #region Initial checks
+
+            if (!Subscription.Id.HasValue)
+                return RemoveResult<Subscription>.Failed(
+                            EventTrackingId,
+                            Subscription,
+                            $"The given subscription identification is mandatory!"
+                        );
+
+            #endregion
+
+            if (subscriptions.TryRemove(Subscription.Id!.Value,
+                                        out var subscriptionVersions))
+            {
+
+                //await LogAsset(
+                //          CommonBaseAPI.removeSubscription,
+                //          new JArray(
+                //              subscriptionVersions.Select(subscription =>
+                //                  subscription.ToJSON(
+                //                      true,
+                //                      true,
+                //                      CustomSubscriptionSerializer,
+                //                      CustomDisplayTextSerializer,
+                //                      CustomPriceSerializer,
+                //                      CustomSubscriptionElementSerializer,
+                //                      CustomPriceComponentSerializer,
+                //                      CustomSubscriptionRestrictionsSerializer,
+                //                      CustomEnergyMixSerializer,
+                //                      CustomEnergySourceSerializer,
+                //                      CustomEnvironmentalImpactSerializer
+                //                  )
+                //              )
+                //          ),
+                //          EventTrackingId,
+                //          CurrentUserId,
+                //          CancellationToken
+                //      );
+
+                return RemoveResult<Subscription>.Success(
+                           EventTrackingId,
+                           subscriptionVersions
+                       );
+
+            }
+
+            return RemoveResult<Subscription>.Failed(
+                       EventTrackingId,
+                       Subscription,
+                       $"The given subscription identification '{Subscription.Id}' is unknown!"
+                   );
+
+        }
+
+        #endregion
+
+        #region RemoveSubscription         (SubscriptionId, ...)
+
+        /// <summary>
+        /// Remove the given subscription.
+        /// </summary>
+        /// <param name="SubscriptionId">An unique subscription identification.</param>
+        /// <param name="SkipNotifications">Skip sending notifications.</param>
+        public async Task<RemoveResult<Subscription>>
+
+            RemoveSubscription(Subscription_Id    SubscriptionId,
+                               Boolean            SkipNotifications   = false,
+                               EventTracking_Id?  EventTrackingId     = null,
+                               User_Id?           CurrentUserId       = null,
+                               CancellationToken  CancellationToken   = default)
+
+        {
+
+            EventTrackingId ??= EventTracking_Id.New;
+
+            if (subscriptions.TryRemove(SubscriptionId,
+                                        out var subscriptionVersions))
+            {
+
+                //await LogAsset(
+                //          CommonBaseAPI.removeSubscription,
+                //          new JArray(
+                //              subscriptionVersions.Select(
+                //                  subscription => subscription.ToJSON(
+                //                                true,
+                //                                true,
+                //                                CustomSubscriptionSerializer,
+                //                                CustomDisplayTextSerializer,
+                //                                CustomPriceSerializer,
+                //                                CustomSubscriptionElementSerializer,
+                //                                CustomPriceComponentSerializer,
+                //                                CustomSubscriptionRestrictionsSerializer,
+                //                                CustomEnergyMixSerializer,
+                //                                CustomEnergySourceSerializer,
+                //                                CustomEnvironmentalImpactSerializer
+                //                            )
+                //                  )
+                //          ),
+                //          EventTrackingId,
+                //          CurrentUserId,
+                //          CancellationToken
+                //      );
+
+                return RemoveResult<Subscription>.Success(
+                           EventTrackingId,
+                           subscriptionVersions
+                       );
+
+            }
+
+            return RemoveResult<Subscription>.Failed(
+                       EventTrackingId,
+                       $"The given subscription identification '{SubscriptionId}' is unknown!"
+                   );
+
+        }
+
+        #endregion
+
+        #region RemoveAllSubscriptions     (IncludeSubscriptions = null, ...)
+
+        /// <summary>
+        /// Remove all matching subscriptions.
+        /// </summary>
+        /// <param name="IncludeSubscriptions">A subscription filter.</param>
+        /// <param name="SkipNotifications">Skip sending notifications.</param>
+        public async Task<RemoveResult<IEnumerable<Subscription>>>
+
+            RemoveAllSubscriptions(Func<Subscription, Boolean>?  IncludeSubscriptions   = null,
+                                   Boolean                       SkipNotifications      = false,
+                                   EventTracking_Id?             EventTrackingId        = null,
+                                   User_Id?                      CurrentUserId          = null,
+                                   CancellationToken             CancellationToken      = default)
+
+        {
+
+            EventTrackingId ??= EventTracking_Id.New;
+
+            var removedSubscriptions = new List<Subscription>();
+
+            if (IncludeSubscriptions is null)
+            {
+                removedSubscriptions.AddRange(subscriptions.Values);
+                subscriptions.Clear();
+            }
+
+            else
+            {
+
+                foreach (var subscription in subscriptions.Values)
+                {
+                    if (IncludeSubscriptions(subscription))
+                        removedSubscriptions.Add(subscription);
+                }
+
+                foreach (var subscription in removedSubscriptions)
+                    subscriptions.TryRemove(Subscription_Id.Parse(subscription.Id!.Value.ToString()), out _);
+
+            }
+
+            //await LogAsset(
+            //          CommonBaseAPI.removeAllSubscriptions,
+            //          new JArray(
+            //              removedSubscriptions.Select(
+            //                  subscription => subscription.ToJSON(
+            //                                true,
+            //                                true,
+            //                                CustomSubscriptionSerializer,
+            //                                CustomDisplayTextSerializer,
+            //                                CustomPriceSerializer,
+            //                                CustomSubscriptionElementSerializer,
+            //                                CustomPriceComponentSerializer,
+            //                                CustomSubscriptionRestrictionsSerializer,
+            //                                CustomEnergyMixSerializer,
+            //                                CustomEnergySourceSerializer,
+            //                                CustomEnvironmentalImpactSerializer
+            //                            )
+            //                  )
+            //          ),
+            //          EventTrackingId,
+            //          CurrentUserId,
+            //          CancellationToken
+            //      );
+
+            return RemoveResult<IEnumerable<Subscription>>.Success(
+                       EventTrackingId,
+                       removedSubscriptions
+                   );
+
+        }
+
+        #endregion
+
+        #region RemoveAllSubscriptions     (IncludeSubscriptionIds, ...)
+
+        /// <summary>
+        /// Remove all matching subscriptions.
+        /// </summary>
+        /// <param name="IncludeSubscriptionIds">The subscription identification filter.</param>
+        /// <param name="SkipNotifications">Skip sending notifications.</param>
+        public async Task<RemoveResult<IEnumerable<Subscription>>>
+
+            RemoveAllSubscriptions(Func<Subscription_Id, Boolean>  IncludeSubscriptionIds,
+                                   Boolean                         SkipNotifications   = false,
+                                   EventTracking_Id?               EventTrackingId     = null,
+                                   User_Id?                        CurrentUserId       = null,
+                                   CancellationToken               CancellationToken   = default)
+        {
+
+            EventTrackingId ??= EventTracking_Id.New;
+
+            var removedSubscriptions = new List<Subscription>();
+
+            foreach (var subscription in subscriptions.Values)
+            {
+                if (IncludeSubscriptionIds(Subscription_Id.Parse(subscription.Id!.Value.ToString())))
+                    removedSubscriptions.Add(subscription);
+            }
+
+            foreach (var subscription in removedSubscriptions)
+                subscriptions.TryRemove(Subscription_Id.Parse(subscription.Id!.Value.ToString()), out _);
+
+
+            //await LogAsset(
+            //          CommonBaseAPI.removeAllSubscriptions,
+            //          new JArray(
+            //              removedSubscriptions.Select(
+            //                  subscription => subscription.ToJSON(
+            //                                true,
+            //                                true,
+            //                                CustomSubscriptionSerializer,
+            //                                CustomDisplayTextSerializer,
+            //                                CustomPriceSerializer,
+            //                                CustomSubscriptionElementSerializer,
+            //                                CustomPriceComponentSerializer,
+            //                                CustomSubscriptionRestrictionsSerializer,
+            //                                CustomEnergyMixSerializer,
+            //                                CustomEnergySourceSerializer,
+            //                                CustomEnvironmentalImpactSerializer
+            //                            )
+            //                  )
+            //          ),
+            //          EventTrackingId,
+            //          CurrentUserId,
+            //          CancellationToken
+            //      );
+
+            return RemoveResult<IEnumerable<Subscription>>.Success(
+                       EventTrackingId,
+                       removedSubscriptions
+                   );
+
+        }
+
+        #endregion
+
+
+        #region SubscriptionExists (SubscriptionId)
+
+        public Boolean SubscriptionExists(Subscription_Id SubscriptionId)
+
+            => subscriptions.ContainsKey(SubscriptionId);
+
+        #endregion
+
+        #region GetSubscription    (SubscriptionId)
+
+        public Subscription? GetSubscription(Subscription_Id SubscriptionId)
+        {
+
+            if (subscriptions.TryGetValue(SubscriptionId, out var subscription))
+                return subscription;
+
+            return null;
+
+        }
+
+        #endregion
+
+        #region TryGetSubscription (SubscriptionId, out Subscription)
+
+        public Boolean TryGetSubscription(Subscription_Id                        SubscriptionId,
+                                          [NotNullWhen(true)] out Subscription?  Subscription)
+        {
+
+            if (subscriptions.TryGetValue(SubscriptionId, out var subscription))
+            {
+                Subscription = subscription;
+                return true;
+            }
+
+            Subscription = null;
+            return false;
+
+        }
+
+        #endregion
+
+        #region GetSubscriptions   (IncludeSubscription = null)
+
+        public IEnumerable<Subscription> GetSubscriptions(Func<Subscription, Boolean>? IncludeSubscription = null)
+        {
+
+            if (IncludeSubscription is null)
+                return subscriptions.Values;
+
+
+            var selectedSubscriptions = new List<Subscription>();
+
+            foreach (var subscription in subscriptions.Values)
+            {
+                if (IncludeSubscription(subscription))
+                    selectedSubscriptions.Add(subscription);
+            }
+
+            return selectedSubscriptions;
+
+        }
+
+        #endregion
+
+        #endregion
+
+        #region VirtualEndNodes
+
+        private readonly ConcurrentDictionary<VirtualEndNode_Id, VirtualEndNode> virtualEndNodes = [];
+
+        #region Events
+
+        public delegate Task OnVirtualEndNodeAddedDelegate(VirtualEndNode VirtualEndNode);
+
+        public event OnVirtualEndNodeAddedDelegate?    OnVirtualEndNodeAdded;
+
+
+        public delegate Task OnVirtualEndNodeChangedDelegate(VirtualEndNode VirtualEndNode);
+
+        public event OnVirtualEndNodeChangedDelegate?  OnVirtualEndNodeChanged;
+
+        #endregion
+
+
+        #region AddVirtualEndNode            (VirtualEndNode, ...)
+
+        public async Task<AddResult<VirtualEndNode>>
+
+            AddVirtualEndNode(VirtualEndNode     VirtualEndNode,
+                              Boolean            SkipNotifications   = false,
+                              EventTracking_Id?  EventTrackingId     = null,
+                              User_Id?           CurrentUserId       = null,
+                              CancellationToken  CancellationToken   = default)
+
+        {
+
+            EventTrackingId ??= EventTracking_Id.New;
+
+            var virtualEndNode = VirtualEndNode.FillMetadata(VirtualEndNode);
+
+            if (virtualEndNodes.TryAdd(virtualEndNode.Id!.Value, virtualEndNode))
+            {
+
+                DebugX.Log($"OpenADR {Version.String} VirtualEndNode '{VirtualEndNode.Id}': '{VirtualEndNode}' added...");
+
+                //VirtualEndNode.CommonAPI = this;
+
+                //await LogAsset(
+                //          CommonBaseAPI.addVirtualEndNode,
+                //          VirtualEndNode.ToJSON(
+                //              true,
+                //              true,
+                //              CustomVirtualEndNodeSerializer,
+                //              CustomDisplayTextSerializer,
+                //              CustomPriceSerializer,
+                //              CustomVirtualEndNodeElementSerializer,
+                //              CustomPriceComponentSerializer,
+                //              CustomVirtualEndNodeRestrictionsSerializer,
+                //              CustomEnergyMixSerializer,
+                //              CustomEnergySourceSerializer,
+                //              CustomEnvironmentalImpactSerializer
+                //          ),
+                //          EventTrackingId,
+                //          CurrentUserId,
+                //          CancellationToken
+                //      );
+
+                if (!SkipNotifications)
+                {
+
+                    var onVirtualEndNodeAdded = OnVirtualEndNodeAdded;
+                    if (onVirtualEndNodeAdded is not null)
+                    {
+                        try
+                        {
+                            await onVirtualEndNodeAdded(VirtualEndNode);
+                        }
+                        catch (Exception e)
+                        {
+                            DebugX.LogT($"OpenADR {Version.String} {nameof(OpenADRHTTPAPI)} ", nameof(AddVirtualEndNode), " ", nameof(OnVirtualEndNodeAdded), ": ",
+                                        Environment.NewLine, e.Message,
+                                        Environment.NewLine, e.StackTrace ?? "");
+                        }
+                    }
+
+                }
+
+                return AddResult<VirtualEndNode>.Success(
+                           EventTrackingId,
+                           VirtualEndNode
+                       );
+
+            }
+
+            return AddResult<VirtualEndNode>.Failed(
+                       EventTrackingId,
+                       VirtualEndNode,
+                       "TryAdd(VirtualEndNode.Id, VirtualEndNode) failed!"
+                   );
+
+        }
+
+        #endregion
+
+        #region AddVirtualEndNodeIfNotExists (VirtualEndNode, ...)
+
+        public async Task<AddResult<VirtualEndNode>>
+
+            AddVirtualEndNodeIfNotExists(VirtualEndNode     VirtualEndNode,
+                                         Boolean            SkipNotifications   = false,
+                                         EventTracking_Id?  EventTrackingId     = null,
+                                         User_Id?           CurrentUserId       = null,
+                                         CancellationToken  CancellationToken   = default)
+
+        {
+
+            EventTrackingId ??= EventTracking_Id.New;
+
+            var virtualEndNode = VirtualEndNode.FillMetadata(VirtualEndNode);
+
+            if (virtualEndNodes.TryAdd(virtualEndNode.Id!.Value, virtualEndNode))
+            {
+
+                //VirtualEndNode.CommonAPI = this;
+
+                //await LogAsset(
+                //          CommonBaseAPI.addVirtualEndNodeIfNotExists,
+                //          VirtualEndNode.ToJSON(
+                //              true,
+                //              true,
+                //              CustomVirtualEndNodeSerializer,
+                //              CustomDisplayTextSerializer,
+                //              CustomPriceSerializer,
+                //              CustomVirtualEndNodeElementSerializer,
+                //              CustomPriceComponentSerializer,
+                //              CustomVirtualEndNodeRestrictionsSerializer,
+                //              CustomEnergyMixSerializer,
+                //              CustomEnergySourceSerializer,
+                //              CustomEnvironmentalImpactSerializer
+                //          ),
+                //          EventTrackingId,
+                //          CurrentUserId,
+                //          CancellationToken
+                //      );
+
+                if (!SkipNotifications)
+                {
+
+                    var onVirtualEndNodeAdded = OnVirtualEndNodeAdded;
+                    if (onVirtualEndNodeAdded is not null)
+                    {
+                        try
+                        {
+                            await onVirtualEndNodeAdded(VirtualEndNode);
+                        }
+                        catch (Exception e)
+                        {
+                            DebugX.LogT($"OpenADR {Version.String} {nameof(OpenADRHTTPAPI)} ", nameof(AddVirtualEndNodeIfNotExists), " ", nameof(OnVirtualEndNodeAdded), ": ",
+                                        Environment.NewLine, e.Message,
+                                        Environment.NewLine, e.StackTrace ?? "");
+                        }
+                    }
+
+                }
+
+                return AddResult<VirtualEndNode>.Success(
+                           EventTrackingId,
+                           VirtualEndNode
+                       );
+
+            }
+
+            return AddResult<VirtualEndNode>.NoOperation(
+                       EventTrackingId,
+                       VirtualEndNode,
+                       "The given virtualEndNode already exists."
+                   );
+
+        }
+
+        #endregion
+
+        #region AddOrUpdateVirtualEndNode    (VirtualEndNode, AllowDowngrades = false, ...)
+
+        public async Task<AddOrUpdateResult<VirtualEndNode>>
+
+            AddOrUpdateVirtualEndNode(VirtualEndNode     VirtualEndNode,
+                                      Boolean?           AllowDowngrades     = false,
+                                      Boolean            SkipNotifications   = false,
+                                      EventTracking_Id?  EventTrackingId     = null,
+                                      User_Id?           CurrentUserId       = null,
+                                      CancellationToken  CancellationToken   = default)
+
+        {
+
+            EventTrackingId ??= EventTracking_Id.New;
+
+            var virtualEndNode = VirtualEndNode.FillMetadata(VirtualEndNode);
+
+            #region Update an existing virtualEndNode
+
+            if (virtualEndNodes.TryGetValue(virtualEndNode.Id!.Value,
+                                            out var existingVirtualEndNode))
+            {
+
+                if ((AllowDowngrades ?? this.AllowDowngrades) == false &&
+                    VirtualEndNode.LastModification <= existingVirtualEndNode.LastModification)
+                {
+
+                    return AddOrUpdateResult<VirtualEndNode>.Failed(
+                               EventTrackingId,
+                               VirtualEndNode,
+                               "The 'lastUpdated' timestamp of the new virtualEndNode must be newer then the timestamp of the existing virtualEndNode!"
+                           );
+
+                }
+
+                if (virtualEndNodes.TryUpdate(virtualEndNode.Id!.Value,
+                                              VirtualEndNode,
+                                              existingVirtualEndNode))
+                {
+
+                //  VirtualEndNode.CommonAPI = this;
+
+                //  await LogAsset(
+                //            CommonBaseAPI.addOrUpdateVirtualEndNode,
+                //            VirtualEndNode.ToJSON(
+                //                true,
+                //                true,
+                //                CustomVirtualEndNodeSerializer,
+                //                CustomDisplayTextSerializer,
+                //                CustomPriceSerializer,
+                //                CustomVirtualEndNodeElementSerializer,
+                //                CustomPriceComponentSerializer,
+                //                CustomVirtualEndNodeRestrictionsSerializer,
+                //                CustomEnergyMixSerializer,
+                //                CustomEnergySourceSerializer,
+                //                CustomEnvironmentalImpactSerializer
+                //            ),
+                //            EventTrackingId,
+                //            CurrentUserId,
+                //            CancellationToken
+                //        );
+
+                if (!SkipNotifications)
+                {
+
+                    var onVirtualEndNodeChanged = OnVirtualEndNodeChanged;
+                    if (onVirtualEndNodeChanged is not null)
+                    {
+                        try
+                        {
+                            await onVirtualEndNodeChanged(VirtualEndNode);
+                        }
+                        catch (Exception e)
+                        {
+                            DebugX.LogT($"OpenADR {Version.String} {nameof(OpenADRHTTPAPI)} ", nameof(AddOrUpdateVirtualEndNode), " ", nameof(OnVirtualEndNodeChanged), ": ",
+                                        Environment.NewLine, e.Message,
+                                        Environment.NewLine, e.StackTrace ?? "");
+                        }
+                    }
+
+                }
+
+                return AddOrUpdateResult<VirtualEndNode>.Updated(
+                           EventTrackingId,
+                           VirtualEndNode
+                       );
+
+            }
+
+            return AddOrUpdateResult<VirtualEndNode>.Failed(
+                       EventTrackingId,
+                       VirtualEndNode,
+                       "Updating the given virtualEndNode failed!"
+                   );
+
+            }
+
+            #endregion
+
+            #region Add a new virtualEndNode
+
+            if (virtualEndNodes.TryAdd(virtualEndNode.Id!.Value,
+                                       VirtualEndNode))
+            {
+
+                //  VirtualEndNode.CommonAPI = this;
+
+                //  await LogAsset(
+                //            CommonBaseAPI.addOrUpdateVirtualEndNode,
+                //            VirtualEndNode.ToJSON(
+                //                true,
+                //                true,
+                //                CustomVirtualEndNodeSerializer,
+                //                CustomDisplayTextSerializer,
+                //                CustomPriceSerializer,
+                //                CustomVirtualEndNodeElementSerializer,
+                //                CustomPriceComponentSerializer,
+                //                CustomVirtualEndNodeRestrictionsSerializer,
+                //                CustomEnergyMixSerializer,
+                //                CustomEnergySourceSerializer,
+                //                CustomEnvironmentalImpactSerializer
+                //            ),
+                //            EventTrackingId,
+                //            CurrentUserId,
+                //            CancellationToken
+                //        );
+
+                if (!SkipNotifications)
+                {
+
+                    var onVirtualEndNodeAdded = OnVirtualEndNodeAdded;
+                    if (onVirtualEndNodeAdded is not null)
+                    {
+                        try
+                        {
+                            await onVirtualEndNodeAdded(VirtualEndNode);
+                        }
+                        catch (Exception e)
+                        {
+                            DebugX.LogT($"OpenADR {Version.String} {nameof(OpenADRHTTPAPI)} ", nameof(AddOrUpdateVirtualEndNode), " ", nameof(OnVirtualEndNodeAdded), ": ",
+                                        Environment.NewLine, e.Message,
+                                        Environment.NewLine, e.StackTrace ?? "");
+                        }
+                    }
+
+                }
+
+                return AddOrUpdateResult<VirtualEndNode>.Created(
+                           EventTrackingId,
+                           VirtualEndNode
+                       );
+
+            }
+
+            #endregion
+
+            return AddOrUpdateResult<VirtualEndNode>.Failed(
+                       EventTrackingId,
+                       VirtualEndNode,
+                       "Adding the given virtualEndNode failed because of concurrency issues!"
+                   );
+
+        }
+
+        #endregion
+
+        #region UpdateVirtualEndNode         (VirtualEndNode, AllowDowngrades = false, ...)
+
+        public async Task<UpdateResult<VirtualEndNode>>
+
+            UpdateVirtualEndNode(VirtualEndNode     VirtualEndNode,
+                                 Boolean?           AllowDowngrades     = false,
+                                 Boolean            SkipNotifications   = false,
+                                 EventTracking_Id?  EventTrackingId     = null,
+                                 User_Id?           CurrentUserId       = null,
+                                 CancellationToken  CancellationToken   = default)
+
+        {
+
+            EventTrackingId ??= EventTracking_Id.New;
+
+            #region Initial checks
+
+            if (!VirtualEndNode.Id.HasValue)
+                return UpdateResult<VirtualEndNode>.Failed(
+                            EventTrackingId,
+                            VirtualEndNode,
+                            $"The given virtualEndNode identification is mandatory!"
+                        );
+
+            if (!virtualEndNodes.TryGetValue(VirtualEndNode.Id!.Value, out var existingVirtualEndNode))
+                return UpdateResult<VirtualEndNode>.Failed(
+                            EventTrackingId,
+                            VirtualEndNode,
+                            $"The given virtualEndNode identification '{VirtualEndNode.Id}' is unknown!"
+                        );
+
+            #endregion
+
+            #region Validate AllowDowngrades
+
+            if ((AllowDowngrades ?? this.AllowDowngrades) == false &&
+                VirtualEndNode.LastModification <= existingVirtualEndNode.LastModification)
+            {
+
+                return UpdateResult<VirtualEndNode>.Failed(
+                           EventTrackingId,
+                           VirtualEndNode,
+                           "The 'lastUpdated' timestamp of the new virtualEndNode must be newer then the timestamp of the existing virtualEndNode!"
+                       );
+
+            }
+
+            #endregion
+
+
+            if (virtualEndNodes.TryUpdate(VirtualEndNode.Id!.Value,
+                                          VirtualEndNode,
+                                          existingVirtualEndNode))
+            {
+
+                //VirtualEndNode.CommonAPI = this;
+
+                //await LogAsset(
+                //          CommonBaseAPI.updateVirtualEndNode,
+                //          VirtualEndNode.ToJSON(
+                //              true,
+                //              true,
+                //              CustomVirtualEndNodeSerializer,
+                //              CustomDisplayTextSerializer,
+                //              CustomPriceSerializer,
+                //              CustomVirtualEndNodeElementSerializer,
+                //              CustomPriceComponentSerializer,
+                //              CustomVirtualEndNodeRestrictionsSerializer,
+                //              CustomEnergyMixSerializer,
+                //              CustomEnergySourceSerializer,
+                //              CustomEnvironmentalImpactSerializer
+                //          ),
+                //          EventTrackingId,
+                //          CurrentUserId,
+                //          CancellationToken
+                //      );
+
+                if (!SkipNotifications)
+                {
+
+                    var onVirtualEndNodeChanged = OnVirtualEndNodeChanged;
+                    if (onVirtualEndNodeChanged is not null)
+                    {
+                        try
+                        {
+                            await onVirtualEndNodeChanged(VirtualEndNode);
+                        }
+                        catch (Exception e)
+                        {
+                            DebugX.LogT($"OpenADR {Version.String} {nameof(OpenADRHTTPAPI)} ", nameof(UpdateVirtualEndNode), " ", nameof(OnVirtualEndNodeChanged), ": ",
+                                        Environment.NewLine, e.Message,
+                                        Environment.NewLine, e.StackTrace ?? "");
+                        }
+                    }
+
+                }
+
+                return UpdateResult<VirtualEndNode>.Success(
+                           EventTrackingId,
+                           VirtualEndNode
+                       );
+
+            }
+
+            return UpdateResult<VirtualEndNode>.Failed(
+                       EventTrackingId,
+                       VirtualEndNode,
+                       "VirtualEndNodes.TryUpdate(VirtualEndNode.Id, VirtualEndNode, VirtualEndNode) failed!"
+                   );
+
+        }
+
+        #endregion
+
+        #region RemoveVirtualEndNode         (VirtualEndNode, ...)
+
+        /// <summary>
+        /// Remove the given virtualEndNode.
+        /// </summary>
+        /// <param name="VirtualEndNode">A virtualEndNode.</param>
+        /// <param name="SkipNotifications">Skip sending notifications.</param>
+        public async Task<RemoveResult<VirtualEndNode>>
+
+            RemoveVirtualEndNode(VirtualEndNode     VirtualEndNode,
+                                 Boolean            SkipNotifications   = false,
+                                 EventTracking_Id?  EventTrackingId     = null,
+                                 User_Id?           CurrentUserId       = null,
+                                 CancellationToken  CancellationToken   = default)
+
+        {
+
+            EventTrackingId ??= EventTracking_Id.New;
+
+            #region Initial checks
+
+            if (!VirtualEndNode.Id.HasValue)
+                return RemoveResult<VirtualEndNode>.Failed(
+                            EventTrackingId,
+                            VirtualEndNode,
+                            $"The given virtualEndNode identification is mandatory!"
+                        );
+
+            #endregion
+
+            if (virtualEndNodes.TryRemove(VirtualEndNode.Id!.Value,
+                                          out var virtualEndNodeVersions))
+            {
+
+                //await LogAsset(
+                //          CommonBaseAPI.removeVirtualEndNode,
+                //          new JArray(
+                //              virtualEndNodeVersions.Select(virtualEndNode =>
+                //                  virtualEndNode.ToJSON(
+                //                      true,
+                //                      true,
+                //                      CustomVirtualEndNodeSerializer,
+                //                      CustomDisplayTextSerializer,
+                //                      CustomPriceSerializer,
+                //                      CustomVirtualEndNodeElementSerializer,
+                //                      CustomPriceComponentSerializer,
+                //                      CustomVirtualEndNodeRestrictionsSerializer,
+                //                      CustomEnergyMixSerializer,
+                //                      CustomEnergySourceSerializer,
+                //                      CustomEnvironmentalImpactSerializer
+                //                  )
+                //              )
+                //          ),
+                //          EventTrackingId,
+                //          CurrentUserId,
+                //          CancellationToken
+                //      );
+
+                return RemoveResult<VirtualEndNode>.Success(
+                           EventTrackingId,
+                           virtualEndNodeVersions
+                       );
+
+            }
+
+            return RemoveResult<VirtualEndNode>.Failed(
+                       EventTrackingId,
+                       VirtualEndNode,
+                       $"The given virtualEndNode identification '{VirtualEndNode.Id}' is unknown!"
+                   );
+
+        }
+
+        #endregion
+
+        #region RemoveVirtualEndNode         (VirtualEndNodeId, ...)
+
+        /// <summary>
+        /// Remove the given virtualEndNode.
+        /// </summary>
+        /// <param name="VirtualEndNodeId">An unique virtualEndNode identification.</param>
+        /// <param name="SkipNotifications">Skip sending notifications.</param>
+        public async Task<RemoveResult<VirtualEndNode>>
+
+            RemoveVirtualEndNode(VirtualEndNode_Id  VirtualEndNodeId,
+                                 Boolean            SkipNotifications   = false,
+                                 EventTracking_Id?  EventTrackingId     = null,
+                                 User_Id?           CurrentUserId       = null,
+                                 CancellationToken  CancellationToken   = default)
+
+        {
+
+            EventTrackingId ??= EventTracking_Id.New;
+
+            if (virtualEndNodes.TryRemove(VirtualEndNodeId,
+                                          out var virtualEndNodeVersions))
+            {
+
+                //await LogAsset(
+                //          CommonBaseAPI.removeVirtualEndNode,
+                //          new JArray(
+                //              virtualEndNodeVersions.Select(
+                //                  virtualEndNode => virtualEndNode.ToJSON(
+                //                                true,
+                //                                true,
+                //                                CustomVirtualEndNodeSerializer,
+                //                                CustomDisplayTextSerializer,
+                //                                CustomPriceSerializer,
+                //                                CustomVirtualEndNodeElementSerializer,
+                //                                CustomPriceComponentSerializer,
+                //                                CustomVirtualEndNodeRestrictionsSerializer,
+                //                                CustomEnergyMixSerializer,
+                //                                CustomEnergySourceSerializer,
+                //                                CustomEnvironmentalImpactSerializer
+                //                            )
+                //                  )
+                //          ),
+                //          EventTrackingId,
+                //          CurrentUserId,
+                //          CancellationToken
+                //      );
+
+                return RemoveResult<VirtualEndNode>.Success(
+                           EventTrackingId,
+                           virtualEndNodeVersions
+                       );
+
+            }
+
+            return RemoveResult<VirtualEndNode>.Failed(
+                       EventTrackingId,
+                       $"The given virtualEndNode identification '{VirtualEndNodeId}' is unknown!"
+                   );
+
+        }
+
+        #endregion
+
+        #region RemoveAllVirtualEndNodes     (IncludeVirtualEndNodes = null, ...)
+
+        /// <summary>
+        /// Remove all matching virtualEndNodes.
+        /// </summary>
+        /// <param name="IncludeVirtualEndNodes">A virtualEndNode filter.</param>
+        /// <param name="SkipNotifications">Skip sending notifications.</param>
+        public async Task<RemoveResult<IEnumerable<VirtualEndNode>>>
+
+            RemoveAllVirtualEndNodes(Func<VirtualEndNode, Boolean>?  IncludeVirtualEndNodes   = null,
+                                     Boolean                         SkipNotifications        = false,
+                                     EventTracking_Id?               EventTrackingId          = null,
+                                     User_Id?                        CurrentUserId            = null,
+                                     CancellationToken               CancellationToken        = default)
+
+        {
+
+            EventTrackingId ??= EventTracking_Id.New;
+
+            var removedVirtualEndNodes = new List<VirtualEndNode>();
+
+            if (IncludeVirtualEndNodes is null)
+            {
+                removedVirtualEndNodes.AddRange(virtualEndNodes.Values);
+                virtualEndNodes.Clear();
+            }
+
+            else
+            {
+
+                foreach (var virtualEndNode in virtualEndNodes.Values)
+                {
+                    if (IncludeVirtualEndNodes(virtualEndNode))
+                        removedVirtualEndNodes.Add(virtualEndNode);
+                }
+
+                foreach (var virtualEndNode in removedVirtualEndNodes)
+                    virtualEndNodes.TryRemove(VirtualEndNode_Id.Parse(virtualEndNode.Id!.Value.ToString()), out _);
+
+            }
+
+            //await LogAsset(
+            //          CommonBaseAPI.removeAllVirtualEndNodes,
+            //          new JArray(
+            //              removedVirtualEndNodes.Select(
+            //                  virtualEndNode => virtualEndNode.ToJSON(
+            //                                true,
+            //                                true,
+            //                                CustomVirtualEndNodeSerializer,
+            //                                CustomDisplayTextSerializer,
+            //                                CustomPriceSerializer,
+            //                                CustomVirtualEndNodeElementSerializer,
+            //                                CustomPriceComponentSerializer,
+            //                                CustomVirtualEndNodeRestrictionsSerializer,
+            //                                CustomEnergyMixSerializer,
+            //                                CustomEnergySourceSerializer,
+            //                                CustomEnvironmentalImpactSerializer
+            //                            )
+            //                  )
+            //          ),
+            //          EventTrackingId,
+            //          CurrentUserId,
+            //          CancellationToken
+            //      );
+
+            return RemoveResult<IEnumerable<VirtualEndNode>>.Success(
+                       EventTrackingId,
+                       removedVirtualEndNodes
+                   );
+
+        }
+
+        #endregion
+
+        #region RemoveAllVirtualEndNodes     (IncludeVirtualEndNodeIds, ...)
+
+        /// <summary>
+        /// Remove all matching virtualEndNodes.
+        /// </summary>
+        /// <param name="IncludeVirtualEndNodeIds">The virtualEndNode identification filter.</param>
+        /// <param name="SkipNotifications">Skip sending notifications.</param>
+        public async Task<RemoveResult<IEnumerable<VirtualEndNode>>>
+
+            RemoveAllVirtualEndNodes(Func<VirtualEndNode_Id, Boolean>  IncludeVirtualEndNodeIds,
+                                     Boolean                           SkipNotifications   = false,
+                                     EventTracking_Id?                 EventTrackingId     = null,
+                                     User_Id?                          CurrentUserId       = null,
+                                     CancellationToken                 CancellationToken   = default)
+
+        {
+
+            EventTrackingId ??= EventTracking_Id.New;
+
+            var removedVirtualEndNodes = new List<VirtualEndNode>();
+
+            foreach (var virtualEndNode in virtualEndNodes.Values)
+            {
+                if (IncludeVirtualEndNodeIds(VirtualEndNode_Id.Parse(virtualEndNode.Id!.Value.ToString())))
+                    removedVirtualEndNodes.Add(virtualEndNode);
+            }
+
+            foreach (var virtualEndNode in removedVirtualEndNodes)
+                virtualEndNodes.TryRemove(VirtualEndNode_Id.Parse(virtualEndNode.Id!.Value.ToString()), out _);
+
+
+            //await LogAsset(
+            //          CommonBaseAPI.removeAllVirtualEndNodes,
+            //          new JArray(
+            //              removedVirtualEndNodes.Select(
+            //                  virtualEndNode => virtualEndNode.ToJSON(
+            //                                true,
+            //                                true,
+            //                                CustomVirtualEndNodeSerializer,
+            //                                CustomDisplayTextSerializer,
+            //                                CustomPriceSerializer,
+            //                                CustomVirtualEndNodeElementSerializer,
+            //                                CustomPriceComponentSerializer,
+            //                                CustomVirtualEndNodeRestrictionsSerializer,
+            //                                CustomEnergyMixSerializer,
+            //                                CustomEnergySourceSerializer,
+            //                                CustomEnvironmentalImpactSerializer
+            //                            )
+            //                  )
+            //          ),
+            //          EventTrackingId,
+            //          CurrentUserId,
+            //          CancellationToken
+            //      );
+
+            return RemoveResult<IEnumerable<VirtualEndNode>>.Success(
+                       EventTrackingId,
+                       removedVirtualEndNodes
+                   );
+
+        }
+
+        #endregion
+
+
+        #region VirtualEndNodeExists (VirtualEndNodeId)
+
+        public Boolean VirtualEndNodeExists(VirtualEndNode_Id VirtualEndNodeId)
+
+            => virtualEndNodes.ContainsKey(VirtualEndNodeId);
+
+        #endregion
+
+        #region GetVirtualEndNode    (VirtualEndNodeId)
+
+        public VirtualEndNode? GetVirtualEndNode(VirtualEndNode_Id VirtualEndNodeId)
+        {
+
+            if (virtualEndNodes.TryGetValue(VirtualEndNodeId, out var virtualEndNode))
+                return virtualEndNode;
+
+            return null;
+
+        }
+
+        #endregion
+
+        #region TryGetVirtualEndNode (VirtualEndNodeId, out VirtualEndNode)
+
+        public Boolean TryGetVirtualEndNode(VirtualEndNode_Id                        VirtualEndNodeId,
+                                            [NotNullWhen(true)] out VirtualEndNode?  VirtualEndNode)
+        {
+
+            if (virtualEndNodes.TryGetValue(VirtualEndNodeId, out var virtualEndNode))
+            {
+                VirtualEndNode = virtualEndNode;
+                return true;
+            }
+
+            VirtualEndNode = null;
+            return false;
+
+        }
+
+        #endregion
+
+        #region GetVirtualEndNodes   (IncludeVirtualEndNode = null)
+
+        public IEnumerable<VirtualEndNode> GetVirtualEndNodes(Func<VirtualEndNode, Boolean>? IncludeVirtualEndNode = null)
+        {
+
+            if (IncludeVirtualEndNode is null)
+                return virtualEndNodes.Values;
+
+
+            var selectedVirtualEndNodes = new List<VirtualEndNode>();
+
+            foreach (var virtualEndNode in virtualEndNodes.Values)
+            {
+                if (IncludeVirtualEndNode(virtualEndNode))
+                    selectedVirtualEndNodes.Add(virtualEndNode);
+            }
+
+            return selectedVirtualEndNodes;
 
         }
 

@@ -551,6 +551,39 @@ namespace cloud.charging.open.protocols.OpenADRv3
         #endregion
 
 
+        #region (static) FillMetadata(Event)
+
+        /// <summary>
+        /// Fill the metadata of this event.
+        /// </summary>
+        /// <param name="Event">An event.</param>
+        public static Event FillMetadata(Event Event)
+        {
+
+            var now = Timestamp.Now;
+
+            return new (
+
+                       Event.ProgramId,
+                       Event.Intervals,
+                       Event.EventName,
+                       Event.Priority,
+                       Event.Targets,
+                       Event.ReportDescriptors,
+                       Event.PayloadDescriptors,
+                       Event.IntervalPeriod,
+
+                       Event.Id               ?? Event_Id.NewRandom,
+                       Event.Created          ?? now,
+                       Event.LastModification ?? now
+
+                   );
+
+        }
+
+        #endregion
+
+
         #region Operator overloading
 
         #region Operator == (Event1, Event2)
@@ -688,7 +721,6 @@ namespace cloud.charging.open.protocols.OpenADRv3
                );
 
         #endregion
-
 
     }
 

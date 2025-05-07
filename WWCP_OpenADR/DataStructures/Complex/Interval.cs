@@ -43,19 +43,19 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// Not a sequence number.
         /// </summary>
         [Mandatory]
-        public Interval_Id               Id                { get; }
+        public Interval_Id             Id                { get; }
 
         /// <summary>
         /// A list of valuesMap objects.
         /// </summary>
         [Mandatory]
-        public IReadOnlyList<ValuesMap>  Payloads          { get; }
+        public IEnumerable<ValuesMap>  Payloads          { get; }
 
         /// <summary>
         /// The optional definition of the start and duration of the interval.
         /// </summary>
         [Optional]
-        public IntervalPeriod?           IntervalPeriod    { get; }
+        public IntervalPeriod?         IntervalPeriod    { get; }
 
         #endregion
 
@@ -67,13 +67,13 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="Id">A random client generated number assigned an interval object. Not a sequence number.</param>
         /// <param name="Payloads">A list of valuesMap objects.</param>
         /// <param name="IntervalPeriod">An optional definition of the start and duration of the interval.</param>
-        public Interval(Interval_Id               Id,
-                        IReadOnlyList<ValuesMap>  Payloads,
-                        IntervalPeriod?           IntervalPeriod   = null)
+        public Interval(Interval_Id             Id,
+                        IEnumerable<ValuesMap>  Payloads,
+                        IntervalPeriod?         IntervalPeriod   = null)
         {
 
             this.Id              = Id;
-            this.Payloads        = Payloads;
+            this.Payloads        = Payloads?.Distinct() ?? [];
             this.IntervalPeriod  = IntervalPeriod;
 
             unchecked
@@ -255,9 +255,11 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// </summary>
         public Interval Clone()
 
-            => new (Id,
-                    [.. Payloads],
-                    IntervalPeriod?.Clone());
+            => new (
+                   Id.             Clone(),
+                   Payloads.Select(valuesMap => valuesMap.Clone()),
+                   IntervalPeriod?.Clone()
+               );
 
         #endregion
 
@@ -332,10 +334,10 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
             => Interval is not null &&
 
-               Id.      Equals       (Interval.Id)       &&
-               Payloads.SequenceEqual(Interval.Payloads) &&
+               Id.              Equals       (Interval.Id)               &&
+               Payloads.Order().SequenceEqual(Interval.Payloads.Order()) &&
 
-             ((IntervalPeriod is null     && Interval.IntervalPeriod is null    ) ||
+             ((IntervalPeriod is null     && Interval.IntervalPeriod is null) ||
               (IntervalPeriod is not null && Interval.IntervalPeriod is not null && IntervalPeriod.Equals(Interval.IntervalPeriod)));
 
         #endregion

@@ -433,6 +433,35 @@ namespace cloud.charging.open.protocols.OpenADRv3
         #endregion
 
 
+        #region (static) FillMetadata(Subscription)
+
+        /// <summary>
+        /// Fill the metadata of this subscription.
+        /// </summary>
+        /// <param name="Subscription">A subscription.</param>
+        public static Subscription FillMetadata(Subscription Subscription)
+        {
+
+            var now = Timestamp.Now;
+
+            return new (
+
+                       Subscription.ClientName,
+                       Subscription.ProgramId,
+                       Subscription.ObjectOperations,
+                       Subscription.Targets,
+
+                       Subscription.Id               ?? Subscription_Id.NewRandom,
+                       Subscription.Created          ?? now,
+                       Subscription.LastModification ?? now
+
+                   );
+
+        }
+
+        #endregion
+
+
         #region Operator overloading
 
         #region Operator == (Subscription1, Subscription2)

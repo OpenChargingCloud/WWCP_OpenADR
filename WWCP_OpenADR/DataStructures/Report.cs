@@ -485,6 +485,37 @@ namespace cloud.charging.open.protocols.OpenADRv3
         #endregion
 
 
+        #region (static) FillMetadata(Report)
+
+        /// <summary>
+        /// Fill the metadata of this report.
+        /// </summary>
+        /// <param name="Report">A report.</param>
+        public static Report FillMetadata(Report Report)
+        {
+
+            var now = Timestamp.Now;
+
+            return new (
+
+                       Report.ProgramId,
+                       Report.EventId,
+                       Report.ClientName,
+                       Report.Resources,
+                       Report.ReportName,
+                       Report.PayloadDescriptors,
+
+                       Report.Id               ?? Report_Id.NewRandom,
+                       Report.Created          ?? now,
+                       Report.LastModification ?? now
+
+                   );
+
+        }
+
+        #endregion
+
+
         #region Operator overloading
 
         #region Operator == (Report1, Report2)

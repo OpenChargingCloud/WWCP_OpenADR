@@ -67,58 +67,58 @@ namespace cloud.charging.open.protocols.OpenADRv3.tests.HTTP
 
             testOpenADR1 = new TestOpenADRNode(
 
-                            Id:                                      NetworkingNode_Id.Parse("OpenADRTest01"),
-                            VendorName:                              "GraphDefined",
-                            Model:                                   "OpenADR-Testing-Model1",
-                            SerialNumber:                            null,
-                            SoftwareVersion:                         null,
-                            Description:                             null,
-                            CustomData:                              null,
+                               Id:                                      NetworkingNode_Id.Parse("OpenADRTest01"),
+                               VendorName:                              "GraphDefined",
+                               Model:                                   "OpenADR-Testing-Model1",
+                               SerialNumber:                            null,
+                               SoftwareVersion:                         null,
+                               Description:                             null,
+                               CustomData:                              null,
 
-                            ClientCAKeyPair:                         null,
-                            ClientCACertificate:                     null,
+                               ClientCAKeyPair:                         null,
+                               ClientCACertificate:                     null,
 
-                            SignaturePolicy:                         null,
-                            ForwardingSignaturePolicy:               null,
+                               SignaturePolicy:                         null,
+                               ForwardingSignaturePolicy:               null,
 
-                            HTTPAPI:                                 null,
-                            HTTPAPI_Disabled:                        false,
-                            HTTPAPI_Port:                            null,
-                            HTTPAPI_ServerName:                      null,
-                            HTTPAPI_ServiceName:                     null,
-                            HTTPAPI_RobotEMailAddress:               null,
-                            HTTPAPI_RobotGPGPassphrase:              null,
-                            HTTPAPI_EventLoggingDisabled:            true,
+                               HTTPAPI:                                 null,
+                               HTTPAPI_Disabled:                        false,
+                               HTTPAPI_Port:                            null,
+                               HTTPAPI_ServerName:                      null,
+                               HTTPAPI_ServiceName:                     null,
+                               HTTPAPI_RobotEMailAddress:               null,
+                               HTTPAPI_RobotGPGPassphrase:              null,
+                               HTTPAPI_EventLoggingDisabled:            true,
 
-                            OpenADRAPI:                              null,
-                            OpenADRAPI_Disabled:                     false,
-                            OpenADRAPI_Path:                         null,
-                            OpenADRAPI_FileSystemPath:               null,
+                               OpenADRAPI:                              null,
+                               OpenADRAPI_Disabled:                     false,
+                               OpenADRAPI_Path:                         null,
+                               OpenADRAPI_FileSystemPath:               null,
 
-                            //WebAPI:                                  null,
-                            WebAPI_Disabled:                         true,
-                            WebAPI_Path:                             null,
+                               //WebAPI:                                  null,
+                               WebAPI_Disabled:                         true,
+                               WebAPI_Path:                             null,
 
-                            NTSServer:                               (csmsNode) => new nts.NTSServer(
-                                                                                       Description:   I18NString.Create("Secure Time Server"),
-                                                                                       NTSKEPort:     IPPort.Parse(7777),
-                                                                                       NTSPort:       IPPort.Parse(1234),
-                                                                                       KeyPair:       nts.KeyPair.GenerateECKeys(1)
-                                                                                   ),
-                            NTSServer_Disabled:                      false,
+                               NTSServer:                               (csmsNode) => new nts.NTSServer(
+                                                                                          Description:   I18NString.Create("Secure Time Server"),
+                                                                                          NTSKEPort:     IPPort.Parse(7777),
+                                                                                          NTSPort:       IPPort.Parse(1234),
+                                                                                          KeyPair:       nts.KeyPair.GenerateECKeys(1)
+                                                                                      ),
+                               NTSServer_Disabled:                      false,
 
-                            DefaultRequestTimeout:                   null,
+                               DefaultRequestTimeout:                   null,
 
-                            DisableSendHeartbeats:                   true,
-                            SendHeartbeatsEvery:                     null,
+                               DisableSendHeartbeats:                   true,
+                               SendHeartbeatsEvery:                     null,
 
-                            DisableMaintenanceTasks:                 false,
-                            MaintenanceEvery:                        null,
+                               DisableMaintenanceTasks:                 false,
+                               MaintenanceEvery:                        null,
 
-                            SMTPClient:                              null,
-                            DNSClient:                               dnsClient
+                               SMTPClient:                              null,
+                               DNSClient:                               dnsClient
 
-                        );
+                           );
 
             Assert.That(testOpenADR1, Is.Not.Null);
 

@@ -475,10 +475,6 @@ namespace cloud.charging.open.protocols.OpenADRv3
         #endregion
 
 
-        public URL remoteURL { get; set; }
-
-
-
         #region GetPrograms      (...)
 
         /// <summary>
@@ -541,7 +537,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                 var dateAndPaginationFilters  = new DateAndPaginationFilters(From, To, Offset, Limit);
 
                 var httpResponse              = await HTTPClientFactory.Create(
-                                                          remoteURL,
+                                                          RemoteURL,
                                                           VirtualHostname,
                                                           Description,
                                                           PreferIPv4,
@@ -564,7 +560,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                                                           DNSClient
                                                       ).
 
-                                                      GET(remoteURL.Path + dateAndPaginationFilters.ToHTTPQueryString(),
+                                                      GET(RemoteURL.Path + "programs" + dateAndPaginationFilters.ToHTTPQueryString(),
                                                           Accept:                ocpiAcceptTypes,
                                                           //Authentication:        TokenAuth,
                                                           Connection:            ConnectionType.Close,
@@ -705,7 +701,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                 #region Upstream HTTP request...
 
                 var httpResponse = await HTTPClientFactory.Create(
-                                             remoteURL,
+                                             RemoteURL,
                                              VirtualHostname,
                                              Description,
                                              PreferIPv4,
@@ -728,7 +724,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                                              DNSClient
                                          ).
 
-                                         GET(remoteURL.Path + ProgramId.ToString(),
+                                         GET(RemoteURL.Path + ProgramId.ToString(),
                                              Accept:                ocpiAcceptTypes,
                                              //Authentication:        TokenAuth,
                                              Connection:            ConnectionType.Close,

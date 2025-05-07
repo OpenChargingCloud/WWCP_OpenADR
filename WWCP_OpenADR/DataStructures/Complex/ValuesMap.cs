@@ -42,14 +42,14 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// e.g. "PRICE" indicates value is to be interpreted as a currency.
         /// </summary>
         [Mandatory]
-        public ValueType              Type      { get; }
+        public ValueType            Type      { get; }
 
         /// <summary>
-        /// A list of data points.
+        /// The enumeration of data points.
         /// Most often a singular value such as a price.
         /// </summary>
         [Mandatory]
-        public IReadOnlyList<Object>  Values    { get; }
+        public IEnumerable<Object>  Values    { get; }
 
         #endregion
 
@@ -59,13 +59,13 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// Create a new values map.
         /// </summary>
         /// <param name="Type">Specifies the type of the values, e.g. "PRICE" indicates value is to be interpreted as a currency.</param>
-        /// <param name="Values">A list of data points. Most often a singular value such as a price.</param>
-        public ValuesMap(ValueType              Type,
-                         IReadOnlyList<Object>  Values)
+        /// <param name="Values">An enumeration of data points. Most often a singular value such as a price.</param>
+        public ValuesMap(ValueType            Type,
+                         IEnumerable<Object>  Values)
         {
 
             this.Type    = Type;
-            this.Values  = Values;
+            this.Values  = Values?.Distinct() ?? [];
 
             unchecked
             {
@@ -74,20 +74,6 @@ namespace cloud.charging.open.protocols.OpenADRv3
             }
 
         }
-
-
-        /// <summary>
-        /// Create a new values map.
-        /// </summary>
-        /// <param name="Type">Specifies the type of the values, e.g. "PRICE" indicates value is to be interpreted as a currency.</param>
-        /// <param name="Values">A list of data points. Most often a singular value such as a price.</param>
-        public ValuesMap(ValueType            Type,
-                         IEnumerable<Object>  Values)
-
-            : this(Type,
-                   [.. Values])
-
-        { }
 
         #endregion
 
@@ -203,8 +189,8 @@ namespace cloud.charging.open.protocols.OpenADRv3
             }
             catch (Exception e)
             {
-                ValuesMap  = default;
-                ErrorResponse    = "The given JSON representation of a values map is invalid: " + e.Message;
+                ValuesMap      = default;
+                ErrorResponse  = "The given JSON representation of a values map is invalid: " + e.Message;
                 return false;
             }
 
@@ -241,8 +227,10 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// </summary>
         public ValuesMap Clone()
 
-            => new (Type.Clone(),
-                    [.. Values]);
+            => new (
+                   Type.Clone(),
+                   [..Values]
+               );
 
         #endregion
 
@@ -316,8 +304,8 @@ namespace cloud.charging.open.protocols.OpenADRv3
         public Boolean Equals(ValuesMap? ValuesMap)
 
             => ValuesMap is not null &&
-               Type.  Equals       (ValuesMap.Type) &&
-               Values.SequenceEqual(ValuesMap.Values);
+               Type.          Equals       (ValuesMap.Type) &&
+               Values.Order().SequenceEqual(ValuesMap.Values.Order());
 
         #endregion
 
