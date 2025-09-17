@@ -31,7 +31,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// A delegate called whenever a GET ~/programs HTTP request will be send.
     /// </summary>
-    public delegate Task OnGetProgramsRequestDelegate(DateTime                              LogTimestamp,
+    public delegate Task OnGetProgramsRequestDelegate(DateTimeOffset                        LogTimestamp,
                                                       OpenADRClient                         Sender,
                                                       EventTracking_Id                      EventTrackingId,
                                                       TimeSpan                              RequestTimeout,
@@ -40,7 +40,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// A delegate called whenever a response to a GET ~/programs HTTP request had been received.
     /// </summary>
-    public delegate Task OnGetProgramsResponseDelegate(DateTime                              LogTimestamp,
+    public delegate Task OnGetProgramsResponseDelegate(DateTimeOffset                        LogTimestamp,
                                                        OpenADRClient                         Sender,
                                                        EventTracking_Id                      EventTrackingId,
                                                        TimeSpan                              RequestTimeout,
@@ -55,7 +55,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// A delegate called whenever a POST ~/programs HTTP request will be send.
     /// </summary>
-    public delegate Task OnPostProgramsRequestDelegate(DateTime                              LogTimestamp,
+    public delegate Task OnPostProgramsRequestDelegate(DateTimeOffset                        LogTimestamp,
                                                        OpenADRClient                         Sender,
                                                        EventTracking_Id                      EventTrackingId,
                                                        TimeSpan                              RequestTimeout,
@@ -64,7 +64,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// A delegate called whenever a response to a POST ~/programs HTTP request had been received.
     /// </summary>
-    public delegate Task OnPostProgramsResponseDelegate(DateTime                              LogTimestamp,
+    public delegate Task OnPostProgramsResponseDelegate(DateTimeOffset                        LogTimestamp,
                                                         OpenADRClient                         Sender,
                                                         Program                               Program,
                                                         EventTracking_Id                      EventTrackingId,
@@ -81,7 +81,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// A delegate called whenever a GET ~/programs/{programId} HTTP request will be send.
     /// </summary>
-    public delegate Task OnGetProgramRequestDelegate(DateTime                              LogTimestamp,
+    public delegate Task OnGetProgramRequestDelegate(DateTimeOffset                        LogTimestamp,
                                                      OpenADRClient                         Sender,
                                                      Program_Id                            ProgramId,
                                                      EventTracking_Id                      EventTrackingId,
@@ -91,7 +91,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// A delegate called whenever a response to a GET ~/programs/{programId} HTTP request had been received.
     /// </summary>
-    public delegate Task OnGetProgramResponseDelegate(DateTime                              LogTimestamp,
+    public delegate Task OnGetProgramResponseDelegate(DateTimeOffset                        LogTimestamp,
                                                       OpenADRClient                         Sender,
                                                       Program_Id                            ProgramId,
                                                       EventTracking_Id                      EventTrackingId,
@@ -107,7 +107,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// A delegate called whenever a PUT ~/programs/{programId} HTTP request will be send.
     /// </summary>
-    public delegate Task OnPutProgramRequestDelegate(DateTime                              LogTimestamp,
+    public delegate Task OnPutProgramRequestDelegate(DateTimeOffset                        LogTimestamp,
                                                      OpenADRClient                         Sender,
                                                      EventTracking_Id                      EventTrackingId,
                                                      TimeSpan                              RequestTimeout,
@@ -116,7 +116,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// A delegate called whenever a response to a PUT ~/programs/{programId} HTTP request had been received.
     /// </summary>
-    public delegate Task OnPutProgramResponseDelegate(DateTime                              LogTimestamp,
+    public delegate Task OnPutProgramResponseDelegate(DateTimeOffset                        LogTimestamp,
                                                       OpenADRClient                         Sender,
                                                       EventTracking_Id                      EventTrackingId,
                                                       TimeSpan                              RequestTimeout,
@@ -131,7 +131,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// A delegate called whenever a DELETE ~/programs/{programId} HTTP request will be send.
     /// </summary>
-    public delegate Task OnDeleteProgramRequestDelegate(DateTime                              LogTimestamp,
+    public delegate Task OnDeleteProgramRequestDelegate(DateTimeOffset                        LogTimestamp,
                                                         OpenADRClient                         Sender,
                                                         Program_Id                            ProgramId,
                                                         EventTracking_Id                      EventTrackingId,
@@ -141,7 +141,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// A delegate called whenever a response to a DELETE ~/programs/{programId} HTTP request had been received.
     /// </summary>
-    public delegate Task OnDeleteProgramResponseDelegate(DateTime                              LogTimestamp,
+    public delegate Task OnDeleteProgramResponseDelegate(DateTimeOffset                        LogTimestamp,
                                                          OpenADRClient                         Sender,
                                                          Program_Id                            ProgramId,
                                                          EventTracking_Id                      EventTrackingId,
@@ -160,7 +160,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// A delegate called whenever a GET ~/reports HTTP request will be send.
     /// </summary>
-    public delegate Task OnGetReportsRequestDelegate(DateTime                              LogTimestamp,
+    public delegate Task OnGetReportsRequestDelegate(DateTimeOffset                        LogTimestamp,
                                                      OpenADRClient                         Sender,
                                                      EventTracking_Id                      EventTrackingId,
                                                      TimeSpan                              RequestTimeout,
@@ -169,7 +169,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// A delegate called whenever a response to a GET ~/reports HTTP request had been received.
     /// </summary>
-    public delegate Task OnGetReportsResponseDelegate(DateTime                              LogTimestamp,
+    public delegate Task OnGetReportsResponseDelegate(DateTimeOffset                        LogTimestamp,
                                                       OpenADRClient                         Sender,
                                                       EventTracking_Id                      EventTrackingId,
                                                       TimeSpan                              RequestTimeout,
@@ -184,7 +184,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// A delegate called whenever a POST ~/reports HTTP request will be send.
     /// </summary>
-    public delegate Task OnPostReportsRequestDelegate(DateTime                              LogTimestamp,
+    public delegate Task OnPostReportsRequestDelegate(DateTimeOffset                        LogTimestamp,
                                                       OpenADRClient                         Sender,
                                                       EventTracking_Id                      EventTrackingId,
                                                       TimeSpan                              RequestTimeout,
@@ -193,7 +193,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// A delegate called whenever a response to a POST ~/reports HTTP request had been received.
     /// </summary>
-    public delegate Task OnPostReportsResponseDelegate(DateTime                              LogTimestamp,
+    public delegate Task OnPostReportsResponseDelegate(DateTimeOffset                        LogTimestamp,
                                                        OpenADRClient                         Sender,
                                                        Report                                Report,
                                                        EventTracking_Id                      EventTrackingId,
@@ -210,7 +210,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// A delegate called whenever a GET ~/reports/{reportId} HTTP request will be send.
     /// </summary>
-    public delegate Task OnGetReportRequestDelegate(DateTime                              LogTimestamp,
+    public delegate Task OnGetReportRequestDelegate(DateTimeOffset                        LogTimestamp,
                                                     OpenADRClient                         Sender,
                                                     Report_Id                             ReportId,
                                                     EventTracking_Id                      EventTrackingId,
@@ -220,7 +220,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// A delegate called whenever a response to a GET ~/reports/{reportId} HTTP request had been received.
     /// </summary>
-    public delegate Task OnGetReportResponseDelegate(DateTime                              LogTimestamp,
+    public delegate Task OnGetReportResponseDelegate(DateTimeOffset                        LogTimestamp,
                                                      OpenADRClient                         Sender,
                                                      Report_Id                             ReportId,
                                                      EventTracking_Id                      EventTrackingId,
@@ -236,7 +236,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// A delegate called whenever a PUT ~/reports/{reportId} HTTP request will be send.
     /// </summary>
-    public delegate Task OnPutReportRequestDelegate(DateTime                              LogTimestamp,
+    public delegate Task OnPutReportRequestDelegate(DateTimeOffset                        LogTimestamp,
                                                     OpenADRClient                         Sender,
                                                     EventTracking_Id                      EventTrackingId,
                                                     TimeSpan                              RequestTimeout,
@@ -245,7 +245,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// A delegate called whenever a response to a PUT ~/reports/{reportId} HTTP request had been received.
     /// </summary>
-    public delegate Task OnPutReportResponseDelegate(DateTime                              LogTimestamp,
+    public delegate Task OnPutReportResponseDelegate(DateTimeOffset                        LogTimestamp,
                                                      OpenADRClient                         Sender,
                                                      EventTracking_Id                      EventTrackingId,
                                                      TimeSpan                              RequestTimeout,
@@ -260,7 +260,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// A delegate called whenever a DELETE ~/reports/{reportId} HTTP request will be send.
     /// </summary>
-    public delegate Task OnDeleteReportRequestDelegate(DateTime                              LogTimestamp,
+    public delegate Task OnDeleteReportRequestDelegate(DateTimeOffset                        LogTimestamp,
                                                        OpenADRClient                         Sender,
                                                        Report_Id                             ReportId,
                                                        EventTracking_Id                      EventTrackingId,
@@ -270,7 +270,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// A delegate called whenever a response to a DELETE ~/reports/{reportId} HTTP request had been received.
     /// </summary>
-    public delegate Task OnDeleteReportResponseDelegate(DateTime                              LogTimestamp,
+    public delegate Task OnDeleteReportResponseDelegate(DateTimeOffset                        LogTimestamp,
                                                         OpenADRClient                         Sender,
                                                         Report_Id                             ReportId,
                                                         EventTracking_Id                      EventTrackingId,
@@ -289,7 +289,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// A delegate called whenever a GET ~/events HTTP request will be send.
     /// </summary>
-    public delegate Task OnGetEventsRequestDelegate(DateTime                              LogTimestamp,
+    public delegate Task OnGetEventsRequestDelegate(DateTimeOffset                        LogTimestamp,
                                                     OpenADRClient                         Sender,
                                                     EventTracking_Id                      EventTrackingId,
                                                     TimeSpan                              RequestTimeout,
@@ -298,7 +298,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// A delegate called whenever a response to a GET ~/events HTTP request had been received.
     /// </summary>
-    public delegate Task OnGetEventsResponseDelegate(DateTime                              LogTimestamp,
+    public delegate Task OnGetEventsResponseDelegate(DateTimeOffset                        LogTimestamp,
                                                      OpenADRClient                         Sender,
                                                      EventTracking_Id                      EventTrackingId,
                                                      TimeSpan                              RequestTimeout,
@@ -313,7 +313,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// A delegate called whenever a POST ~/events HTTP request will be send.
     /// </summary>
-    public delegate Task OnPostEventsRequestDelegate(DateTime                              LogTimestamp,
+    public delegate Task OnPostEventsRequestDelegate(DateTimeOffset                        LogTimestamp,
                                                      OpenADRClient                         Sender,
                                                      EventTracking_Id                      EventTrackingId,
                                                      TimeSpan                              RequestTimeout,
@@ -322,7 +322,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// A delegate called whenever a response to a POST ~/events HTTP request had been received.
     /// </summary>
-    public delegate Task OnPostEventsResponseDelegate(DateTime                              LogTimestamp,
+    public delegate Task OnPostEventsResponseDelegate(DateTimeOffset                        LogTimestamp,
                                                       OpenADRClient                         Sender,
                                                       Event                                 Event,
                                                       EventTracking_Id                      EventTrackingId,
@@ -339,7 +339,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// A delegate called whenever a GET ~/events/{eventId} HTTP request will be send.
     /// </summary>
-    public delegate Task OnGetEventRequestDelegate(DateTime                              LogTimestamp,
+    public delegate Task OnGetEventRequestDelegate(DateTimeOffset                        LogTimestamp,
                                                    OpenADRClient                         Sender,
                                                    Event_Id                              EventId,
                                                    EventTracking_Id                      EventTrackingId,
@@ -349,7 +349,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// A delegate called whenever a response to a GET ~/events/{eventId} HTTP request had been received.
     /// </summary>
-    public delegate Task OnGetEventResponseDelegate(DateTime                              LogTimestamp,
+    public delegate Task OnGetEventResponseDelegate(DateTimeOffset                        LogTimestamp,
                                                     OpenADRClient                         Sender,
                                                     Event_Id                              EventId,
                                                     EventTracking_Id                      EventTrackingId,
@@ -365,7 +365,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// A delegate called whenever a PUT ~/events/{eventId} HTTP request will be send.
     /// </summary>
-    public delegate Task OnPutEventRequestDelegate(DateTime                              LogTimestamp,
+    public delegate Task OnPutEventRequestDelegate(DateTimeOffset                        LogTimestamp,
                                                    OpenADRClient                         Sender,
                                                    EventTracking_Id                      EventTrackingId,
                                                    TimeSpan                              RequestTimeout,
@@ -374,7 +374,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// A delegate called whenever a response to a PUT ~/events/{eventId} HTTP request had been received.
     /// </summary>
-    public delegate Task OnPutEventResponseDelegate(DateTime                              LogTimestamp,
+    public delegate Task OnPutEventResponseDelegate(DateTimeOffset                        LogTimestamp,
                                                     OpenADRClient                         Sender,
                                                     EventTracking_Id                      EventTrackingId,
                                                     TimeSpan                              RequestTimeout,
@@ -389,7 +389,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// A delegate called whenever a DELETE ~/events/{eventId} HTTP request will be send.
     /// </summary>
-    public delegate Task OnDeleteEventRequestDelegate(DateTime                              LogTimestamp,
+    public delegate Task OnDeleteEventRequestDelegate(DateTimeOffset                        LogTimestamp,
                                                       OpenADRClient                         Sender,
                                                       Event_Id                              EventId,
                                                       EventTracking_Id                      EventTrackingId,
@@ -399,7 +399,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// A delegate called whenever a response to a DELETE ~/events/{eventId} HTTP request had been received.
     /// </summary>
-    public delegate Task OnDeleteEventResponseDelegate(DateTime                              LogTimestamp,
+    public delegate Task OnDeleteEventResponseDelegate(DateTimeOffset                        LogTimestamp,
                                                        OpenADRClient                         Sender,
                                                        Event_Id                              EventId,
                                                        EventTracking_Id                      EventTrackingId,
@@ -418,7 +418,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// A delegate called whenever a GET ~/subscriptions HTTP request will be send.
     /// </summary>
-    public delegate Task OnGetSubscriptionsRequestDelegate(DateTime                              LogTimestamp,
+    public delegate Task OnGetSubscriptionsRequestDelegate(DateTimeOffset                        LogTimestamp,
                                                            OpenADRClient                         Sender,
                                                            EventTracking_Id                      EventTrackingId,
                                                            TimeSpan                              RequestTimeout,
@@ -427,7 +427,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// A delegate called whenever a response to a GET ~/subscriptions HTTP request had been received.
     /// </summary>
-    public delegate Task OnGetSubscriptionsResponseDelegate(DateTime                              LogTimestamp,
+    public delegate Task OnGetSubscriptionsResponseDelegate(DateTimeOffset                        LogTimestamp,
                                                             OpenADRClient                         Sender,
                                                             EventTracking_Id                      EventTrackingId,
                                                             TimeSpan                              RequestTimeout,
@@ -442,7 +442,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// A delegate called whenever a POST ~/subscriptions HTTP request will be send.
     /// </summary>
-    public delegate Task OnPostSubscriptionsRequestDelegate(DateTime                              LogTimestamp,
+    public delegate Task OnPostSubscriptionsRequestDelegate(DateTimeOffset                        LogTimestamp,
                                                             OpenADRClient                         Sender,
                                                             EventTracking_Id                      EventTrackingId,
                                                             TimeSpan                              RequestTimeout,
@@ -451,7 +451,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// A delegate called whenever a response to a POST ~/subscriptions HTTP request had been received.
     /// </summary>
-    public delegate Task OnPostSubscriptionsResponseDelegate(DateTime                              LogTimestamp,
+    public delegate Task OnPostSubscriptionsResponseDelegate(DateTimeOffset                        LogTimestamp,
                                                              OpenADRClient                         Sender,
                                                              Subscription                          Subscription,
                                                              EventTracking_Id                      EventTrackingId,
@@ -468,7 +468,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// A delegate called whenever a GET ~/subscriptions/{subscriptionId} HTTP request will be send.
     /// </summary>
-    public delegate Task OnGetSubscriptionRequestDelegate(DateTime                              LogTimestamp,
+    public delegate Task OnGetSubscriptionRequestDelegate(DateTimeOffset                        LogTimestamp,
                                                           OpenADRClient                         Sender,
                                                           Subscription_Id                       SubscriptionId,
                                                           EventTracking_Id                      EventTrackingId,
@@ -478,7 +478,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// A delegate called whenever a response to a GET ~/subscriptions/{subscriptionId} HTTP request had been received.
     /// </summary>
-    public delegate Task OnGetSubscriptionResponseDelegate(DateTime                              LogTimestamp,
+    public delegate Task OnGetSubscriptionResponseDelegate(DateTimeOffset                        LogTimestamp,
                                                            OpenADRClient                         Sender,
                                                            Subscription_Id                       SubscriptionId,
                                                            EventTracking_Id                      EventTrackingId,
@@ -494,7 +494,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// A delegate called whenever a PUT ~/subscriptions/{subscriptionId} HTTP request will be send.
     /// </summary>
-    public delegate Task OnPutSubscriptionRequestDelegate(DateTime                              LogTimestamp,
+    public delegate Task OnPutSubscriptionRequestDelegate(DateTimeOffset                        LogTimestamp,
                                                           OpenADRClient                         Sender,
                                                           EventTracking_Id                      EventTrackingId,
                                                           TimeSpan                              RequestTimeout,
@@ -503,7 +503,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// A delegate called whenever a response to a PUT ~/subscriptions/{subscriptionId} HTTP request had been received.
     /// </summary>
-    public delegate Task OnPutSubscriptionResponseDelegate(DateTime                              LogTimestamp,
+    public delegate Task OnPutSubscriptionResponseDelegate(DateTimeOffset                        LogTimestamp,
                                                            OpenADRClient                         Sender,
                                                            EventTracking_Id                      EventTrackingId,
                                                            TimeSpan                              RequestTimeout,
@@ -518,7 +518,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// A delegate called whenever a DELETE ~/subscriptions/{subscriptionId} HTTP request will be send.
     /// </summary>
-    public delegate Task OnDeleteSubscriptionRequestDelegate(DateTime                              LogTimestamp,
+    public delegate Task OnDeleteSubscriptionRequestDelegate(DateTimeOffset                        LogTimestamp,
                                                              OpenADRClient                         Sender,
                                                              Subscription_Id                       SubscriptionId,
                                                              EventTracking_Id                      EventTrackingId,
@@ -528,7 +528,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// A delegate called whenever a response to a DELETE ~/subscriptions/{subscriptionId} HTTP request had been received.
     /// </summary>
-    public delegate Task OnDeleteSubscriptionResponseDelegate(DateTime                              LogTimestamp,
+    public delegate Task OnDeleteSubscriptionResponseDelegate(DateTimeOffset                        LogTimestamp,
                                                               OpenADRClient                         Sender,
                                                               Subscription_Id                       SubscriptionId,
                                                               EventTracking_Id                      EventTrackingId,
@@ -547,7 +547,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// A delegate called whenever a GET ~/vens HTTP request will be send.
     /// </summary>
-    public delegate Task OnGetVENsRequestDelegate(DateTime                              LogTimestamp,
+    public delegate Task OnGetVENsRequestDelegate(DateTimeOffset                        LogTimestamp,
                                                   OpenADRClient                         Sender,
                                                   EventTracking_Id                      EventTrackingId,
                                                   TimeSpan                              RequestTimeout,
@@ -556,7 +556,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// A delegate called whenever a response to a GET ~/vens HTTP request had been received.
     /// </summary>
-    public delegate Task OnGetVENsResponseDelegate(DateTime                              LogTimestamp,
+    public delegate Task OnGetVENsResponseDelegate(DateTimeOffset                        LogTimestamp,
                                                    OpenADRClient                         Sender,
                                                    EventTracking_Id                      EventTrackingId,
                                                    TimeSpan                              RequestTimeout,
@@ -571,7 +571,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// A delegate called whenever a POST ~/vens HTTP request will be send.
     /// </summary>
-    public delegate Task OnPostVENsRequestDelegate(DateTime                              LogTimestamp,
+    public delegate Task OnPostVENsRequestDelegate(DateTimeOffset                        LogTimestamp,
                                                    OpenADRClient                         Sender,
                                                    EventTracking_Id                      EventTrackingId,
                                                    TimeSpan                              RequestTimeout,
@@ -580,7 +580,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// A delegate called whenever a response to a POST ~/vens HTTP request had been received.
     /// </summary>
-    public delegate Task OnPostVENsResponseDelegate(DateTime                              LogTimestamp,
+    public delegate Task OnPostVENsResponseDelegate(DateTimeOffset                        LogTimestamp,
                                                     OpenADRClient                         Sender,
                                                     VirtualEndNode                        VirtualEndNode,
                                                     EventTracking_Id                      EventTrackingId,
@@ -597,7 +597,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// A delegate called whenever a GET ~/vens/{venId} HTTP request will be send.
     /// </summary>
-    public delegate Task OnGetVENRequestDelegate(DateTime                              LogTimestamp,
+    public delegate Task OnGetVENRequestDelegate(DateTimeOffset                        LogTimestamp,
                                                  OpenADRClient                         Sender,
                                                  VirtualEndNode_Id                     VirtualEndNodeId,
                                                  EventTracking_Id                      EventTrackingId,
@@ -607,7 +607,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// A delegate called whenever a response to a GET ~/vens/{venId} HTTP request had been received.
     /// </summary>
-    public delegate Task OnGetVENResponseDelegate(DateTime                              LogTimestamp,
+    public delegate Task OnGetVENResponseDelegate(DateTimeOffset                        LogTimestamp,
                                                   OpenADRClient                         Sender,
                                                   VirtualEndNode_Id                     VirtualEndNodeId,
                                                   EventTracking_Id                      EventTrackingId,
@@ -623,7 +623,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// A delegate called whenever a PUT ~/vens/{venId} HTTP request will be send.
     /// </summary>
-    public delegate Task OnPutVENRequestDelegate(DateTime                              LogTimestamp,
+    public delegate Task OnPutVENRequestDelegate(DateTimeOffset                        LogTimestamp,
                                                  OpenADRClient                         Sender,
                                                  EventTracking_Id                      EventTrackingId,
                                                  TimeSpan                              RequestTimeout,
@@ -632,7 +632,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// A delegate called whenever a response to a PUT ~/vens/{venId} HTTP request had been received.
     /// </summary>
-    public delegate Task OnPutVENResponseDelegate(DateTime                              LogTimestamp,
+    public delegate Task OnPutVENResponseDelegate(DateTimeOffset                        LogTimestamp,
                                                   OpenADRClient                         Sender,
                                                   EventTracking_Id                      EventTrackingId,
                                                   TimeSpan                              RequestTimeout,
@@ -647,7 +647,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// A delegate called whenever a DELETE ~/vens/{venId} HTTP request will be send.
     /// </summary>
-    public delegate Task OnDeleteVENRequestDelegate(DateTime                              LogTimestamp,
+    public delegate Task OnDeleteVENRequestDelegate(DateTimeOffset                        LogTimestamp,
                                                     OpenADRClient                         Sender,
                                                     VirtualEndNode_Id                     VirtualEndNodeId,
                                                     EventTracking_Id                      EventTrackingId,
@@ -657,7 +657,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// A delegate called whenever a response to a DELETE ~/vens/{venId} HTTP request had been received.
     /// </summary>
-    public delegate Task OnDeleteVENResponseDelegate(DateTime                              LogTimestamp,
+    public delegate Task OnDeleteVENResponseDelegate(DateTimeOffset                        LogTimestamp,
                                                      OpenADRClient                         Sender,
                                                      VirtualEndNode_Id                     VirtualEndNodeId,
                                                      EventTracking_Id                      EventTrackingId,
@@ -676,7 +676,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// A delegate called whenever a GET ~/vens/{venId}/resources HTTP request will be send.
     /// </summary>
-    public delegate Task OnGetVENResourcesRequestDelegate(DateTime                              LogTimestamp,
+    public delegate Task OnGetVENResourcesRequestDelegate(DateTimeOffset                        LogTimestamp,
                                                           OpenADRClient                         Sender,
                                                           EventTracking_Id                      EventTrackingId,
                                                           TimeSpan                              RequestTimeout,
@@ -685,7 +685,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// A delegate called whenever a response to a GET ~/vens/{venId}/resources HTTP request had been received.
     /// </summary>
-    public delegate Task OnGetVENResourcesResponseDelegate(DateTime                              LogTimestamp,
+    public delegate Task OnGetVENResourcesResponseDelegate(DateTimeOffset                        LogTimestamp,
                                                            OpenADRClient                         Sender,
                                                            EventTracking_Id                      EventTrackingId,
                                                            TimeSpan                              RequestTimeout,
@@ -700,7 +700,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// A delegate called whenever a POST ~/vens/{venId}/resources HTTP request will be send.
     /// </summary>
-    public delegate Task OnPostVENResourcesRequestDelegate(DateTime                              LogTimestamp,
+    public delegate Task OnPostVENResourcesRequestDelegate(DateTimeOffset                        LogTimestamp,
                                                            OpenADRClient                         Sender,
                                                            EventTracking_Id                      EventTrackingId,
                                                            TimeSpan                              RequestTimeout,
@@ -709,7 +709,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// A delegate called whenever a response to a POST ~/vens/{venId}/resources HTTP request had been received.
     /// </summary>
-    public delegate Task OnPostVENResourcesResponseDelegate(DateTime                              LogTimestamp,
+    public delegate Task OnPostVENResourcesResponseDelegate(DateTimeOffset                        LogTimestamp,
                                                             OpenADRClient                         Sender,
                                                             VirtualEndNode                        VirtualEndNode,
                                                             EventTracking_Id                      EventTrackingId,
@@ -726,7 +726,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// A delegate called whenever a GET ~/vens/{venId}/resources/{resourceId} HTTP request will be send.
     /// </summary>
-    public delegate Task OnGetVENResourceRequestDelegate(DateTime                              LogTimestamp,
+    public delegate Task OnGetVENResourceRequestDelegate(DateTimeOffset                        LogTimestamp,
                                                          OpenADRClient                         Sender,
                                                          VirtualEndNode_Id                     VirtualEndNodeId,
                                                          EventTracking_Id                      EventTrackingId,
@@ -736,7 +736,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// A delegate called whenever a response to a GET ~/vens/{venId}/resources/{resourceId} HTTP request had been received.
     /// </summary>
-    public delegate Task OnGetVENResourceResponseDelegate(DateTime                              LogTimestamp,
+    public delegate Task OnGetVENResourceResponseDelegate(DateTimeOffset                        LogTimestamp,
                                                           OpenADRClient                         Sender,
                                                           VirtualEndNode_Id                     VirtualEndNodeId,
                                                           EventTracking_Id                      EventTrackingId,
@@ -752,7 +752,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// A delegate called whenever a PUT ~/vens/{venId}/resources/{resourceId} HTTP request will be send.
     /// </summary>
-    public delegate Task OnPutVENResourceRequestDelegate(DateTime                              LogTimestamp,
+    public delegate Task OnPutVENResourceRequestDelegate(DateTimeOffset                        LogTimestamp,
                                                          OpenADRClient                         Sender,
                                                          EventTracking_Id                      EventTrackingId,
                                                          TimeSpan                              RequestTimeout,
@@ -761,7 +761,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// A delegate called whenever a response to a PUT ~/vens/{venId}/resources/{resourceId} HTTP request had been received.
     /// </summary>
-    public delegate Task OnPutVENResourceResponseDelegate(DateTime                              LogTimestamp,
+    public delegate Task OnPutVENResourceResponseDelegate(DateTimeOffset                        LogTimestamp,
                                                           OpenADRClient                         Sender,
                                                           EventTracking_Id                      EventTrackingId,
                                                           TimeSpan                              RequestTimeout,
@@ -776,7 +776,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// A delegate called whenever a DELETE ~/vens/{venId}/resources/{resourceId} HTTP request will be send.
     /// </summary>
-    public delegate Task OnDeleteVENResourceRequestDelegate(DateTime                              LogTimestamp,
+    public delegate Task OnDeleteVENResourceRequestDelegate(DateTimeOffset                        LogTimestamp,
                                                             OpenADRClient                         Sender,
                                                             VirtualEndNode_Id                     VirtualEndNodeId,
                                                             EventTracking_Id                      EventTrackingId,
@@ -786,7 +786,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// A delegate called whenever a response to a DELETE ~/vens/{venId}/resources/{resourceId} HTTP request had been received.
     /// </summary>
-    public delegate Task OnDeleteVENResourceResponseDelegate(DateTime                              LogTimestamp,
+    public delegate Task OnDeleteVENResourceResponseDelegate(DateTimeOffset                        LogTimestamp,
                                                              OpenADRClient                         Sender,
                                                              VirtualEndNode_Id                     VirtualEndNodeId,
                                                              EventTracking_Id                      EventTrackingId,

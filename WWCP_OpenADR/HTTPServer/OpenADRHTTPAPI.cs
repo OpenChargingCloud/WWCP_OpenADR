@@ -5964,192 +5964,192 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
             #region GET      ~/programs
 
-            HTTPBaseAPI.AddMethodCallback(
+            //HTTPBaseAPI.AddMethodCallback(
 
-                HTTPHostname.Any,
-                HTTPMethod.GET,
-                URLPathPrefix + "programs",
-                HTTPContentType.Application.JSON_UTF8,
-                HTTPRequestLogger:   GET_programs__HTTPRequest,
-                HTTPResponseLogger:  GET_programs__HTTPResponse,
-                HTTPDelegate:        request => {
+            //    HTTPHostname.Any,
+            //    HTTPMethod.GET,
+            //    URLPathPrefix + "programs",
+            //    HTTPContentType.Application.JSON_UTF8,
+            //    HTTPRequestLogger:   GET_programs__HTTPRequest,
+            //    HTTPResponseLogger:  GET_programs__HTTPResponse,
+            //    HTTPDelegate:        request => {
 
-                    #region Check access token
+            //        #region Check access token
 
-                    //if (request.LocalAccessInfo.IsNot(Role.HTTP) == true ||
-                    //    request.LocalAccessInfo?.Status != AccessStatus.ALLOWED)
-                    //{
+            //        //if (request.LocalAccessInfo.IsNot(Role.HTTP) == true ||
+            //        //    request.LocalAccessInfo?.Status != AccessStatus.ALLOWED)
+            //        //{
 
-                    //    return Task.FromResult(
-                    //        new HTTPResponse.Builder(request) {
-                    //            HTTPStatusCode              = HTTPStatusCode.Forbidden,
-                    //            AccessControlAllowOrigin    = "*",
-                    //            AccessControlAllowMethods   = [ "OPTIONS", "GET", "POST" ],
-                    //            AccessControlAllowHeaders   = [ "Content-Type", "Accept", "Authorization"],
-                    //            AccessControlExposeHeaders  = [ "X-Request-ID", "X-Correlation-ID", "Link", "X-Total-Count", "X-Filtered-Count" ]
-                    //        });
+            //        //    return Task.FromResult(
+            //        //        new HTTPResponse.Builder(request) {
+            //        //            HTTPStatusCode              = HTTPStatusCode.Forbidden,
+            //        //            AccessControlAllowOrigin    = "*",
+            //        //            AccessControlAllowMethods   = [ "OPTIONS", "GET", "POST" ],
+            //        //            AccessControlAllowHeaders   = [ "Content-Type", "Accept", "Authorization"],
+            //        //            AccessControlExposeHeaders  = [ "X-Request-ID", "X-Correlation-ID", "Link", "X-Total-Count", "X-Filtered-Count" ]
+            //        //        });
 
-                    //}
+            //        //}
 
-                    #endregion
-
-
-                    var targetType        = request.QueryString.GetString  ("targetType");
-                    var targetValues      = request.QueryString.GetStrings ("targetValues");
-                    var skip              = request.QueryString.GetUInt32  ("skip");
-                    var limit             = request.QueryString.GetUInt32  ("limit");
-                    var from              = request.QueryString.GetDateTime("from");
-                    var to                = request.QueryString.GetDateTime("to");
-
-                    var matchFilter       = request.QueryString.CreateStringFilter<Program>(
-                                                "match",
-                                                (program, pattern) => program.ProgramName.      Contains(pattern)         ||
-                                                                      program.ProgramLongName?. Contains(pattern) == true ||
-                                                                      program.RetailerName?.    Contains(pattern) == true ||
-                                                                      program.RetailerLongName?.Contains(pattern) == true
-                                            );
-
-                                            //ToDo: Filter to NOT show all programs to everyone!
-                    var allPrograms       = GetPrograms().ToArray();
-
-                    var filteredPrograms  = allPrograms.Where(matchFilter).
-                                                        Where(program => !from.HasValue || program.LastModification >  from.Value).
-                                                        Where(program => !to.  HasValue || program.LastModification <= to.  Value).
-                                                        ToArray();
+            //        #endregion
 
 
-                    return Task.FromResult(
-                               new HTTPResponse.Builder(request) {
-                                   HTTPStatusCode              = HTTPStatusCode.OK,
-                                   Content                     = new JArray(
-                                                                     filteredPrograms.
-                                                                         OrderBy(program => program.Created).
-                                                                         SkipTakeFilter(skip, limit).
-                                                                         Select (program => program.ToJSON(
-                                                                                                CustomProgramSerializer,
-                                                                                                CustomIntervalPeriodSerializer,
-                                                                                                CustomEventPayloadDescriptorSerializer,
-                                                                                                CustomReportPayloadDescriptorSerializer,
-                                                                                                CustomValuesMapSerializer
-                                                                                            ))
-                                                                 ).ToUTF8Bytes(),
-                                   Allow                       = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.POST ],
-                                   AccessControlAllowOrigin    = "*",
-                                   AccessControlAllowMethods   = [ "OPTIONS", "GET", "POST" ],
-                                   AccessControlAllowHeaders   = [ "Content-Type", "Accept", "Authorization"],
-                                   AccessControlExposeHeaders  = [ "X-Request-ID", "X-Correlation-ID", "Link", "X-Total-Count", "X-Filtered-Count" ],
-                                   Connection                  = ConnectionType.Close
-                               }.
+            //        var targetType        = request.QueryString.GetString  ("targetType");
+            //        var targetValues      = request.QueryString.GetStrings ("targetValues");
+            //        var skip              = request.QueryString.GetUInt32  ("skip");
+            //        var limit             = request.QueryString.GetUInt32  ("limit");
+            //        var from              = request.QueryString.GetDateTime("from");
+            //        var to                = request.QueryString.GetDateTime("to");
 
-                               // The overall number of locations
-                               Set("X-Total-Count",     allPrograms.     Length).
+            //        var matchFilter       = request.QueryString.CreateStringFilter<Program>(
+            //                                    "match",
+            //                                    (program, pattern) => program.ProgramName.      Contains(pattern)         ||
+            //                                                          program.ProgramLongName?. Contains(pattern) == true ||
+            //                                                          program.RetailerName?.    Contains(pattern) == true ||
+            //                                                          program.RetailerLongName?.Contains(pattern) == true
+            //                                );
 
-                               // The number of locations matching search filters
-                               Set("X-Filtered-Count",  filteredPrograms.Length).
+            //                                //ToDo: Filter to NOT show all programs to everyone!
+            //        var allPrograms       = GetPrograms().ToArray();
 
-                               // The maximum number of locations that the server WILL return within a single request
-                               Set("X-Limit",           allPrograms.     Length).AsImmutable
+            //        var filteredPrograms  = allPrograms.Where(matchFilter).
+            //                                            Where(program => !from.HasValue || program.LastModification >  from.Value).
+            //                                            Where(program => !to.  HasValue || program.LastModification <= to.  Value).
+            //                                            ToArray();
 
-                           );
 
-                }
+            //        return Task.FromResult(
+            //                   new HTTPResponse.Builder(request) {
+            //                       HTTPStatusCode              = HTTPStatusCode.OK,
+            //                       Content                     = new JArray(
+            //                                                         filteredPrograms.
+            //                                                             OrderBy(program => program.Created).
+            //                                                             SkipTakeFilter(skip, limit).
+            //                                                             Select (program => program.ToJSON(
+            //                                                                                    CustomProgramSerializer,
+            //                                                                                    CustomIntervalPeriodSerializer,
+            //                                                                                    CustomEventPayloadDescriptorSerializer,
+            //                                                                                    CustomReportPayloadDescriptorSerializer,
+            //                                                                                    CustomValuesMapSerializer
+            //                                                                                ))
+            //                                                     ).ToUTF8Bytes(),
+            //                       Allow                       = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.POST ],
+            //                       AccessControlAllowOrigin    = "*",
+            //                       AccessControlAllowMethods   = [ "OPTIONS", "GET", "POST" ],
+            //                       AccessControlAllowHeaders   = [ "Content-Type", "Accept", "Authorization"],
+            //                       AccessControlExposeHeaders  = [ "X-Request-ID", "X-Correlation-ID", "Link", "X-Total-Count", "X-Filtered-Count" ],
+            //                       Connection                  = ConnectionType.Close
+            //                   }.
 
-            );
+            //                   // The overall number of locations
+            //                   Set("X-Total-Count",     allPrograms.     Length).
+
+            //                   // The number of locations matching search filters
+            //                   Set("X-Filtered-Count",  filteredPrograms.Length).
+
+            //                   // The maximum number of locations that the server WILL return within a single request
+            //                   Set("X-Limit",           allPrograms.     Length).AsImmutable
+
+            //               );
+
+            //    }
+
+            //);
 
             #endregion
 
             #region POST     ~/programs
 
-            HTTPBaseAPI.AddMethodCallback(
+            //HTTPBaseAPI.AddMethodCallback(
 
-                HTTPHostname.Any,
-                HTTPMethod.POST,
-                URLPathPrefix + "programs",
-                HTTPContentType.Application.JSON_UTF8,
-                HTTPRequestLogger:   POST_programs__HTTPRequest,
-                HTTPResponseLogger:  POST_programs__HTTPResponse,
-                HTTPDelegate:        async request => {
+            //    HTTPHostname.Any,
+            //    HTTPMethod.POST,
+            //    URLPathPrefix + "programs",
+            //    HTTPContentType.Application.JSON_UTF8,
+            //    HTTPRequestLogger:   POST_programs__HTTPRequest,
+            //    HTTPResponseLogger:  POST_programs__HTTPResponse,
+            //    HTTPDelegate:        async request => {
 
-                    #region Check access token
+            //        #region Check access token
 
-                    //if (request.LocalAccessInfo.IsNot(Role.HTTP) == true ||
-                    //    request.LocalAccessInfo?.Status != AccessStatus.ALLOWED)
-                    //{
+            //        //if (request.LocalAccessInfo.IsNot(Role.HTTP) == true ||
+            //        //    request.LocalAccessInfo?.Status != AccessStatus.ALLOWED)
+            //        //{
 
-                    //    return Task.FromResult(
-                    //        new OpenADRResponse.Builder(request) {
-                    //            StatusCode           = 2000,
-                    //            StatusMessage        = "Invalid or blocked access token!",
-                    //            HTTPResponseBuilder  = new HTTPResponse.Builder(request.HTTPRequest) {
-                    //                HTTPStatusCode             = HTTPStatusCode.Forbidden,
-                    //                AccessControlAllowMethods  = [ "OPTIONS", "GET" ],
-                    //                AccessControlAllowHeaders  = [ "Authorization" ]
-                    //            }
-                    //        });
+            //        //    return Task.FromResult(
+            //        //        new OpenADRResponse.Builder(request) {
+            //        //            StatusCode           = 2000,
+            //        //            StatusMessage        = "Invalid or blocked access token!",
+            //        //            HTTPResponseBuilder  = new HTTPResponse.Builder(request.HTTPRequest) {
+            //        //                HTTPStatusCode             = HTTPStatusCode.Forbidden,
+            //        //                AccessControlAllowMethods  = [ "OPTIONS", "GET" ],
+            //        //                AccessControlAllowHeaders  = [ "Authorization" ]
+            //        //            }
+            //        //        });
 
-                    //}
+            //        //}
 
-                    #endregion
+            //        #endregion
 
-                    #region Parse new or updated tariff
+            //        #region Parse new or updated tariff
 
-                    if (!request.TryParseJSONObjectRequestBody(out var programJSON, out var httpResponseBuilder))
-                        return httpResponseBuilder;
+            //        if (!request.TryParseJSONObjectRequestBody(out var programJSON, out var httpResponseBuilder))
+            //            return httpResponseBuilder;
 
-                    if (!Program.TryParse(programJSON,
-                                          out var newProgram,
-                                          out var errorResponse))
-                    {
+            //        if (!Program.TryParse(programJSON,
+            //                              out var newProgram,
+            //                              out var errorResponse))
+            //        {
 
-                        return new HTTPResponse.Builder(request) {
-                                   HTTPStatusCode              = HTTPStatusCode.BadRequest,
-                                   Allow                       = [ HTTPMethod.OPTIONS, HTTPMethod.GET ],
-                                   AccessControlAllowOrigin    = "*",
-                                   AccessControlAllowMethods   = [ "OPTIONS", "GET" ],
-                                   AccessControlAllowHeaders   = [ "Authorization" ],
-                                   AccessControlExposeHeaders  = [ "X-Request-ID", "X-Correlation-ID", "Link", "X-Total-Count", "X-Filtered-Count" ],
-                                   Connection                  = ConnectionType.Close
-                               };
+            //            return new HTTPResponse.Builder(request) {
+            //                       HTTPStatusCode              = HTTPStatusCode.BadRequest,
+            //                       Allow                       = [ HTTPMethod.OPTIONS, HTTPMethod.GET ],
+            //                       AccessControlAllowOrigin    = "*",
+            //                       AccessControlAllowMethods   = [ "OPTIONS", "GET" ],
+            //                       AccessControlAllowHeaders   = [ "Authorization" ],
+            //                       AccessControlExposeHeaders  = [ "X-Request-ID", "X-Correlation-ID", "Link", "X-Total-Count", "X-Filtered-Count" ],
+            //                       Connection                  = ConnectionType.Close
+            //                   };
 
-                    }
+            //        }
 
-                    #endregion
-
-
-                    var result = await AddProgram(
-                                           newProgram,
-                                           SkipNotifications:  true,
-                                           EventTrackingId:    request.EventTrackingId,
-                                           //CurrentUserId:      request.UserId,
-                                           CancellationToken:  request.CancellationToken
-                                       );
+            //        #endregion
 
 
-                    return result.IsSuccessAndDataNotNull(out var data)
+            //        var result = await AddProgram(
+            //                               newProgram,
+            //                               SkipNotifications:  true,
+            //                               EventTrackingId:    request.EventTrackingId,
+            //                               //CurrentUserId:      request.UserId,
+            //                               CancellationToken:  request.CancellationToken
+            //                           );
 
-                               ? new HTTPResponse.Builder(request) {
-                                     HTTPStatusCode              = HTTPStatusCode.OK,
-                                     Allow                       = [ HTTPMethod.OPTIONS, HTTPMethod.GET ],
-                                     AccessControlAllowOrigin    = "*",
-                                     AccessControlAllowMethods   = [ "OPTIONS", "GET" ],
-                                     AccessControlAllowHeaders   = [ "Authorization" ],
-                                     AccessControlExposeHeaders  = [ "X-Request-ID", "X-Correlation-ID", "Link", "X-Total-Count", "X-Filtered-Count" ],
-                                     Connection                  = ConnectionType.Close
-                                 }.AsImmutable
 
-                               : new HTTPResponse.Builder(request) {
-                                     HTTPStatusCode              = HTTPStatusCode.BadRequest,
-                                     Allow                       = [ HTTPMethod.OPTIONS, HTTPMethod.GET ],
-                                     AccessControlAllowOrigin    = "*",
-                                     AccessControlAllowMethods   = [ "OPTIONS", "GET" ],
-                                     AccessControlAllowHeaders   = [ "Authorization" ],
-                                     AccessControlExposeHeaders  = [ "X-Request-ID", "X-Correlation-ID", "Link", "X-Total-Count", "X-Filtered-Count" ],
-                                     Connection                  = ConnectionType.Close
-                                 }.AsImmutable;
+            //        return result.IsSuccessAndDataNotNull(out var data)
 
-                }
+            //                   ? new HTTPResponse.Builder(request) {
+            //                         HTTPStatusCode              = HTTPStatusCode.OK,
+            //                         Allow                       = [ HTTPMethod.OPTIONS, HTTPMethod.GET ],
+            //                         AccessControlAllowOrigin    = "*",
+            //                         AccessControlAllowMethods   = [ "OPTIONS", "GET" ],
+            //                         AccessControlAllowHeaders   = [ "Authorization" ],
+            //                         AccessControlExposeHeaders  = [ "X-Request-ID", "X-Correlation-ID", "Link", "X-Total-Count", "X-Filtered-Count" ],
+            //                         Connection                  = ConnectionType.Close
+            //                     }.AsImmutable
 
-            );
+            //                   : new HTTPResponse.Builder(request) {
+            //                         HTTPStatusCode              = HTTPStatusCode.BadRequest,
+            //                         Allow                       = [ HTTPMethod.OPTIONS, HTTPMethod.GET ],
+            //                         AccessControlAllowOrigin    = "*",
+            //                         AccessControlAllowMethods   = [ "OPTIONS", "GET" ],
+            //                         AccessControlAllowHeaders   = [ "Authorization" ],
+            //                         AccessControlExposeHeaders  = [ "X-Request-ID", "X-Correlation-ID", "Link", "X-Total-Count", "X-Filtered-Count" ],
+            //                         Connection                  = ConnectionType.Close
+            //                     }.AsImmutable;
+
+            //    }
+
+            //);
 
             #endregion
 
@@ -6191,82 +6191,82 @@ namespace cloud.charging.open.protocols.OpenADRv3
             // -------------------------------------------------------------------------------
             // curl -v -H "Accept: application/json" http://127.0.0.1:5500/programs/program1
             // -------------------------------------------------------------------------------
-            HTTPBaseAPI.AddMethodCallback(
+            //HTTPBaseAPI.AddMethodCallback(
 
-                HTTPHostname.Any,
-                HTTPMethod.GET,
-                URLPathPrefix + "programs/{programId}",
-                HTTPContentType.Application.JSON_UTF8,
-                HTTPRequestLogger:   GET_program__HTTPRequest,
-                HTTPResponseLogger:  GET_program__HTTPResponse,
-                HTTPDelegate:        request => {
+            //    HTTPHostname.Any,
+            //    HTTPMethod.GET,
+            //    URLPathPrefix + "programs/{programId}",
+            //    HTTPContentType.Application.JSON_UTF8,
+            //    HTTPRequestLogger:   GET_program__HTTPRequest,
+            //    HTTPResponseLogger:  GET_program__HTTPResponse,
+            //    HTTPDelegate:        request => {
 
-                    #region Check access token
+            //        #region Check access token
 
-                    //if (request.LocalAccessInfo.IsNot(Role.HTTP) == true ||
-                    //    request.LocalAccessInfo?.Status != AccessStatus.ALLOWED)
-                    //{
+            //        //if (request.LocalAccessInfo.IsNot(Role.HTTP) == true ||
+            //        //    request.LocalAccessInfo?.Status != AccessStatus.ALLOWED)
+            //        //{
 
-                    //    return Task.FromResult(
-                    //        new HTTPResponse.Builder(request) {
-                    //            HTTPStatusCode              = HTTPStatusCode.Forbidden,
-                    //            AccessControlAllowOrigin    = "*",
-                    //            AccessControlAllowMethods   = [ "OPTIONS", "GET", "POST" ],
-                    //            AccessControlAllowHeaders   = [ "Content-Type", "Accept", "Authorization"],
-                    //            AccessControlExposeHeaders  = [ "X-Request-ID", "X-Correlation-ID", "Link", "X-Total-Count", "X-Filtered-Count" ]
-                    //        });
+            //        //    return Task.FromResult(
+            //        //        new HTTPResponse.Builder(request) {
+            //        //            HTTPStatusCode              = HTTPStatusCode.Forbidden,
+            //        //            AccessControlAllowOrigin    = "*",
+            //        //            AccessControlAllowMethods   = [ "OPTIONS", "GET", "POST" ],
+            //        //            AccessControlAllowHeaders   = [ "Content-Type", "Accept", "Authorization"],
+            //        //            AccessControlExposeHeaders  = [ "X-Request-ID", "X-Correlation-ID", "Link", "X-Total-Count", "X-Filtered-Count" ]
+            //        //        });
 
-                    //}
+            //        //}
 
-                    #endregion
+            //        #endregion
 
-                    #region Try to get the requested program
+            //        #region Try to get the requested program
 
-                    if (!request.ParseProgramId(out var programId,
-                                                out var httpResponseBuilder))
-                    {
-                        return Task.FromResult(httpResponseBuilder.AsImmutable);
-                    }
+            //        if (!request.ParseProgramId(out var programId,
+            //                                    out var httpResponseBuilder))
+            //        {
+            //            return Task.FromResult(httpResponseBuilder.AsImmutable);
+            //        }
 
-                    if (!TryGetProgram(programId, out var program))
-                    {
+            //        if (!TryGetProgram(programId, out var program))
+            //        {
 
-                        return Task.FromResult(
-                                   new HTTPResponse.Builder(request) {
-                                       HTTPStatusCode             = HTTPStatusCode.NotFound,
-                                       AccessControlAllowHeaders  = [ "Authorization" ],
-                                       Connection                 = ConnectionType.Close
-                                   }.AsImmutable
-                               );
+            //            return Task.FromResult(
+            //                       new HTTPResponse.Builder(request) {
+            //                           HTTPStatusCode             = HTTPStatusCode.NotFound,
+            //                           AccessControlAllowHeaders  = [ "Authorization" ],
+            //                           Connection                 = ConnectionType.Close
+            //                       }.AsImmutable
+            //                   );
 
-                    }
+            //        }
 
-                    #endregion
+            //        #endregion
 
 
-                    return Task.FromResult(
-                               new HTTPResponse.Builder(request) {
-                                   HTTPStatusCode             = HTTPStatusCode.OK,
-                                   Server                     = HTTPServiceName,
-                                   Date                       = Timestamp.Now,
-                                   Allow                      = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE],
-                                   AccessControlAllowOrigin   = "*",
-                                   AccessControlAllowMethods  = [ "OPTIONS", "GET", "PUT", "DELETE" ],
-                                   ContentType                = HTTPContentType.Application.JSON_UTF8,
-                                   Content                    = program.ToJSON(
-                                                                    CustomProgramSerializer,
-                                                                    CustomIntervalPeriodSerializer,
-                                                                    CustomEventPayloadDescriptorSerializer,
-                                                                    CustomReportPayloadDescriptorSerializer,
-                                                                    CustomValuesMapSerializer
-                                                                ).ToUTF8Bytes(),
-                                   Connection                 = ConnectionType.Close
-                               }.AsImmutable
-                           );
+            //        return Task.FromResult(
+            //                   new HTTPResponse.Builder(request) {
+            //                       HTTPStatusCode             = HTTPStatusCode.OK,
+            //                       Server                     = HTTPServiceName,
+            //                       Date                       = Timestamp.Now,
+            //                       Allow                      = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE],
+            //                       AccessControlAllowOrigin   = "*",
+            //                       AccessControlAllowMethods  = [ "OPTIONS", "GET", "PUT", "DELETE" ],
+            //                       ContentType                = HTTPContentType.Application.JSON_UTF8,
+            //                       //Content                    = program.ToJSON(
+            //                       //                                 CustomProgramSerializer,
+            //                       //                                 CustomIntervalPeriodSerializer,
+            //                       //                                 CustomEventPayloadDescriptorSerializer,
+            //                       //                                 CustomReportPayloadDescriptorSerializer,
+            //                       //                                 CustomValuesMapSerializer
+            //                       //                             ).ToUTF8Bytes(),
+            //                       Connection                 = ConnectionType.Close
+            //                   }.AsImmutable
+            //               );
 
-                }
+            //    }
 
-            );
+            //);
 
             #endregion
 
@@ -6275,127 +6275,127 @@ namespace cloud.charging.open.protocols.OpenADRv3
             // -------------------------------------------------------------------------------
             // curl -v -H "Accept: application/json" http://127.0.0.1:5500/programs/program1
             // -------------------------------------------------------------------------------
-            HTTPBaseAPI.AddMethodCallback(
+            //HTTPBaseAPI.AddMethodCallback(
 
-                HTTPHostname.Any,
-                HTTPMethod.PUT,
-                URLPathPrefix + "programs/{programId}",
-                HTTPContentType.Application.JSON_UTF8,
-                HTTPRequestLogger:   PUT_program__HTTPRequest,
-                HTTPResponseLogger:  PUT_program__HTTPResponse,
-                HTTPDelegate:        async request => {
+            //    HTTPHostname.Any,
+            //    HTTPMethod.PUT,
+            //    URLPathPrefix + "programs/{programId}",
+            //    HTTPContentType.Application.JSON_UTF8,
+            //    HTTPRequestLogger:   PUT_program__HTTPRequest,
+            //    HTTPResponseLogger:  PUT_program__HTTPResponse,
+            //    HTTPDelegate:        async request => {
 
-                    #region Check access token
+            //        #region Check access token
 
-                    //if (request.LocalAccessInfo.IsNot(Role.HTTP) == true ||
-                    //    request.LocalAccessInfo?.Status != AccessStatus.ALLOWED)
-                    //{
+            //        //if (request.LocalAccessInfo.IsNot(Role.HTTP) == true ||
+            //        //    request.LocalAccessInfo?.Status != AccessStatus.ALLOWED)
+            //        //{
 
-                    //    return Task.FromResult(
-                    //        new HTTPResponse.Builder(request) {
-                    //            HTTPStatusCode              = HTTPStatusCode.Forbidden,
-                    //            AccessControlAllowOrigin    = "*",
-                    //            AccessControlAllowMethods   = [ "OPTIONS", "GET", "POST" ],
-                    //            AccessControlAllowHeaders   = [ "Content-Type", "Accept", "Authorization"],
-                    //            AccessControlExposeHeaders  = [ "X-Request-ID", "X-Correlation-ID", "Link", "X-Total-Count", "X-Filtered-Count" ]
-                    //        });
+            //        //    return Task.FromResult(
+            //        //        new HTTPResponse.Builder(request) {
+            //        //            HTTPStatusCode              = HTTPStatusCode.Forbidden,
+            //        //            AccessControlAllowOrigin    = "*",
+            //        //            AccessControlAllowMethods   = [ "OPTIONS", "GET", "POST" ],
+            //        //            AccessControlAllowHeaders   = [ "Content-Type", "Accept", "Authorization"],
+            //        //            AccessControlExposeHeaders  = [ "X-Request-ID", "X-Correlation-ID", "Link", "X-Total-Count", "X-Filtered-Count" ]
+            //        //        });
 
-                    //}
+            //        //}
 
-                    #endregion
+            //        #endregion
 
-                    #region Try to get the requested program identification
+            //        #region Try to get the requested program identification
 
-                    if (!request.ParseProgramId(out var programIdURL,
-                                                out var httpResponseBuilder))
-                    {
-                        return httpResponseBuilder;
-                    }
+            //        if (!request.ParseProgramId(out var programIdURL,
+            //                                    out var httpResponseBuilder))
+            //        {
+            //            return httpResponseBuilder;
+            //        }
 
-                    #endregion
+            //        #endregion
 
-                    #region Try to parse the new program
+            //        #region Try to parse the new program
 
-                    if (!request.TryParseJSONObjectRequestBody(out var programJSON, out httpResponseBuilder))
-                        return httpResponseBuilder;
+            //        if (!request.TryParseJSONObjectRequestBody(out var programJSON, out httpResponseBuilder))
+            //            return httpResponseBuilder;
 
-                    if (!Program.TryParse(programJSON,
-                                          out var newOrUpdatedProgram,
-                                          out var errorResponse))
-                    {
+            //        if (!Program.TryParse(programJSON,
+            //                              out var newOrUpdatedProgram,
+            //                              out var errorResponse))
+            //        {
 
-                        return new HTTPResponse.Builder(request) {
-                                   HTTPStatusCode             = HTTPStatusCode.BadRequest,
-                                   AccessControlAllowHeaders  = [ "Authorization" ],
-                                   Content                    = new Problem(
-                                                                    nameof(Program),
-                                                                    errorResponse
-                                                                ).ToJSON().ToUTF8Bytes(),
-                                   ContentType                = HTTPContentType.Application.JSON_UTF8,
-                                   Connection                 = ConnectionType.Close
-                               };
+            //            return new HTTPResponse.Builder(request) {
+            //                       HTTPStatusCode             = HTTPStatusCode.BadRequest,
+            //                       AccessControlAllowHeaders  = [ "Authorization" ],
+            //                       Content                    = new Problem(
+            //                                                        nameof(Program),
+            //                                                        errorResponse
+            //                                                    ).ToJSON().ToUTF8Bytes(),
+            //                       ContentType                = HTTPContentType.Application.JSON_UTF8,
+            //                       Connection                 = ConnectionType.Close
+            //                   };
 
-                    }
+            //        }
 
-                    if (newOrUpdatedProgram.Id.ToString() != programIdURL.ToString())
-                    {
+            //        if (newOrUpdatedProgram.Id.ToString() != programIdURL.ToString())
+            //        {
 
-                        return new HTTPResponse.Builder(request) {
-                                   HTTPStatusCode             = HTTPStatusCode.BadRequest,
-                                   AccessControlAllowHeaders  = [ "Authorization" ],
-                                   Content                    = new Problem(
-                                                                    nameof(Program),
-                                                                    $"The programId '{programIdURL}' within the URL does not match the programId '{newOrUpdatedProgram.Id}' in the parsed JSON request body!"
-                                                                ).ToJSON().ToUTF8Bytes(),
-                                   ContentType                = HTTPContentType.Application.JSON_UTF8,
-                                   Connection                 = ConnectionType.Close
-                               };
+            //            return new HTTPResponse.Builder(request) {
+            //                       HTTPStatusCode             = HTTPStatusCode.BadRequest,
+            //                       AccessControlAllowHeaders  = [ "Authorization" ],
+            //                       Content                    = new Problem(
+            //                                                        nameof(Program),
+            //                                                        $"The programId '{programIdURL}' within the URL does not match the programId '{newOrUpdatedProgram.Id}' in the parsed JSON request body!"
+            //                                                    ).ToJSON().ToUTF8Bytes(),
+            //                       ContentType                = HTTPContentType.Application.JSON_UTF8,
+            //                       Connection                 = ConnectionType.Close
+            //                   };
 
-                    }
+            //        }
 
-                    #endregion
-
-
-                    var result = await UpdateProgram(
-                                           newOrUpdatedProgram,
-                                           EventTrackingId:    request.EventTrackingId,
-                                           CurrentUserId:      null, //request.LocalAccessInfo?.UserId,
-                                           CancellationToken:  request.CancellationToken
-                                       );
+            //        #endregion
 
 
-                    return result.IsSuccessAndDataNotNull(out var data)
+            //        var result = await UpdateProgram(
+            //                               newOrUpdatedProgram,
+            //                               EventTrackingId:    request.EventTrackingId,
+            //                               CurrentUserId:      null, //request.LocalAccessInfo?.UserId,
+            //                               CancellationToken:  request.CancellationToken
+            //                           );
 
-                        ? new HTTPResponse.Builder(request) {
-                                   HTTPStatusCode             = HTTPStatusCode.OK,
-                                   Server                     = HTTPServiceName,
-                                   Date                       = Timestamp.Now,
-                                   Allow                      = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE],
-                                   AccessControlAllowOrigin   = "*",
-                                   AccessControlAllowMethods  = [ "OPTIONS", "GET", "PUT", "DELETE" ],
-                                   ContentType                = HTTPContentType.Application.JSON_UTF8,
-                                   Content                    = newOrUpdatedProgram.ToJSON().ToUTF8Bytes(),
-                                   Connection                 = ConnectionType.Close
-                               }.AsImmutable
 
-                        : new HTTPResponse.Builder(request) {
-                                   HTTPStatusCode             = HTTPStatusCode.Conflict,
-                                   Server                     = HTTPServiceName,
-                                   Date                       = Timestamp.Now,
-                                   Allow                      = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE],
-                                   AccessControlAllowOrigin   = "*",
-                                   AccessControlAllowMethods  = [ "OPTIONS", "GET", "PUT", "DELETE" ],
-                                   ContentType                = HTTPContentType.Application.JSON_UTF8,
-                                   Content                    = new Problem(
-                                                                    nameof(Program),
-                                                                    "conflict!"
-                                                                ).ToJSON().ToUTF8Bytes(),
-                                   Connection                 = ConnectionType.Close
-                               }.AsImmutable;
+            //        return result.IsSuccessAndDataNotNull(out var data)
 
-                }
+            //            ? new HTTPResponse.Builder(request) {
+            //                       HTTPStatusCode             = HTTPStatusCode.OK,
+            //                       Server                     = HTTPServiceName,
+            //                       Date                       = Timestamp.Now,
+            //                       Allow                      = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE],
+            //                       AccessControlAllowOrigin   = "*",
+            //                       AccessControlAllowMethods  = [ "OPTIONS", "GET", "PUT", "DELETE" ],
+            //                       ContentType                = HTTPContentType.Application.JSON_UTF8,
+            //                       Content                    = newOrUpdatedProgram.ToJSON().ToUTF8Bytes(),
+            //                       Connection                 = ConnectionType.Close
+            //                   }.AsImmutable
 
-            );
+            //            : new HTTPResponse.Builder(request) {
+            //                       HTTPStatusCode             = HTTPStatusCode.Conflict,
+            //                       Server                     = HTTPServiceName,
+            //                       Date                       = Timestamp.Now,
+            //                       Allow                      = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE],
+            //                       AccessControlAllowOrigin   = "*",
+            //                       AccessControlAllowMethods  = [ "OPTIONS", "GET", "PUT", "DELETE" ],
+            //                       ContentType                = HTTPContentType.Application.JSON_UTF8,
+            //                       Content                    = new Problem(
+            //                                                        nameof(Program),
+            //                                                        "conflict!"
+            //                                                    ).ToJSON().ToUTF8Bytes(),
+            //                       Connection                 = ConnectionType.Close
+            //                   }.AsImmutable;
+
+            //    }
+
+            //);
 
             #endregion
 
@@ -6404,81 +6404,81 @@ namespace cloud.charging.open.protocols.OpenADRv3
             // -------------------------------------------------------------------------------
             // curl -v -H "Accept: application/json" http://127.0.0.1:5500/programs/program1
             // -------------------------------------------------------------------------------
-            HTTPBaseAPI.AddMethodCallback(
+            //HTTPBaseAPI.AddMethodCallback(
 
-                HTTPHostname.Any,
-                HTTPMethod.DELETE,
-                URLPathPrefix + "programs/{programId}",
-                HTTPContentType.Application.JSON_UTF8,
-                HTTPRequestLogger:   DELETE_program__HTTPRequest,
-                HTTPResponseLogger:  DELETE_program__HTTPResponse,
-                HTTPDelegate:        async request => {
+            //    HTTPHostname.Any,
+            //    HTTPMethod.DELETE,
+            //    URLPathPrefix + "programs/{programId}",
+            //    HTTPContentType.Application.JSON_UTF8,
+            //    HTTPRequestLogger:   DELETE_program__HTTPRequest,
+            //    HTTPResponseLogger:  DELETE_program__HTTPResponse,
+            //    HTTPDelegate:        async request => {
 
-                    #region Check access token
+            //        #region Check access token
 
-                    //if (request.LocalAccessInfo.IsNot(Role.HTTP) == true ||
-                    //    request.LocalAccessInfo?.Status != AccessStatus.ALLOWED)
-                    //{
+            //        //if (request.LocalAccessInfo.IsNot(Role.HTTP) == true ||
+            //        //    request.LocalAccessInfo?.Status != AccessStatus.ALLOWED)
+            //        //{
 
-                    //    return Task.FromResult(
-                    //        new HTTPResponse.Builder(request) {
-                    //            HTTPStatusCode              = HTTPStatusCode.Forbidden,
-                    //            AccessControlAllowOrigin    = "*",
-                    //            AccessControlAllowMethods   = [ "OPTIONS", "GET", "POST" ],
-                    //            AccessControlAllowHeaders   = [ "Content-Type", "Accept", "Authorization"],
-                    //            AccessControlExposeHeaders  = [ "X-Request-ID", "X-Correlation-ID", "Link", "X-Total-Count", "X-Filtered-Count" ]
-                    //        });
+            //        //    return Task.FromResult(
+            //        //        new HTTPResponse.Builder(request) {
+            //        //            HTTPStatusCode              = HTTPStatusCode.Forbidden,
+            //        //            AccessControlAllowOrigin    = "*",
+            //        //            AccessControlAllowMethods   = [ "OPTIONS", "GET", "POST" ],
+            //        //            AccessControlAllowHeaders   = [ "Content-Type", "Accept", "Authorization"],
+            //        //            AccessControlExposeHeaders  = [ "X-Request-ID", "X-Correlation-ID", "Link", "X-Total-Count", "X-Filtered-Count" ]
+            //        //        });
 
-                    //}
+            //        //}
 
-                    #endregion
+            //        #endregion
 
-                    #region Try to get the requested program
+            //        #region Try to get the requested program
 
-                    if (!request.ParseProgramId(out var programId,
-                                                out var httpResponseBuilder))
-                    {
-                        return httpResponseBuilder;
-                    }
+            //        if (!request.ParseProgramId(out var programId,
+            //                                    out var httpResponseBuilder))
+            //        {
+            //            return httpResponseBuilder;
+            //        }
 
-                    #endregion
-
-
-                    var result = await RemoveProgram(
-                                           programId,
-                                           EventTrackingId:    request.EventTrackingId,
-                                           CurrentUserId:      null, //request.LocalAccessInfo?.UserId,
-                                           CancellationToken:  request.CancellationToken
-                                       );
+            //        #endregion
 
 
-                    return result.IsSuccessAndDataNotNull(out var data)
+            //        var result = await RemoveProgram(
+            //                               programId,
+            //                               EventTrackingId:    request.EventTrackingId,
+            //                               CurrentUserId:      null, //request.LocalAccessInfo?.UserId,
+            //                               CancellationToken:  request.CancellationToken
+            //                           );
 
-                        ? new HTTPResponse.Builder(request) {
-                              HTTPStatusCode             = HTTPStatusCode.OK,
-                              Server                     = HTTPServiceName,
-                              Date                       = Timestamp.Now,
-                              Allow                      = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE],
-                              AccessControlAllowOrigin   = "*",
-                              AccessControlAllowMethods  = [ "OPTIONS", "GET", "PUT", "DELETE" ],
-                              ContentType                = HTTPContentType.Application.JSON_UTF8,
-                              Content                    = new JArray().ToUTF8Bytes(),
-                              Connection                 = ConnectionType.Close
-                          }.AsImmutable
 
-                        : new HTTPResponse.Builder(request) {
-                              HTTPStatusCode             = HTTPStatusCode.NotFound,
-                              Server                     = HTTPServiceName,
-                              Date                       = Timestamp.Now,
-                              Allow                      = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE],
-                              AccessControlAllowOrigin   = "*",
-                              AccessControlAllowMethods  = [ "OPTIONS", "GET", "PUT", "DELETE" ],
-                              Connection                 = ConnectionType.Close
-                          }.AsImmutable;
+            //        return result.IsSuccessAndDataNotNull(out var data)
 
-                }
+            //            ? new HTTPResponse.Builder(request) {
+            //                  HTTPStatusCode             = HTTPStatusCode.OK,
+            //                  Server                     = HTTPServiceName,
+            //                  Date                       = Timestamp.Now,
+            //                  Allow                      = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE],
+            //                  AccessControlAllowOrigin   = "*",
+            //                  AccessControlAllowMethods  = [ "OPTIONS", "GET", "PUT", "DELETE" ],
+            //                  ContentType                = HTTPContentType.Application.JSON_UTF8,
+            //                  Content                    = new JArray().ToUTF8Bytes(),
+            //                  Connection                 = ConnectionType.Close
+            //              }.AsImmutable
 
-            );
+            //            : new HTTPResponse.Builder(request) {
+            //                  HTTPStatusCode             = HTTPStatusCode.NotFound,
+            //                  Server                     = HTTPServiceName,
+            //                  Date                       = Timestamp.Now,
+            //                  Allow                      = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE],
+            //                  AccessControlAllowOrigin   = "*",
+            //                  AccessControlAllowMethods  = [ "OPTIONS", "GET", "PUT", "DELETE" ],
+            //                  Connection                 = ConnectionType.Close
+            //              }.AsImmutable;
+
+            //    }
+
+            //);
 
             #endregion
 

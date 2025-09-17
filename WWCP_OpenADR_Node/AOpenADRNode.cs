@@ -92,12 +92,12 @@ namespace cloud.charging.open.protocols.OpenADRv3.Node
         /// <summary>
         /// The time at the OpenADR.
         /// </summary>
-        public DateTime?                    OpenADRTime                              { get; set; } = Timestamp.Now;
+        public DateTimeOffset?              OpenADRTime                              { get; set; } = Timestamp.Now;
 
 
         public HTTPAPI?                     HTTPAPI                                  { get; }
 
-        public OpenADRHTTPAPI?                  OpenADRAPI                               { get; }
+        public OpenADRHTTPAPI?              OpenADRAPI                               { get; }
         public HTTPPath?                    OpenADRAPI_Path                          { get; }
 
         public WebAPI?                      WebAPI                                   { get; }
