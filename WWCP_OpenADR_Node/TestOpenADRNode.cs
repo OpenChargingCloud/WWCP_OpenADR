@@ -107,7 +107,7 @@ namespace cloud.charging.open.protocols.OpenADRv3.Node
                                Boolean                           DisableMaintenanceTasks                 = false,
                                TimeSpan?                         MaintenanceEvery                        = null,
 
-                               ISMTPClient?                      SMTPClient                              = null,
+                               ISMTPSubmissionClient?                      SMTPClient                              = null,
                                DNSClient?                        DNSClient                               = null)
 
             : base(Id,

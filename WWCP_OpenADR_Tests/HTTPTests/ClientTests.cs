@@ -56,7 +56,7 @@ namespace cloud.charging.open.protocols.OpenADRv3.tests.HTTP
             {
 
                 var client = new OpenADRClient(
-                             URL.Parse($"http://localhost:{testOpenADR1.HTTPExtAPI?.HTTPServer.IPPorts.First()}/OpenADR/"),
+                             URL.Parse($"http://localhost:{testOpenADR1.HTTPExtAPI?.HTTPServer.TCPPort}/OpenADR/"),
                              DNSClient: testOpenADR1.DNSClient
                          );
 

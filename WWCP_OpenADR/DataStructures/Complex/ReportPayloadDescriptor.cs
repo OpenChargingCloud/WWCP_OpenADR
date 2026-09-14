@@ -350,7 +350,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                    ReadingType?.Clone(),
                    Units?.      Clone(),
                    Accuracy,
-                   Confidence?. Clone()
+                   Confidence
                );
 
         #endregion

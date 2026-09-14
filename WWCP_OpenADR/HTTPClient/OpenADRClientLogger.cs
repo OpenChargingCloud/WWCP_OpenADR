@@ -84,30 +84,30 @@ namespace cloud.charging.open.protocols.OpenADRv3
                               handler => HTTPClient.OnGetProgramsHTTPRequest += handler,
                               handler => HTTPClient.OnGetProgramsHTTPRequest -= handler,
                               "GetPrograms", "locations", "requests", "all").
-                    RegisterDefaultConsoleLogTarget(this).
-                    RegisterDefaultDiscLogTarget(this);
+                    RegisterDefaultConsoleLogTargetX(this).
+                    RegisterDefaultDiscLogTargetX(this);
 
                 RegisterEvent("GetProgramsResponse",
                               handler => HTTPClient.OnGetProgramsHTTPResponse += handler,
                               handler => HTTPClient.OnGetProgramsHTTPResponse -= handler,
                               "GetPrograms", "locations", "responses", "all").
-                    RegisterDefaultConsoleLogTarget(this).
-                    RegisterDefaultDiscLogTarget(this);
+                    RegisterDefaultConsoleLogTargetX(this).
+                    RegisterDefaultDiscLogTargetX(this);
 
 
                 RegisterEvent("PostProgramsRequest",
                               handler => HTTPClient.OnPostProgramsHTTPRequest += handler,
                               handler => HTTPClient.OnPostProgramsHTTPRequest -= handler,
                               "PostPrograms", "locations", "requests", "all").
-                    RegisterDefaultConsoleLogTarget(this).
-                    RegisterDefaultDiscLogTarget(this);
+                    RegisterDefaultConsoleLogTargetX(this).
+                    RegisterDefaultDiscLogTargetX(this);
 
                 RegisterEvent("PostProgramsResponse",
                               handler => HTTPClient.OnPostProgramsHTTPResponse += handler,
                               handler => HTTPClient.OnPostProgramsHTTPResponse -= handler,
                               "PostPrograms", "locations", "responses", "all").
-                    RegisterDefaultConsoleLogTarget(this).
-                    RegisterDefaultDiscLogTarget(this);
+                    RegisterDefaultConsoleLogTargetX(this).
+                    RegisterDefaultDiscLogTargetX(this);
 
 
 
@@ -115,45 +115,45 @@ namespace cloud.charging.open.protocols.OpenADRv3
                               handler => HTTPClient.OnGetProgramHTTPRequest += handler,
                               handler => HTTPClient.OnGetProgramHTTPRequest -= handler,
                               "GetProgram", "locations", "requests", "all").
-                    RegisterDefaultConsoleLogTarget(this).
-                    RegisterDefaultDiscLogTarget(this);
+                    RegisterDefaultConsoleLogTargetX(this).
+                    RegisterDefaultDiscLogTargetX(this);
 
                 RegisterEvent("GetProgramResponse",
                               handler => HTTPClient.OnGetProgramHTTPResponse += handler,
                               handler => HTTPClient.OnGetProgramHTTPResponse -= handler,
                               "GetProgram", "locations", "responses", "all").
-                    RegisterDefaultConsoleLogTarget(this).
-                    RegisterDefaultDiscLogTarget(this);
+                    RegisterDefaultConsoleLogTargetX(this).
+                    RegisterDefaultDiscLogTargetX(this);
 
 
                 RegisterEvent("PutProgramRequest",
                               handler => HTTPClient.OnPutProgramHTTPRequest += handler,
                               handler => HTTPClient.OnPutProgramHTTPRequest -= handler,
                               "PutProgram", "locations", "requests", "all").
-                    RegisterDefaultConsoleLogTarget(this).
-                    RegisterDefaultDiscLogTarget(this);
+                    RegisterDefaultConsoleLogTargetX(this).
+                    RegisterDefaultDiscLogTargetX(this);
 
                 RegisterEvent("PutProgramResponse",
                               handler => HTTPClient.OnPutProgramHTTPResponse += handler,
                               handler => HTTPClient.OnPutProgramHTTPResponse -= handler,
                               "PutProgram", "locations", "responses", "all").
-                    RegisterDefaultConsoleLogTarget(this).
-                    RegisterDefaultDiscLogTarget(this);
+                    RegisterDefaultConsoleLogTargetX(this).
+                    RegisterDefaultDiscLogTargetX(this);
 
 
                 RegisterEvent("DeleteProgramRequest",
                               handler => HTTPClient.OnDeleteProgramHTTPRequest += handler,
                               handler => HTTPClient.OnDeleteProgramHTTPRequest -= handler,
                               "DeleteProgram", "locations", "requests", "all").
-                    RegisterDefaultConsoleLogTarget(this).
-                    RegisterDefaultDiscLogTarget(this);
+                    RegisterDefaultConsoleLogTargetX(this).
+                    RegisterDefaultDiscLogTargetX(this);
 
                 RegisterEvent("DeleteProgramResponse",
                               handler => HTTPClient.OnDeleteProgramHTTPResponse += handler,
                               handler => HTTPClient.OnDeleteProgramHTTPResponse -= handler,
                               "DeleteProgram", "locations", "responses", "all").
-                    RegisterDefaultConsoleLogTarget(this).
-                    RegisterDefaultDiscLogTarget(this);
+                    RegisterDefaultConsoleLogTargetX(this).
+                    RegisterDefaultDiscLogTargetX(this);
 
                 #endregion
 

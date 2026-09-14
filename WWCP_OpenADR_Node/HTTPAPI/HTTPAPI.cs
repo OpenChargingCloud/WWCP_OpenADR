@@ -40,8 +40,8 @@ namespace cloud.charging.open.protocols.OpenADRv3.Node
     /// <summary>
     /// The OpenADR Networking Node HTTP API.
     /// </summary>
-    public class HTTPAPI : AHTTPAPIExtension<HTTPExtAPI>,
-                           IHTTPAPIExtension<HTTPExtAPI>
+    public class HTTPAPI : AHTTPAPIExtension<HTTPExtAPI>
+                         //IHTTPAPIExtension<HTTPExtAPI>
     {
 
         #region Data
@@ -136,9 +136,9 @@ namespace cloud.charging.open.protocols.OpenADRv3.Node
                        Formatting                                  JSONFormatting         = Formatting.None)
 
             : base(HTTPAPI,
-                   HTTPServerName ?? DefaultHTTPServerName,
                    URLPathPrefix,
-                   BasePath)
+                   BasePath,
+                   HTTPServerName:  HTTPServerName ?? DefaultHTTPServerName)
 
         {
 
@@ -156,13 +156,18 @@ namespace cloud.charging.open.protocols.OpenADRv3.Node
             var LogfilePrefix        = "HTTPSSEs" + Path.DirectorySeparatorChar;
 
             this.EventLog            = HTTPBaseAPI.AddJSONEventSource(
-                                           EventIdentification:      EventLogId,
-                                           URLTemplate:              this.URLPathPrefix + "/events",
+                                           EventSourceId:            EventLogId,
                                            MaxNumberOfCachedEvents:  10000,
                                            RetryInterval:            TimeSpan.FromSeconds(5),
                                            EnableLogging:            !EventLoggingDisabled,
                                            LogfilePrefix:            LogfilePrefix
                                        );
+
+            // Creating an event source and mapping it onto a URL are two steps now.
+            HTTPBaseAPI.MapJSONEventSource(
+                this.EventLog,
+                this.URLPathPrefix + "/events"
+            );
 
             RegisterURITemplates();
 
@@ -279,20 +284,20 @@ namespace cloud.charging.open.protocols.OpenADRv3.Node
         private void RegisterURITemplates()
         {
 
-            HTTPBaseAPI.HTTPServer.AddAuth(request => {
+//            HTTPBaseAPI.HTTPServer.AddAuth(request => {
 
-                if (request.Path.ToString() == "/systemInfo"       ||
-                    request.Path.ToString() == "/webSocketClients" ||
-                    request.Path.ToString() == "/webSocketServers" ||
-                    request.Path.ToString() == "/ocppAdapter"      ||
-                    request.Path.ToString() == "/connections")
-                {
-                    return HTTPExtAPI.Anonymous;
-                }
+//                if (request.Path.ToString() == "/systemInfo"       ||
+//                    request.Path.ToString() == "/webSocketClients" ||
+//                    request.Path.ToString() == "/webSocketServers" ||
+//                    request.Path.ToString() == "/ocppAdapter"      ||
+//                    request.Path.ToString() == "/connections")
+//                {
+//                    return HTTPExtAPI.Anonymous;
+//                }
 
-                return null;
+//                return null;
 
-            });
+//            });
 
 
             #region / (HTTPRoot)
@@ -314,7 +319,7 @@ namespace cloud.charging.open.protocols.OpenADRv3.Node
             //                                         Server                     = DefaultHTTPServerName,
             //                                         Date                       = Timestamp.Now,
             //                                         AccessControlAllowOrigin   = "*",
-            //                                         AccessControlAllowMethods  = [ "OPTIONS", "GET" ],
+            //                                         AccessControlAllowMethods  = [ HTTPMethod.OPTIONS, HTTPMethod.GET ],
             //                                         AccessControlAllowHeaders  = [ "Authorization" ],
             //                                         ContentType                = HTTPContentType.Text.HTML_UTF8,
             //                                         Content                    = ("<html><body>" +
@@ -338,8 +343,7 @@ namespace cloud.charging.open.protocols.OpenADRv3.Node
             // curl -v -H "Accept: application/json" http://127.0.0.1:6000/systemInfo
             // curl -v -H "Accept: application/json" http://127.0.0.1:7000/systemInfo
             // ------------------------------------------------------------------------
-            HTTPBaseAPI.AddMethodCallback(
-                HTTPHostname.Any,
+            HTTPBaseAPI.AddHandler(
                 HTTPMethod.GET,
                 URLPathPrefix + "systemInfo",
                 HTTPContentType.Application.JSON_UTF8,
@@ -382,7 +386,7 @@ namespace cloud.charging.open.protocols.OpenADRv3.Node
                                    Server                     = HTTPServiceName,
                                    Date                       = Timestamp.Now,
                                    AccessControlAllowOrigin   = "*",
-                                   AccessControlAllowMethods  = [ "GET" ],
+                                   AccessControlAllowMethods  = [ HTTPMethod.GET ],
                                    AccessControlAllowHeaders  = [ "Content-Type", "Accept", "Authorization" ],
                                    ContentType                = HTTPContentType.Application.JSON_UTF8,
                                    Content                    = systemInfo.ToUTF8Bytes(jsonFormatting),

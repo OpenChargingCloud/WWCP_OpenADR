@@ -161,7 +161,7 @@ namespace cloud.charging.open.protocols.OpenADRv3.tests.HTTP
         {
 
             if (testOpenADR1 is not null)
-                await testOpenADR1.Shutdown();
+                await testOpenADR1.Stop();
 
             testOpenADR1               = null;
 

@@ -63,7 +63,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                     HTTPStatusCode              = HTTPStatusCode.BadRequest,
                     Allow                       = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE],
                     AccessControlAllowOrigin    = "*",
-                    AccessControlAllowMethods   = [ "OPTIONS", "GET", "PUT", "DELETE" ],
+                    AccessControlAllowMethods   = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE ],
                     AccessControlAllowHeaders   = [ "Content-Type", "Accept", "Authorization"],
                     AccessControlExposeHeaders  = [ "X-Request-ID", "X-Correlation-ID", "Link", "X-Total-Count", "X-Filtered-Count" ],
                     Connection                  = ConnectionType.Close
@@ -105,7 +105,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                     HTTPStatusCode              = HTTPStatusCode.BadRequest,
                     Allow                       = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE],
                     AccessControlAllowOrigin    = "*",
-                    AccessControlAllowMethods   = [ "OPTIONS", "GET", "PUT", "DELETE" ],
+                    AccessControlAllowMethods   = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE ],
                     AccessControlAllowHeaders   = [ "Content-Type", "Accept", "Authorization"],
                     AccessControlExposeHeaders  = [ "X-Request-ID", "X-Correlation-ID", "Link", "X-Total-Count", "X-Filtered-Count" ],
                     Connection                  = ConnectionType.Close
@@ -147,7 +147,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                     HTTPStatusCode              = HTTPStatusCode.BadRequest,
                     Allow                       = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE],
                     AccessControlAllowOrigin    = "*",
-                    AccessControlAllowMethods   = [ "OPTIONS", "GET", "PUT", "DELETE" ],
+                    AccessControlAllowMethods   = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE ],
                     AccessControlAllowHeaders   = [ "Content-Type", "Accept", "Authorization"],
                     AccessControlExposeHeaders  = [ "X-Request-ID", "X-Correlation-ID", "Link", "X-Total-Count", "X-Filtered-Count" ],
                     Connection                  = ConnectionType.Close
@@ -189,7 +189,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                     HTTPStatusCode              = HTTPStatusCode.BadRequest,
                     Allow                       = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE],
                     AccessControlAllowOrigin    = "*",
-                    AccessControlAllowMethods   = [ "OPTIONS", "GET", "PUT", "DELETE" ],
+                    AccessControlAllowMethods   = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE ],
                     AccessControlAllowHeaders   = [ "Content-Type", "Accept", "Authorization"],
                     AccessControlExposeHeaders  = [ "X-Request-ID", "X-Correlation-ID", "Link", "X-Total-Count", "X-Filtered-Count" ],
                     Connection                  = ConnectionType.Close
@@ -231,7 +231,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                     HTTPStatusCode              = HTTPStatusCode.BadRequest,
                     Allow                       = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE],
                     AccessControlAllowOrigin    = "*",
-                    AccessControlAllowMethods   = [ "OPTIONS", "GET", "PUT", "DELETE" ],
+                    AccessControlAllowMethods   = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE ],
                     AccessControlAllowHeaders   = [ "Content-Type", "Accept", "Authorization"],
                     AccessControlExposeHeaders  = [ "X-Request-ID", "X-Correlation-ID", "Link", "X-Total-Count", "X-Filtered-Count" ],
                     Connection                  = ConnectionType.Close
@@ -283,7 +283,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                 HTTPStatusCode              = HTTPStatusCode.BadRequest,
                 Allow                       = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE],
                 AccessControlAllowOrigin    = "*",
-                AccessControlAllowMethods   = [ "OPTIONS", "GET", "PUT", "DELETE" ],
+                AccessControlAllowMethods   = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE ],
                 AccessControlAllowHeaders   = [ "Content-Type", "Accept", "Authorization"],
                 AccessControlExposeHeaders  = [ "X-Request-ID", "X-Correlation-ID", "Link", "X-Total-Count", "X-Filtered-Count" ],
                 Connection                  = ConnectionType.Close
@@ -301,8 +301,8 @@ namespace cloud.charging.open.protocols.OpenADRv3
     /// <summary>
     /// The OpenADR HTTP API.
     /// </summary>
-    public class OpenADRHTTPAPI : AHTTPAPIExtension<HTTPExtAPI>,
-                                  IHTTPAPIExtension<HTTPExtAPI>
+    public class OpenADRHTTPAPI : AHTTPAPIExtension<HTTPExtAPI>
+                                //IHTTPAPIExtension<HTTPExtAPI>
     {
 
         #region Data
@@ -370,13 +370,15 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="Timestamp">The timestamp of the request.</param>
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
-        protected internal Task GET_programs__HTTPRequest(DateTime     Timestamp,
-                                                          HTTPAPI      API,
-                                                          HTTPRequest  Request)
+        protected internal Task GET_programs__HTTPRequest(DateTimeOffset     Timestamp,
+                                                          HTTPAPI            API,
+                                                          HTTPRequest        Request,
+                                                          CancellationToken  CancellationToken)
 
             => OnGET_programs__HTTPRequest?.WhenAll(Timestamp,
                                                     API,
-                                                    Request) ?? Task.CompletedTask;
+                                                    Request,
+                                                    CancellationToken) ?? Task.CompletedTask;
 
         /// <summary>
         /// An event sent whenever a GET ~/programs HTTP response was sent.
@@ -385,15 +387,17 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
         /// <param name="Response">A HTTP response.</param>
-        protected internal Task GET_programs__HTTPResponse(DateTime      Timestamp,
-                                                           HTTPAPI       API,
-                                                           HTTPRequest   Request,
-                                                           HTTPResponse  Response)
+        protected internal Task GET_programs__HTTPResponse(DateTimeOffset     Timestamp,
+                                                           HTTPAPI            API,
+                                                           HTTPRequest        Request,
+                                                           HTTPResponse       Response,
+                                                           CancellationToken  CancellationToken)
 
             => OnGET_programs__HTTPResponse?.WhenAll(Timestamp,
                                                      API,
                                                      Request,
-                                                     Response) ?? Task.CompletedTask;
+                                                     Response,
+                                                     CancellationToken) ?? Task.CompletedTask;
 
         #endregion
 
@@ -417,13 +421,15 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="Timestamp">The timestamp of the request.</param>
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
-        protected internal Task POST_programs__HTTPRequest(DateTime     Timestamp,
-                                                           HTTPAPI      API,
-                                                           HTTPRequest  Request)
+        protected internal Task POST_programs__HTTPRequest(DateTimeOffset     Timestamp,
+                                                           HTTPAPI            API,
+                                                           HTTPRequest        Request,
+                                                           CancellationToken  CancellationToken)
 
             => OnPOST_programs__HTTPRequest?.WhenAll(Timestamp,
                                                      API,
-                                                     Request) ?? Task.CompletedTask;
+                                                     Request,
+                                                     CancellationToken) ?? Task.CompletedTask;
 
         /// <summary>
         /// An event sent whenever a POST ~/programs HTTP response was sent.
@@ -432,15 +438,17 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
         /// <param name="Response">A HTTP response.</param>
-        protected internal Task POST_programs__HTTPResponse(DateTime      Timestamp,
-                                                            HTTPAPI       API,
-                                                            HTTPRequest   Request,
-                                                            HTTPResponse  Response)
+        protected internal Task POST_programs__HTTPResponse(DateTimeOffset     Timestamp,
+                                                            HTTPAPI            API,
+                                                            HTTPRequest        Request,
+                                                            HTTPResponse       Response,
+                                                            CancellationToken  CancellationToken)
 
             => OnPOST_programs__HTTPResponse?.WhenAll(Timestamp,
                                                       API,
                                                       Request,
-                                                      Response) ?? Task.CompletedTask;
+                                                      Response,
+                                                      CancellationToken) ?? Task.CompletedTask;
 
         #endregion
 
@@ -465,13 +473,15 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="Timestamp">The timestamp of the request.</param>
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
-        protected internal Task GET_program__HTTPRequest(DateTime     Timestamp,
-                                                         HTTPAPI      API,
-                                                         HTTPRequest  Request)
+        protected internal Task GET_program__HTTPRequest(DateTimeOffset     Timestamp,
+                                                         HTTPAPI            API,
+                                                         HTTPRequest        Request,
+                                                         CancellationToken  CancellationToken)
 
             => OnGET_program__HTTPRequest?.WhenAll(Timestamp,
                                                    API,
-                                                   Request) ?? Task.CompletedTask;
+                                                   Request,
+                                                   CancellationToken) ?? Task.CompletedTask;
 
         /// <summary>
         /// An event sent whenever a GET ~/programs/{programId} HTTP response was sent.
@@ -480,15 +490,17 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
         /// <param name="Response">A HTTP response.</param>
-        protected internal Task GET_program__HTTPResponse(DateTime      Timestamp,
-                                                          HTTPAPI       API,
-                                                          HTTPRequest   Request,
-                                                          HTTPResponse  Response)
+        protected internal Task GET_program__HTTPResponse(DateTimeOffset     Timestamp,
+                                                          HTTPAPI            API,
+                                                          HTTPRequest        Request,
+                                                          HTTPResponse       Response,
+                                                          CancellationToken  CancellationToken)
 
             => OnGET_program__HTTPResponse?.WhenAll(Timestamp,
                                                     API,
                                                     Request,
-                                                    Response) ?? Task.CompletedTask;
+                                                    Response,
+                                                    CancellationToken) ?? Task.CompletedTask;
 
         #endregion
 
@@ -512,13 +524,15 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="Timestamp">The timestamp of the request.</param>
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
-        protected internal Task PUT_program__HTTPRequest(DateTime     Timestamp,
-                                                         HTTPAPI      API,
-                                                         HTTPRequest  Request)
+        protected internal Task PUT_program__HTTPRequest(DateTimeOffset     Timestamp,
+                                                         HTTPAPI            API,
+                                                         HTTPRequest        Request,
+                                                         CancellationToken  CancellationToken)
 
             => OnPUT_program__HTTPRequest?.WhenAll(Timestamp,
                                                    API,
-                                                   Request) ?? Task.CompletedTask;
+                                                   Request,
+                                                   CancellationToken) ?? Task.CompletedTask;
 
         /// <summary>
         /// An event sent whenever a PUT ~/programs/{programId} HTTP response was sent.
@@ -527,15 +541,17 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
         /// <param name="Response">A HTTP response.</param>
-        protected internal Task PUT_program__HTTPResponse(DateTime      Timestamp,
-                                                          HTTPAPI       API,
-                                                          HTTPRequest   Request,
-                                                          HTTPResponse  Response)
+        protected internal Task PUT_program__HTTPResponse(DateTimeOffset     Timestamp,
+                                                          HTTPAPI            API,
+                                                          HTTPRequest        Request,
+                                                          HTTPResponse       Response,
+                                                          CancellationToken  CancellationToken)
 
             => OnPUT_program__HTTPResponse?.WhenAll(Timestamp,
                                                     API,
                                                     Request,
-                                                    Response) ?? Task.CompletedTask;
+                                                    Response,
+                                                    CancellationToken) ?? Task.CompletedTask;
 
         #endregion
 
@@ -559,13 +575,15 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="Timestamp">The timestamp of the request.</param>
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
-        protected internal Task DELETE_program__HTTPRequest(DateTime     Timestamp,
-                                                            HTTPAPI      API,
-                                                            HTTPRequest  Request)
+        protected internal Task DELETE_program__HTTPRequest(DateTimeOffset     Timestamp,
+                                                            HTTPAPI            API,
+                                                            HTTPRequest        Request,
+                                                            CancellationToken  CancellationToken)
 
             => OnDELETE_program__HTTPRequest?.WhenAll(Timestamp,
                                                       API,
-                                                      Request) ?? Task.CompletedTask;
+                                                      Request,
+                                                      CancellationToken) ?? Task.CompletedTask;
 
         /// <summary>
         /// An event sent whenever a DELETE ~/programs/{programId} HTTP response was sent.
@@ -574,15 +592,17 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
         /// <param name="Response">A HTTP response.</param>
-        protected internal Task DELETE_program__HTTPResponse(DateTime      Timestamp,
-                                                             HTTPAPI       API,
-                                                             HTTPRequest   Request,
-                                                             HTTPResponse  Response)
+        protected internal Task DELETE_program__HTTPResponse(DateTimeOffset     Timestamp,
+                                                             HTTPAPI            API,
+                                                             HTTPRequest        Request,
+                                                             HTTPResponse       Response,
+                                                             CancellationToken  CancellationToken)
 
             => OnDELETE_program__HTTPResponse?.WhenAll(Timestamp,
                                                        API,
                                                        Request,
-                                                       Response) ?? Task.CompletedTask;
+                                                       Response,
+                                                       CancellationToken) ?? Task.CompletedTask;
 
         #endregion
 
@@ -610,13 +630,15 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="Timestamp">The timestamp of the request.</param>
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
-        protected internal Task GET_reports__HTTPRequest(DateTime     Timestamp,
-                                                         HTTPAPI      API,
-                                                         HTTPRequest  Request)
+        protected internal Task GET_reports__HTTPRequest(DateTimeOffset     Timestamp,
+                                                         HTTPAPI            API,
+                                                         HTTPRequest        Request,
+                                                         CancellationToken  CancellationToken)
 
             => OnGET_reports__HTTPRequest?.WhenAll(Timestamp,
                                                    API,
-                                                   Request) ?? Task.CompletedTask;
+                                                   Request,
+                                                   CancellationToken) ?? Task.CompletedTask;
 
         /// <summary>
         /// An event sent whenever a GET ~/reports HTTP response was sent.
@@ -625,15 +647,17 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
         /// <param name="Response">A HTTP response.</param>
-        protected internal Task GET_reports__HTTPResponse(DateTime      Timestamp,
-                                                          HTTPAPI       API,
-                                                          HTTPRequest   Request,
-                                                          HTTPResponse  Response)
+        protected internal Task GET_reports__HTTPResponse(DateTimeOffset     Timestamp,
+                                                          HTTPAPI            API,
+                                                          HTTPRequest        Request,
+                                                          HTTPResponse       Response,
+                                                          CancellationToken  CancellationToken)
 
             => OnGET_reports__HTTPResponse?.WhenAll(Timestamp,
                                                     API,
                                                     Request,
-                                                    Response) ?? Task.CompletedTask;
+                                                    Response,
+                                                    CancellationToken) ?? Task.CompletedTask;
 
         #endregion
 
@@ -657,13 +681,15 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="Timestamp">The timestamp of the request.</param>
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
-        protected internal Task POST_reports__HTTPRequest(DateTime     Timestamp,
-                                                          HTTPAPI      API,
-                                                          HTTPRequest  Request)
+        protected internal Task POST_reports__HTTPRequest(DateTimeOffset     Timestamp,
+                                                          HTTPAPI            API,
+                                                          HTTPRequest        Request,
+                                                          CancellationToken  CancellationToken)
 
             => OnPOST_reports__HTTPRequest?.WhenAll(Timestamp,
                                                     API,
-                                                    Request) ?? Task.CompletedTask;
+                                                    Request,
+                                                    CancellationToken) ?? Task.CompletedTask;
 
         /// <summary>
         /// An event sent whenever a POST ~/reports HTTP response was sent.
@@ -672,15 +698,17 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
         /// <param name="Response">A HTTP response.</param>
-        protected internal Task POST_reports__HTTPResponse(DateTime      Timestamp,
-                                                           HTTPAPI       API,
-                                                           HTTPRequest   Request,
-                                                           HTTPResponse  Response)
+        protected internal Task POST_reports__HTTPResponse(DateTimeOffset     Timestamp,
+                                                           HTTPAPI            API,
+                                                           HTTPRequest        Request,
+                                                           HTTPResponse       Response,
+                                                           CancellationToken  CancellationToken)
 
             => OnPOST_reports__HTTPResponse?.WhenAll(Timestamp,
                                                      API,
                                                      Request,
-                                                     Response) ?? Task.CompletedTask;
+                                                     Response,
+                                                     CancellationToken) ?? Task.CompletedTask;
 
         #endregion
 
@@ -705,13 +733,15 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="Timestamp">The timestamp of the request.</param>
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
-        protected internal Task GET_report__HTTPRequest(DateTime     Timestamp,
-                                                        HTTPAPI      API,
-                                                        HTTPRequest  Request)
+        protected internal Task GET_report__HTTPRequest(DateTimeOffset     Timestamp,
+                                                        HTTPAPI            API,
+                                                        HTTPRequest        Request,
+                                                        CancellationToken  CancellationToken)
 
             => OnGET_report__HTTPRequest?.WhenAll(Timestamp,
                                                   API,
-                                                  Request) ?? Task.CompletedTask;
+                                                  Request,
+                                                  CancellationToken) ?? Task.CompletedTask;
 
         /// <summary>
         /// An event sent whenever a GET ~/reports/{reportId} HTTP response was sent.
@@ -720,15 +750,17 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
         /// <param name="Response">A HTTP response.</param>
-        protected internal Task GET_report__HTTPResponse(DateTime      Timestamp,
-                                                         HTTPAPI       API,
-                                                         HTTPRequest   Request,
-                                                         HTTPResponse  Response)
+        protected internal Task GET_report__HTTPResponse(DateTimeOffset     Timestamp,
+                                                         HTTPAPI            API,
+                                                         HTTPRequest        Request,
+                                                         HTTPResponse       Response,
+                                                         CancellationToken  CancellationToken)
 
             => OnGET_report__HTTPResponse?.WhenAll(Timestamp,
                                                    API,
                                                    Request,
-                                                   Response) ?? Task.CompletedTask;
+                                                   Response,
+                                                   CancellationToken) ?? Task.CompletedTask;
 
         #endregion
 
@@ -752,13 +784,15 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="Timestamp">The timestamp of the request.</param>
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
-        protected internal Task PUT_report__HTTPRequest(DateTime     Timestamp,
-                                                        HTTPAPI      API,
-                                                        HTTPRequest  Request)
+        protected internal Task PUT_report__HTTPRequest(DateTimeOffset     Timestamp,
+                                                        HTTPAPI            API,
+                                                        HTTPRequest        Request,
+                                                        CancellationToken  CancellationToken)
 
             => OnPUT_report__HTTPRequest?.WhenAll(Timestamp,
                                                   API,
-                                                  Request) ?? Task.CompletedTask;
+                                                  Request,
+                                                  CancellationToken) ?? Task.CompletedTask;
 
         /// <summary>
         /// An event sent whenever a PUT ~/reports/{reportId} HTTP response was sent.
@@ -767,15 +801,17 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
         /// <param name="Response">A HTTP response.</param>
-        protected internal Task PUT_report__HTTPResponse(DateTime      Timestamp,
-                                                         HTTPAPI       API,
-                                                         HTTPRequest   Request,
-                                                         HTTPResponse  Response)
+        protected internal Task PUT_report__HTTPResponse(DateTimeOffset     Timestamp,
+                                                         HTTPAPI            API,
+                                                         HTTPRequest        Request,
+                                                         HTTPResponse       Response,
+                                                         CancellationToken  CancellationToken)
 
             => OnPUT_report__HTTPResponse?.WhenAll(Timestamp,
                                                    API,
                                                    Request,
-                                                   Response) ?? Task.CompletedTask;
+                                                   Response,
+                                                   CancellationToken) ?? Task.CompletedTask;
 
         #endregion
 
@@ -799,13 +835,15 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="Timestamp">The timestamp of the request.</param>
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
-        protected internal Task DELETE_report__HTTPRequest(DateTime     Timestamp,
-                                                           HTTPAPI      API,
-                                                           HTTPRequest  Request)
+        protected internal Task DELETE_report__HTTPRequest(DateTimeOffset     Timestamp,
+                                                           HTTPAPI            API,
+                                                           HTTPRequest        Request,
+                                                           CancellationToken  CancellationToken)
 
             => OnDELETE_report__HTTPRequest?.WhenAll(Timestamp,
                                                      API,
-                                                     Request) ?? Task.CompletedTask;
+                                                     Request,
+                                                     CancellationToken) ?? Task.CompletedTask;
 
         /// <summary>
         /// An event sent whenever a DELETE ~/reports/{reportId} HTTP response was sent.
@@ -814,15 +852,17 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
         /// <param name="Response">A HTTP response.</param>
-        protected internal Task DELETE_report__HTTPResponse(DateTime      Timestamp,
-                                                            HTTPAPI       API,
-                                                            HTTPRequest   Request,
-                                                            HTTPResponse  Response)
+        protected internal Task DELETE_report__HTTPResponse(DateTimeOffset     Timestamp,
+                                                            HTTPAPI            API,
+                                                            HTTPRequest        Request,
+                                                            HTTPResponse       Response,
+                                                            CancellationToken  CancellationToken)
 
             => OnDELETE_report__HTTPResponse?.WhenAll(Timestamp,
                                                       API,
                                                       Request,
-                                                      Response) ?? Task.CompletedTask;
+                                                      Response,
+                                                      CancellationToken) ?? Task.CompletedTask;
 
         #endregion
 
@@ -850,13 +890,15 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="Timestamp">The timestamp of the request.</param>
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
-        protected internal Task GET_events__HTTPRequest(DateTime     Timestamp,
-                                                        HTTPAPI      API,
-                                                        HTTPRequest  Request)
+        protected internal Task GET_events__HTTPRequest(DateTimeOffset     Timestamp,
+                                                        HTTPAPI            API,
+                                                        HTTPRequest        Request,
+                                                        CancellationToken  CancellationToken)
 
             => OnGET_events__HTTPRequest?.WhenAll(Timestamp,
                                                   API,
-                                                  Request) ?? Task.CompletedTask;
+                                                  Request,
+                                                  CancellationToken) ?? Task.CompletedTask;
 
         /// <summary>
         /// An event sent whenever a GET ~/events HTTP response was sent.
@@ -865,15 +907,17 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
         /// <param name="Response">A HTTP response.</param>
-        protected internal Task GET_events__HTTPResponse(DateTime      Timestamp,
-                                                         HTTPAPI       API,
-                                                         HTTPRequest   Request,
-                                                         HTTPResponse  Response)
+        protected internal Task GET_events__HTTPResponse(DateTimeOffset     Timestamp,
+                                                         HTTPAPI            API,
+                                                         HTTPRequest        Request,
+                                                         HTTPResponse       Response,
+                                                         CancellationToken  CancellationToken)
 
             => OnGET_events__HTTPResponse?.WhenAll(Timestamp,
                                                    API,
                                                    Request,
-                                                   Response) ?? Task.CompletedTask;
+                                                   Response,
+                                                   CancellationToken) ?? Task.CompletedTask;
 
         #endregion
 
@@ -897,13 +941,15 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="Timestamp">The timestamp of the request.</param>
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
-        protected internal Task POST_events__HTTPRequest(DateTime     Timestamp,
-                                                         HTTPAPI      API,
-                                                         HTTPRequest  Request)
+        protected internal Task POST_events__HTTPRequest(DateTimeOffset     Timestamp,
+                                                         HTTPAPI            API,
+                                                         HTTPRequest        Request,
+                                                         CancellationToken  CancellationToken)
 
             => OnPOST_events__HTTPRequest?.WhenAll(Timestamp,
                                                    API,
-                                                   Request) ?? Task.CompletedTask;
+                                                   Request,
+                                                   CancellationToken) ?? Task.CompletedTask;
 
         /// <summary>
         /// An event sent whenever a POST ~/events HTTP response was sent.
@@ -912,15 +958,17 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
         /// <param name="Response">A HTTP response.</param>
-        protected internal Task POST_events__HTTPResponse(DateTime      Timestamp,
-                                                          HTTPAPI       API,
-                                                          HTTPRequest   Request,
-                                                          HTTPResponse  Response)
+        protected internal Task POST_events__HTTPResponse(DateTimeOffset     Timestamp,
+                                                          HTTPAPI            API,
+                                                          HTTPRequest        Request,
+                                                          HTTPResponse       Response,
+                                                          CancellationToken  CancellationToken)
 
             => OnPOST_events__HTTPResponse?.WhenAll(Timestamp,
                                                     API,
                                                     Request,
-                                                    Response) ?? Task.CompletedTask;
+                                                    Response,
+                                                    CancellationToken) ?? Task.CompletedTask;
 
         #endregion
 
@@ -945,13 +993,15 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="Timestamp">The timestamp of the request.</param>
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
-        protected internal Task GET_event__HTTPRequest(DateTime     Timestamp,
-                                                       HTTPAPI      API,
-                                                       HTTPRequest  Request)
+        protected internal Task GET_event__HTTPRequest(DateTimeOffset     Timestamp,
+                                                       HTTPAPI            API,
+                                                       HTTPRequest        Request,
+                                                       CancellationToken  CancellationToken)
 
             => OnGET_event__HTTPRequest?.WhenAll(Timestamp,
                                                  API,
-                                                 Request) ?? Task.CompletedTask;
+                                                 Request,
+                                                 CancellationToken) ?? Task.CompletedTask;
 
         /// <summary>
         /// An event sent whenever a GET ~/events/{eventId} HTTP response was sent.
@@ -960,15 +1010,17 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
         /// <param name="Response">A HTTP response.</param>
-        protected internal Task GET_event__HTTPResponse(DateTime      Timestamp,
-                                                        HTTPAPI       API,
-                                                        HTTPRequest   Request,
-                                                        HTTPResponse  Response)
+        protected internal Task GET_event__HTTPResponse(DateTimeOffset     Timestamp,
+                                                        HTTPAPI            API,
+                                                        HTTPRequest        Request,
+                                                        HTTPResponse       Response,
+                                                        CancellationToken  CancellationToken)
 
             => OnGET_event__HTTPResponse?.WhenAll(Timestamp,
                                                   API,
                                                   Request,
-                                                  Response) ?? Task.CompletedTask;
+                                                  Response,
+                                                  CancellationToken) ?? Task.CompletedTask;
 
         #endregion
 
@@ -992,13 +1044,15 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="Timestamp">The timestamp of the request.</param>
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
-        protected internal Task PUT_event__HTTPRequest(DateTime     Timestamp,
-                                                       HTTPAPI      API,
-                                                       HTTPRequest  Request)
+        protected internal Task PUT_event__HTTPRequest(DateTimeOffset     Timestamp,
+                                                       HTTPAPI            API,
+                                                       HTTPRequest        Request,
+                                                       CancellationToken  CancellationToken)
 
             => OnPUT_event__HTTPRequest?.WhenAll(Timestamp,
                                                  API,
-                                                 Request) ?? Task.CompletedTask;
+                                                 Request,
+                                                 CancellationToken) ?? Task.CompletedTask;
 
         /// <summary>
         /// An event sent whenever a PUT ~/events/{eventId} HTTP response was sent.
@@ -1007,15 +1061,17 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
         /// <param name="Response">A HTTP response.</param>
-        protected internal Task PUT_event__HTTPResponse(DateTime      Timestamp,
-                                                        HTTPAPI       API,
-                                                        HTTPRequest   Request,
-                                                        HTTPResponse  Response)
+        protected internal Task PUT_event__HTTPResponse(DateTimeOffset     Timestamp,
+                                                        HTTPAPI            API,
+                                                        HTTPRequest        Request,
+                                                        HTTPResponse       Response,
+                                                        CancellationToken  CancellationToken)
 
             => OnPUT_event__HTTPResponse?.WhenAll(Timestamp,
                                                   API,
                                                   Request,
-                                                  Response) ?? Task.CompletedTask;
+                                                  Response,
+                                                  CancellationToken) ?? Task.CompletedTask;
 
         #endregion
 
@@ -1039,13 +1095,15 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="Timestamp">The timestamp of the request.</param>
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
-        protected internal Task DELETE_event__HTTPRequest(DateTime     Timestamp,
-                                                          HTTPAPI      API,
-                                                          HTTPRequest  Request)
+        protected internal Task DELETE_event__HTTPRequest(DateTimeOffset     Timestamp,
+                                                          HTTPAPI            API,
+                                                          HTTPRequest        Request,
+                                                          CancellationToken  CancellationToken)
 
             => OnDELETE_event__HTTPRequest?.WhenAll(Timestamp,
                                                     API,
-                                                    Request) ?? Task.CompletedTask;
+                                                    Request,
+                                                    CancellationToken) ?? Task.CompletedTask;
 
         /// <summary>
         /// An event sent whenever a DELETE ~/events/{eventId} HTTP response was sent.
@@ -1054,15 +1112,17 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
         /// <param name="Response">A HTTP response.</param>
-        protected internal Task DELETE_event__HTTPResponse(DateTime      Timestamp,
-                                                           HTTPAPI       API,
-                                                           HTTPRequest   Request,
-                                                           HTTPResponse  Response)
+        protected internal Task DELETE_event__HTTPResponse(DateTimeOffset     Timestamp,
+                                                           HTTPAPI            API,
+                                                           HTTPRequest        Request,
+                                                           HTTPResponse       Response,
+                                                           CancellationToken  CancellationToken)
 
             => OnDELETE_event__HTTPResponse?.WhenAll(Timestamp,
                                                      API,
                                                      Request,
-                                                     Response) ?? Task.CompletedTask;
+                                                     Response,
+                                                     CancellationToken) ?? Task.CompletedTask;
 
         #endregion
 
@@ -1090,13 +1150,15 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="Timestamp">The timestamp of the request.</param>
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
-        protected internal Task GET_subscriptions__HTTPRequest(DateTime     Timestamp,
-                                                               HTTPAPI      API,
-                                                               HTTPRequest  Request)
+        protected internal Task GET_subscriptions__HTTPRequest(DateTimeOffset     Timestamp,
+                                                               HTTPAPI            API,
+                                                               HTTPRequest        Request,
+                                                               CancellationToken  CancellationToken)
 
             => OnGET_subscriptions__HTTPRequest?.WhenAll(Timestamp,
                                                          API,
-                                                         Request) ?? Task.CompletedTask;
+                                                         Request,
+                                                         CancellationToken) ?? Task.CompletedTask;
 
         /// <summary>
         /// An event sent whenever a GET ~/subscriptions HTTP response was sent.
@@ -1105,15 +1167,17 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
         /// <param name="Response">A HTTP response.</param>
-        protected internal Task GET_subscriptions__HTTPResponse(DateTime      Timestamp,
-                                                                HTTPAPI       API,
-                                                                HTTPRequest   Request,
-                                                                HTTPResponse  Response)
+        protected internal Task GET_subscriptions__HTTPResponse(DateTimeOffset     Timestamp,
+                                                                HTTPAPI            API,
+                                                                HTTPRequest        Request,
+                                                                HTTPResponse       Response,
+                                                                CancellationToken  CancellationToken)
 
             => OnGET_subscriptions__HTTPResponse?.WhenAll(Timestamp,
                                                           API,
                                                           Request,
-                                                          Response) ?? Task.CompletedTask;
+                                                          Response,
+                                                          CancellationToken) ?? Task.CompletedTask;
 
         #endregion
 
@@ -1137,13 +1201,15 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="Timestamp">The timestamp of the request.</param>
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
-        protected internal Task POST_subscriptions__HTTPRequest(DateTime     Timestamp,
-                                                                HTTPAPI      API,
-                                                                HTTPRequest  Request)
+        protected internal Task POST_subscriptions__HTTPRequest(DateTimeOffset     Timestamp,
+                                                                HTTPAPI            API,
+                                                                HTTPRequest        Request,
+                                                                CancellationToken  CancellationToken)
 
             => OnPOST_subscriptions__HTTPRequest?.WhenAll(Timestamp,
                                                           API,
-                                                          Request) ?? Task.CompletedTask;
+                                                          Request,
+                                                          CancellationToken) ?? Task.CompletedTask;
 
         /// <summary>
         /// An event sent whenever a POST ~/subscriptions HTTP response was sent.
@@ -1152,15 +1218,17 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
         /// <param name="Response">A HTTP response.</param>
-        protected internal Task POST_subscriptions__HTTPResponse(DateTime      Timestamp,
-                                                                 HTTPAPI       API,
-                                                                 HTTPRequest   Request,
-                                                                 HTTPResponse  Response)
+        protected internal Task POST_subscriptions__HTTPResponse(DateTimeOffset     Timestamp,
+                                                                 HTTPAPI            API,
+                                                                 HTTPRequest        Request,
+                                                                 HTTPResponse       Response,
+                                                                 CancellationToken  CancellationToken)
 
             => OnPOST_subscriptions__HTTPResponse?.WhenAll(Timestamp,
                                                            API,
                                                            Request,
-                                                           Response) ?? Task.CompletedTask;
+                                                           Response,
+                                                           CancellationToken) ?? Task.CompletedTask;
 
         #endregion
 
@@ -1185,13 +1253,15 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="Timestamp">The timestamp of the request.</param>
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
-        protected internal Task GET_subscription__HTTPRequest(DateTime     Timestamp,
-                                                              HTTPAPI      API,
-                                                              HTTPRequest  Request)
+        protected internal Task GET_subscription__HTTPRequest(DateTimeOffset     Timestamp,
+                                                              HTTPAPI            API,
+                                                              HTTPRequest        Request,
+                                                              CancellationToken  CancellationToken)
 
             => OnGET_subscription__HTTPRequest?.WhenAll(Timestamp,
                                                         API,
-                                                        Request) ?? Task.CompletedTask;
+                                                        Request,
+                                                        CancellationToken) ?? Task.CompletedTask;
 
         /// <summary>
         /// An event sent whenever a GET ~/subscriptions/{subscriptionId} HTTP response was sent.
@@ -1200,15 +1270,17 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
         /// <param name="Response">A HTTP response.</param>
-        protected internal Task GET_subscription__HTTPResponse(DateTime      Timestamp,
-                                                               HTTPAPI       API,
-                                                               HTTPRequest   Request,
-                                                               HTTPResponse  Response)
+        protected internal Task GET_subscription__HTTPResponse(DateTimeOffset     Timestamp,
+                                                               HTTPAPI            API,
+                                                               HTTPRequest        Request,
+                                                               HTTPResponse       Response,
+                                                               CancellationToken  CancellationToken)
 
             => OnGET_subscription__HTTPResponse?.WhenAll(Timestamp,
                                                          API,
                                                          Request,
-                                                         Response) ?? Task.CompletedTask;
+                                                         Response,
+                                                         CancellationToken) ?? Task.CompletedTask;
 
         #endregion
 
@@ -1232,13 +1304,15 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="Timestamp">The timestamp of the request.</param>
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
-        protected internal Task PUT_subscription__HTTPRequest(DateTime     Timestamp,
-                                                              HTTPAPI      API,
-                                                              HTTPRequest  Request)
+        protected internal Task PUT_subscription__HTTPRequest(DateTimeOffset     Timestamp,
+                                                              HTTPAPI            API,
+                                                              HTTPRequest        Request,
+                                                              CancellationToken  CancellationToken)
 
             => OnPUT_subscription__HTTPRequest?.WhenAll(Timestamp,
                                                         API,
-                                                        Request) ?? Task.CompletedTask;
+                                                        Request,
+                                                        CancellationToken) ?? Task.CompletedTask;
 
         /// <summary>
         /// An event sent whenever a PUT ~/subscriptions/{subscriptionId} HTTP response was sent.
@@ -1247,15 +1321,17 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
         /// <param name="Response">A HTTP response.</param>
-        protected internal Task PUT_subscription__HTTPResponse(DateTime      Timestamp,
-                                                               HTTPAPI       API,
-                                                               HTTPRequest   Request,
-                                                               HTTPResponse  Response)
+        protected internal Task PUT_subscription__HTTPResponse(DateTimeOffset     Timestamp,
+                                                               HTTPAPI            API,
+                                                               HTTPRequest        Request,
+                                                               HTTPResponse       Response,
+                                                               CancellationToken  CancellationToken)
 
             => OnPUT_subscription__HTTPResponse?.WhenAll(Timestamp,
                                                          API,
                                                          Request,
-                                                         Response) ?? Task.CompletedTask;
+                                                         Response,
+                                                         CancellationToken) ?? Task.CompletedTask;
 
         #endregion
 
@@ -1279,13 +1355,15 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="Timestamp">The timestamp of the request.</param>
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
-        protected internal Task DELETE_subscription__HTTPRequest(DateTime     Timestamp,
-                                                                 HTTPAPI      API,
-                                                                 HTTPRequest  Request)
+        protected internal Task DELETE_subscription__HTTPRequest(DateTimeOffset     Timestamp,
+                                                                 HTTPAPI            API,
+                                                                 HTTPRequest        Request,
+                                                                 CancellationToken  CancellationToken)
 
             => OnDELETE_subscription__HTTPRequest?.WhenAll(Timestamp,
                                                            API,
-                                                           Request) ?? Task.CompletedTask;
+                                                           Request,
+                                                           CancellationToken) ?? Task.CompletedTask;
 
         /// <summary>
         /// An event sent whenever a DELETE ~/subscriptions/{subscriptionId} HTTP response was sent.
@@ -1294,15 +1372,17 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
         /// <param name="Response">A HTTP response.</param>
-        protected internal Task DELETE_subscription__HTTPResponse(DateTime      Timestamp,
-                                                                  HTTPAPI       API,
-                                                                  HTTPRequest   Request,
-                                                                  HTTPResponse  Response)
+        protected internal Task DELETE_subscription__HTTPResponse(DateTimeOffset     Timestamp,
+                                                                  HTTPAPI            API,
+                                                                  HTTPRequest        Request,
+                                                                  HTTPResponse       Response,
+                                                                  CancellationToken  CancellationToken)
 
             => OnDELETE_subscription__HTTPResponse?.WhenAll(Timestamp,
                                                             API,
                                                             Request,
-                                                            Response) ?? Task.CompletedTask;
+                                                            Response,
+                                                            CancellationToken) ?? Task.CompletedTask;
 
         #endregion
 
@@ -1330,13 +1410,15 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="Timestamp">The timestamp of the request.</param>
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
-        protected internal Task GET_vens__HTTPRequest(DateTime     Timestamp,
-                                                      HTTPAPI      API,
-                                                      HTTPRequest  Request)
+        protected internal Task GET_vens__HTTPRequest(DateTimeOffset     Timestamp,
+                                                      HTTPAPI            API,
+                                                      HTTPRequest        Request,
+                                                      CancellationToken  CancellationToken)
 
             => OnGET_vens__HTTPRequest?.WhenAll(Timestamp,
                                                 API,
-                                                Request) ?? Task.CompletedTask;
+                                                Request,
+                                                CancellationToken) ?? Task.CompletedTask;
 
         /// <summary>
         /// An event sent whenever a GET ~/vens HTTP response was sent.
@@ -1345,15 +1427,17 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
         /// <param name="Response">A HTTP response.</param>
-        protected internal Task GET_vens__HTTPResponse(DateTime      Timestamp,
-                                                       HTTPAPI       API,
-                                                       HTTPRequest   Request,
-                                                       HTTPResponse  Response)
+        protected internal Task GET_vens__HTTPResponse(DateTimeOffset     Timestamp,
+                                                       HTTPAPI            API,
+                                                       HTTPRequest        Request,
+                                                       HTTPResponse       Response,
+                                                       CancellationToken  CancellationToken)
 
             => OnGET_vens__HTTPResponse?.WhenAll(Timestamp,
                                                  API,
                                                  Request,
-                                                 Response) ?? Task.CompletedTask;
+                                                 Response,
+                                                 CancellationToken) ?? Task.CompletedTask;
 
         #endregion
 
@@ -1377,13 +1461,15 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="Timestamp">The timestamp of the request.</param>
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
-        protected internal Task POST_vens__HTTPRequest(DateTime     Timestamp,
-                                                       HTTPAPI      API,
-                                                       HTTPRequest  Request)
+        protected internal Task POST_vens__HTTPRequest(DateTimeOffset     Timestamp,
+                                                       HTTPAPI            API,
+                                                       HTTPRequest        Request,
+                                                       CancellationToken  CancellationToken)
 
             => OnPOST_vens__HTTPRequest?.WhenAll(Timestamp,
                                                  API,
-                                                 Request) ?? Task.CompletedTask;
+                                                 Request,
+                                                 CancellationToken) ?? Task.CompletedTask;
 
         /// <summary>
         /// An event sent whenever a POST ~/vens HTTP response was sent.
@@ -1392,15 +1478,17 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
         /// <param name="Response">A HTTP response.</param>
-        protected internal Task POST_vens__HTTPResponse(DateTime      Timestamp,
-                                                        HTTPAPI       API,
-                                                        HTTPRequest   Request,
-                                                        HTTPResponse  Response)
+        protected internal Task POST_vens__HTTPResponse(DateTimeOffset     Timestamp,
+                                                        HTTPAPI            API,
+                                                        HTTPRequest        Request,
+                                                        HTTPResponse       Response,
+                                                        CancellationToken  CancellationToken)
 
             => OnPOST_vens__HTTPResponse?.WhenAll(Timestamp,
                                                   API,
                                                   Request,
-                                                  Response) ?? Task.CompletedTask;
+                                                  Response,
+                                                  CancellationToken) ?? Task.CompletedTask;
 
         #endregion
 
@@ -1425,13 +1513,15 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="Timestamp">The timestamp of the request.</param>
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
-        protected internal Task GET_ven__HTTPRequest(DateTime     Timestamp,
-                                                     HTTPAPI      API,
-                                                     HTTPRequest  Request)
+        protected internal Task GET_ven__HTTPRequest(DateTimeOffset     Timestamp,
+                                                     HTTPAPI            API,
+                                                     HTTPRequest        Request,
+                                                     CancellationToken  CancellationToken)
 
             => OnGET_ven__HTTPRequest?.WhenAll(Timestamp,
                                                API,
-                                               Request) ?? Task.CompletedTask;
+                                               Request,
+                                               CancellationToken) ?? Task.CompletedTask;
 
         /// <summary>
         /// An event sent whenever a GET ~/vens/{venId} HTTP response was sent.
@@ -1440,15 +1530,17 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
         /// <param name="Response">A HTTP response.</param>
-        protected internal Task GET_ven__HTTPResponse(DateTime      Timestamp,
-                                                      HTTPAPI       API,
-                                                      HTTPRequest   Request,
-                                                      HTTPResponse  Response)
+        protected internal Task GET_ven__HTTPResponse(DateTimeOffset     Timestamp,
+                                                      HTTPAPI            API,
+                                                      HTTPRequest        Request,
+                                                      HTTPResponse       Response,
+                                                      CancellationToken  CancellationToken)
 
             => OnGET_ven__HTTPResponse?.WhenAll(Timestamp,
                                                 API,
                                                 Request,
-                                                Response) ?? Task.CompletedTask;
+                                                Response,
+                                                CancellationToken) ?? Task.CompletedTask;
 
         #endregion
 
@@ -1472,13 +1564,15 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="Timestamp">The timestamp of the request.</param>
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
-        protected internal Task PUT_ven__HTTPRequest(DateTime     Timestamp,
-                                                     HTTPAPI      API,
-                                                     HTTPRequest  Request)
+        protected internal Task PUT_ven__HTTPRequest(DateTimeOffset     Timestamp,
+                                                     HTTPAPI            API,
+                                                     HTTPRequest        Request,
+                                                     CancellationToken  CancellationToken)
 
             => OnPUT_ven__HTTPRequest?.WhenAll(Timestamp,
                                                API,
-                                               Request) ?? Task.CompletedTask;
+                                               Request,
+                                               CancellationToken) ?? Task.CompletedTask;
 
         /// <summary>
         /// An event sent whenever a PUT ~/vens/{venId} HTTP response was sent.
@@ -1487,15 +1581,17 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
         /// <param name="Response">A HTTP response.</param>
-        protected internal Task PUT_ven__HTTPResponse(DateTime      Timestamp,
-                                                      HTTPAPI       API,
-                                                      HTTPRequest   Request,
-                                                      HTTPResponse  Response)
+        protected internal Task PUT_ven__HTTPResponse(DateTimeOffset     Timestamp,
+                                                      HTTPAPI            API,
+                                                      HTTPRequest        Request,
+                                                      HTTPResponse       Response,
+                                                      CancellationToken  CancellationToken)
 
             => OnPUT_ven__HTTPResponse?.WhenAll(Timestamp,
                                                 API,
                                                 Request,
-                                                Response) ?? Task.CompletedTask;
+                                                Response,
+                                                CancellationToken) ?? Task.CompletedTask;
 
         #endregion
 
@@ -1519,13 +1615,15 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="Timestamp">The timestamp of the request.</param>
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
-        protected internal Task DELETE_ven__HTTPRequest(DateTime     Timestamp,
-                                                        HTTPAPI      API,
-                                                        HTTPRequest  Request)
+        protected internal Task DELETE_ven__HTTPRequest(DateTimeOffset     Timestamp,
+                                                        HTTPAPI            API,
+                                                        HTTPRequest        Request,
+                                                        CancellationToken  CancellationToken)
 
             => OnDELETE_ven__HTTPRequest?.WhenAll(Timestamp,
                                                   API,
-                                                  Request) ?? Task.CompletedTask;
+                                                  Request,
+                                                  CancellationToken) ?? Task.CompletedTask;
 
         /// <summary>
         /// An event sent whenever a DELETE ~/vens/{venId} HTTP response was sent.
@@ -1534,15 +1632,17 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
         /// <param name="Response">A HTTP response.</param>
-        protected internal Task DELETE_ven__HTTPResponse(DateTime      Timestamp,
-                                                         HTTPAPI       API,
-                                                         HTTPRequest   Request,
-                                                         HTTPResponse  Response)
+        protected internal Task DELETE_ven__HTTPResponse(DateTimeOffset     Timestamp,
+                                                         HTTPAPI            API,
+                                                         HTTPRequest        Request,
+                                                         HTTPResponse       Response,
+                                                         CancellationToken  CancellationToken)
 
             => OnDELETE_ven__HTTPResponse?.WhenAll(Timestamp,
                                                    API,
                                                    Request,
-                                                   Response) ?? Task.CompletedTask;
+                                                   Response,
+                                                   CancellationToken) ?? Task.CompletedTask;
 
         #endregion
 
@@ -1567,13 +1667,15 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="Timestamp">The timestamp of the request.</param>
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
-        protected internal Task GET_ven_resources__HTTPRequest(DateTime     Timestamp,
-                                                               HTTPAPI      API,
-                                                               HTTPRequest  Request)
+        protected internal Task GET_ven_resources__HTTPRequest(DateTimeOffset     Timestamp,
+                                                               HTTPAPI            API,
+                                                               HTTPRequest        Request,
+                                                               CancellationToken  CancellationToken)
 
             => OnGET_vens__HTTPRequest?.WhenAll(Timestamp,
                                                 API,
-                                                Request) ?? Task.CompletedTask;
+                                                Request,
+                                                CancellationToken) ?? Task.CompletedTask;
 
         /// <summary>
         /// An event sent whenever a GET ~/vens/{venId}/resources/{resourceId} HTTP response was sent.
@@ -1582,15 +1684,17 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
         /// <param name="Response">A HTTP response.</param>
-        protected internal Task GET_ven_resources__HTTPResponse(DateTime      Timestamp,
-                                                                HTTPAPI       API,
-                                                                HTTPRequest   Request,
-                                                                HTTPResponse  Response)
+        protected internal Task GET_ven_resources__HTTPResponse(DateTimeOffset     Timestamp,
+                                                                HTTPAPI            API,
+                                                                HTTPRequest        Request,
+                                                                HTTPResponse       Response,
+                                                                CancellationToken  CancellationToken)
 
             => OnGET_vens__HTTPResponse?.WhenAll(Timestamp,
                                                  API,
                                                  Request,
-                                                 Response) ?? Task.CompletedTask;
+                                                 Response,
+                                                 CancellationToken) ?? Task.CompletedTask;
 
         #endregion
 
@@ -1614,13 +1718,15 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="Timestamp">The timestamp of the request.</param>
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
-        protected internal Task POST_ven_resources__HTTPRequest(DateTime     Timestamp,
-                                                                HTTPAPI      API,
-                                                                HTTPRequest  Request)
+        protected internal Task POST_ven_resources__HTTPRequest(DateTimeOffset     Timestamp,
+                                                                HTTPAPI            API,
+                                                                HTTPRequest        Request,
+                                                                CancellationToken  CancellationToken)
 
             => OnPOST_vens__HTTPRequest?.WhenAll(Timestamp,
                                                  API,
-                                                 Request) ?? Task.CompletedTask;
+                                                 Request,
+                                                 CancellationToken) ?? Task.CompletedTask;
 
         /// <summary>
         /// An event sent whenever a POST ~/vens/{venId}/resources/{resourceId} HTTP response was sent.
@@ -1629,15 +1735,17 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
         /// <param name="Response">A HTTP response.</param>
-        protected internal Task POST_ven_resources__HTTPResponse(DateTime      Timestamp,
-                                                                 HTTPAPI       API,
-                                                                 HTTPRequest   Request,
-                                                                 HTTPResponse  Response)
+        protected internal Task POST_ven_resources__HTTPResponse(DateTimeOffset     Timestamp,
+                                                                 HTTPAPI            API,
+                                                                 HTTPRequest        Request,
+                                                                 HTTPResponse       Response,
+                                                                 CancellationToken  CancellationToken)
 
             => OnPOST_vens__HTTPResponse?.WhenAll(Timestamp,
                                                   API,
                                                   Request,
-                                                  Response) ?? Task.CompletedTask;
+                                                  Response,
+                                                  CancellationToken) ?? Task.CompletedTask;
 
         #endregion
 
@@ -1662,13 +1770,15 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="Timestamp">The timestamp of the request.</param>
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
-        protected internal Task GET_ven_resource__HTTPRequest(DateTime     Timestamp,
-                                                              HTTPAPI      API,
-                                                              HTTPRequest  Request)
+        protected internal Task GET_ven_resource__HTTPRequest(DateTimeOffset     Timestamp,
+                                                              HTTPAPI            API,
+                                                              HTTPRequest        Request,
+                                                              CancellationToken  CancellationToken)
 
             => OnGET_ven_resource__HTTPRequest?.WhenAll(Timestamp,
                                                         API,
-                                                        Request) ?? Task.CompletedTask;
+                                                        Request,
+                                                        CancellationToken) ?? Task.CompletedTask;
 
         /// <summary>
         /// An event sent whenever a GET ~/vens/{venId}/resources/{resourceId} HTTP response was sent.
@@ -1677,15 +1787,17 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
         /// <param name="Response">A HTTP response.</param>
-        protected internal Task GET_ven_resource__HTTPResponse(DateTime      Timestamp,
-                                                               HTTPAPI       API,
-                                                               HTTPRequest   Request,
-                                                               HTTPResponse  Response)
+        protected internal Task GET_ven_resource__HTTPResponse(DateTimeOffset     Timestamp,
+                                                               HTTPAPI            API,
+                                                               HTTPRequest        Request,
+                                                               HTTPResponse       Response,
+                                                               CancellationToken  CancellationToken)
 
             => OnGET_ven_resource__HTTPResponse?.WhenAll(Timestamp,
                                                          API,
                                                          Request,
-                                                         Response) ?? Task.CompletedTask;
+                                                         Response,
+                                                         CancellationToken) ?? Task.CompletedTask;
 
         #endregion
 
@@ -1709,13 +1821,15 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="Timestamp">The timestamp of the request.</param>
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
-        protected internal Task PUT_ven_resource__HTTPRequest(DateTime     Timestamp,
-                                                              HTTPAPI      API,
-                                                              HTTPRequest  Request)
+        protected internal Task PUT_ven_resource__HTTPRequest(DateTimeOffset     Timestamp,
+                                                              HTTPAPI            API,
+                                                              HTTPRequest        Request,
+                                                              CancellationToken  CancellationToken)
 
             => OnPUT_ven_resource__HTTPRequest?.WhenAll(Timestamp,
                                                         API,
-                                                        Request) ?? Task.CompletedTask;
+                                                        Request,
+                                                        CancellationToken) ?? Task.CompletedTask;
 
         /// <summary>
         /// An event sent whenever a PUT ~/vens/{venId}/resources/{resourceId} HTTP response was sent.
@@ -1724,15 +1838,17 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
         /// <param name="Response">A HTTP response.</param>
-        protected internal Task PUT_ven_resource__HTTPResponse(DateTime      Timestamp,
-                                                               HTTPAPI       API,
-                                                               HTTPRequest   Request,
-                                                               HTTPResponse  Response)
+        protected internal Task PUT_ven_resource__HTTPResponse(DateTimeOffset     Timestamp,
+                                                               HTTPAPI            API,
+                                                               HTTPRequest        Request,
+                                                               HTTPResponse       Response,
+                                                               CancellationToken  CancellationToken)
 
             => OnPUT_ven_resource__HTTPResponse?.WhenAll(Timestamp,
                                                          API,
                                                          Request,
-                                                         Response) ?? Task.CompletedTask;
+                                                         Response,
+                                                         CancellationToken) ?? Task.CompletedTask;
 
         #endregion
 
@@ -1756,13 +1872,15 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="Timestamp">The timestamp of the request.</param>
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
-        protected internal Task DELETE_ven_resource__HTTPRequest(DateTime     Timestamp,
-                                                                 HTTPAPI      API,
-                                                                 HTTPRequest  Request)
+        protected internal Task DELETE_ven_resource__HTTPRequest(DateTimeOffset     Timestamp,
+                                                                 HTTPAPI            API,
+                                                                 HTTPRequest        Request,
+                                                                 CancellationToken  CancellationToken)
 
             => OnDELETE_ven_resource__HTTPRequest?.WhenAll(Timestamp,
                                                            API,
-                                                           Request) ?? Task.CompletedTask;
+                                                           Request,
+                                                           CancellationToken) ?? Task.CompletedTask;
 
         /// <summary>
         /// An event sent whenever a DELETE ~/vens/{venId}/resources/{resourceId} HTTP response was sent.
@@ -1771,15 +1889,17 @@ namespace cloud.charging.open.protocols.OpenADRv3
         /// <param name="API">The HTTP API.</param>
         /// <param name="Request">A HTTP request.</param>
         /// <param name="Response">A HTTP response.</param>
-        protected internal Task DELETE_ven_resource__HTTPResponse(DateTime      Timestamp,
-                                                                  HTTPAPI       API,
-                                                                  HTTPRequest   Request,
-                                                                  HTTPResponse  Response)
+        protected internal Task DELETE_ven_resource__HTTPResponse(DateTimeOffset     Timestamp,
+                                                                  HTTPAPI            API,
+                                                                  HTTPRequest        Request,
+                                                                  HTTPResponse       Response,
+                                                                  CancellationToken  CancellationToken)
 
             => OnDELETE_ven_resource__HTTPResponse?.WhenAll(Timestamp,
                                                             API,
                                                             Request,
-                                                            Response) ?? Task.CompletedTask;
+                                                            Response,
+                                                            CancellationToken) ?? Task.CompletedTask;
 
         #endregion
 
@@ -1826,10 +1946,10 @@ namespace cloud.charging.open.protocols.OpenADRv3
                               JObject?                                    APIVersionHashes       = null)
 
             : base(HTTPAPI,
-                   HTTPServerName ?? DefaultHTTPServerName,
                    URLPathPrefix,
                    BasePath,
-                   APIVersionHash: APIVersionHashes?[nameof(OpenADRHTTPAPI)]?.Value<String>()?.Trim())
+                   HTTPServerName:  HTTPServerName ?? DefaultHTTPServerName,
+                   APIVersionHash:  APIVersionHashes?[nameof(OpenADRHTTPAPI)]?.Value<String>()?.Trim())
 
         {
 
@@ -5917,29 +6037,28 @@ namespace cloud.charging.open.protocols.OpenADRv3
         private void RegisterURLTemplates()
         {
 
-            HTTPBaseAPI.HTTPServer.AddAuth(request => {
+//            HTTPBaseAPI.HTTPServer.AddAuth(request => {
 
-                #region Allow some URLs for anonymous access...
+//                #region Allow some URLs for anonymous access...
 
-                if (request.Path.Equals(URLPathPrefix))
-                {
-                    return HTTPExtAPI.Anonymous;
-                }
+//                if (request.Path.Equals(URLPathPrefix))
+//                {
+//                    return HTTPExtAPI.Anonymous;
+//                }
 
-                #endregion
+//                #endregion
 
-                return null;
+//                return null;
 
-            });
+//            });
 
 
             #region ~/programs
 
             #region OPTIONS  ~/programs
 
-            HTTPBaseAPI.AddMethodCallback(
+            HTTPBaseAPI.AddHandler(
 
-                HTTPHostname.Any,
                 HTTPMethod.OPTIONS,
                 URLPathPrefix + "programs",
                 HTTPDelegate: request =>
@@ -5951,7 +6070,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                             Date                        = Timestamp.Now,
                             Allow                       = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.POST ],
                             AccessControlAllowOrigin    = "*",
-                            AccessControlAllowMethods   = [ "OPTIONS", "GET", "POST" ],
+                            AccessControlAllowMethods   = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.POST ],
                             AccessControlAllowHeaders   = [ "Content-Type", "Accept", "Authorization"],
                             AccessControlExposeHeaders  = [ "X-Request-ID", "X-Correlation-ID", "Link", "X-Total-Count", "X-Filtered-Count" ],
                             Connection                  = ConnectionType.Close
@@ -5984,7 +6103,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
             //        //        new HTTPResponse.Builder(request) {
             //        //            HTTPStatusCode              = HTTPStatusCode.Forbidden,
             //        //            AccessControlAllowOrigin    = "*",
-            //        //            AccessControlAllowMethods   = [ "OPTIONS", "GET", "POST" ],
+            //        //            AccessControlAllowMethods   = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.POST ],
             //        //            AccessControlAllowHeaders   = [ "Content-Type", "Accept", "Authorization"],
             //        //            AccessControlExposeHeaders  = [ "X-Request-ID", "X-Correlation-ID", "Link", "X-Total-Count", "X-Filtered-Count" ]
             //        //        });
@@ -6035,7 +6154,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
             //                                                     ).ToUTF8Bytes(),
             //                       Allow                       = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.POST ],
             //                       AccessControlAllowOrigin    = "*",
-            //                       AccessControlAllowMethods   = [ "OPTIONS", "GET", "POST" ],
+            //                       AccessControlAllowMethods   = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.POST ],
             //                       AccessControlAllowHeaders   = [ "Content-Type", "Accept", "Authorization"],
             //                       AccessControlExposeHeaders  = [ "X-Request-ID", "X-Correlation-ID", "Link", "X-Total-Count", "X-Filtered-Count" ],
             //                       Connection                  = ConnectionType.Close
@@ -6082,7 +6201,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
             //        //            StatusMessage        = "Invalid or blocked access token!",
             //        //            HTTPResponseBuilder  = new HTTPResponse.Builder(request.HTTPRequest) {
             //        //                HTTPStatusCode             = HTTPStatusCode.Forbidden,
-            //        //                AccessControlAllowMethods  = [ "OPTIONS", "GET" ],
+            //        //                AccessControlAllowMethods  = [ HTTPMethod.OPTIONS, HTTPMethod.GET ],
             //        //                AccessControlAllowHeaders  = [ "Authorization" ]
             //        //            }
             //        //        });
@@ -6105,7 +6224,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
             //                       HTTPStatusCode              = HTTPStatusCode.BadRequest,
             //                       Allow                       = [ HTTPMethod.OPTIONS, HTTPMethod.GET ],
             //                       AccessControlAllowOrigin    = "*",
-            //                       AccessControlAllowMethods   = [ "OPTIONS", "GET" ],
+            //                       AccessControlAllowMethods   = [ HTTPMethod.OPTIONS, HTTPMethod.GET ],
             //                       AccessControlAllowHeaders   = [ "Authorization" ],
             //                       AccessControlExposeHeaders  = [ "X-Request-ID", "X-Correlation-ID", "Link", "X-Total-Count", "X-Filtered-Count" ],
             //                       Connection                  = ConnectionType.Close
@@ -6131,7 +6250,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
             //                         HTTPStatusCode              = HTTPStatusCode.OK,
             //                         Allow                       = [ HTTPMethod.OPTIONS, HTTPMethod.GET ],
             //                         AccessControlAllowOrigin    = "*",
-            //                         AccessControlAllowMethods   = [ "OPTIONS", "GET" ],
+            //                         AccessControlAllowMethods   = [ HTTPMethod.OPTIONS, HTTPMethod.GET ],
             //                         AccessControlAllowHeaders   = [ "Authorization" ],
             //                         AccessControlExposeHeaders  = [ "X-Request-ID", "X-Correlation-ID", "Link", "X-Total-Count", "X-Filtered-Count" ],
             //                         Connection                  = ConnectionType.Close
@@ -6141,7 +6260,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
             //                         HTTPStatusCode              = HTTPStatusCode.BadRequest,
             //                         Allow                       = [ HTTPMethod.OPTIONS, HTTPMethod.GET ],
             //                         AccessControlAllowOrigin    = "*",
-            //                         AccessControlAllowMethods   = [ "OPTIONS", "GET" ],
+            //                         AccessControlAllowMethods   = [ HTTPMethod.OPTIONS, HTTPMethod.GET ],
             //                         AccessControlAllowHeaders   = [ "Authorization" ],
             //                         AccessControlExposeHeaders  = [ "X-Request-ID", "X-Correlation-ID", "Link", "X-Total-Count", "X-Filtered-Count" ],
             //                         Connection                  = ConnectionType.Close
@@ -6162,9 +6281,8 @@ namespace cloud.charging.open.protocols.OpenADRv3
             // ------------------------------------------------------------
             // curl -v -X OPTIONS http://127.0.0.1:5500/programs/program1
             // ------------------------------------------------------------
-            HTTPBaseAPI.AddMethodCallback(
+            HTTPBaseAPI.AddHandler(
 
-                HTTPHostname.Any,
                 HTTPMethod.OPTIONS,
                 URLPathPrefix + "programs/{programId}",
                 HTTPDelegate: request =>
@@ -6176,7 +6294,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                             Date                        = Timestamp.Now,
                             Allow                       = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE],
                             AccessControlAllowOrigin    = "*",
-                            AccessControlAllowMethods   = [ "OPTIONS", "GET", "PUT", "DELETE" ],
+                            AccessControlAllowMethods   = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE ],
                             AccessControlAllowHeaders   = [ "Content-Type", "Accept", "Authorization"],
                             AccessControlExposeHeaders  = [ "X-Request-ID", "X-Correlation-ID", "Link", "X-Total-Count", "X-Filtered-Count" ],
                             Connection                  = ConnectionType.Close
@@ -6211,7 +6329,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
             //        //        new HTTPResponse.Builder(request) {
             //        //            HTTPStatusCode              = HTTPStatusCode.Forbidden,
             //        //            AccessControlAllowOrigin    = "*",
-            //        //            AccessControlAllowMethods   = [ "OPTIONS", "GET", "POST" ],
+            //        //            AccessControlAllowMethods   = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.POST ],
             //        //            AccessControlAllowHeaders   = [ "Content-Type", "Accept", "Authorization"],
             //        //            AccessControlExposeHeaders  = [ "X-Request-ID", "X-Correlation-ID", "Link", "X-Total-Count", "X-Filtered-Count" ]
             //        //        });
@@ -6251,7 +6369,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
             //                       Date                       = Timestamp.Now,
             //                       Allow                      = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE],
             //                       AccessControlAllowOrigin   = "*",
-            //                       AccessControlAllowMethods  = [ "OPTIONS", "GET", "PUT", "DELETE" ],
+            //                       AccessControlAllowMethods  = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE ],
             //                       ContentType                = HTTPContentType.Application.JSON_UTF8,
             //                       //Content                    = program.ToJSON(
             //                       //                                 CustomProgramSerializer,
@@ -6295,7 +6413,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
             //        //        new HTTPResponse.Builder(request) {
             //        //            HTTPStatusCode              = HTTPStatusCode.Forbidden,
             //        //            AccessControlAllowOrigin    = "*",
-            //        //            AccessControlAllowMethods   = [ "OPTIONS", "GET", "POST" ],
+            //        //            AccessControlAllowMethods   = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.POST ],
             //        //            AccessControlAllowHeaders   = [ "Content-Type", "Accept", "Authorization"],
             //        //            AccessControlExposeHeaders  = [ "X-Request-ID", "X-Correlation-ID", "Link", "X-Total-Count", "X-Filtered-Count" ]
             //        //        });
@@ -6372,7 +6490,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
             //                       Date                       = Timestamp.Now,
             //                       Allow                      = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE],
             //                       AccessControlAllowOrigin   = "*",
-            //                       AccessControlAllowMethods  = [ "OPTIONS", "GET", "PUT", "DELETE" ],
+            //                       AccessControlAllowMethods  = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE ],
             //                       ContentType                = HTTPContentType.Application.JSON_UTF8,
             //                       Content                    = newOrUpdatedProgram.ToJSON().ToUTF8Bytes(),
             //                       Connection                 = ConnectionType.Close
@@ -6384,7 +6502,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
             //                       Date                       = Timestamp.Now,
             //                       Allow                      = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE],
             //                       AccessControlAllowOrigin   = "*",
-            //                       AccessControlAllowMethods  = [ "OPTIONS", "GET", "PUT", "DELETE" ],
+            //                       AccessControlAllowMethods  = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE ],
             //                       ContentType                = HTTPContentType.Application.JSON_UTF8,
             //                       Content                    = new Problem(
             //                                                        nameof(Program),
@@ -6424,7 +6542,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
             //        //        new HTTPResponse.Builder(request) {
             //        //            HTTPStatusCode              = HTTPStatusCode.Forbidden,
             //        //            AccessControlAllowOrigin    = "*",
-            //        //            AccessControlAllowMethods   = [ "OPTIONS", "GET", "POST" ],
+            //        //            AccessControlAllowMethods   = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.POST ],
             //        //            AccessControlAllowHeaders   = [ "Content-Type", "Accept", "Authorization"],
             //        //            AccessControlExposeHeaders  = [ "X-Request-ID", "X-Correlation-ID", "Link", "X-Total-Count", "X-Filtered-Count" ]
             //        //        });
@@ -6460,7 +6578,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
             //                  Date                       = Timestamp.Now,
             //                  Allow                      = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE],
             //                  AccessControlAllowOrigin   = "*",
-            //                  AccessControlAllowMethods  = [ "OPTIONS", "GET", "PUT", "DELETE" ],
+            //                  AccessControlAllowMethods  = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE ],
             //                  ContentType                = HTTPContentType.Application.JSON_UTF8,
             //                  Content                    = new JArray().ToUTF8Bytes(),
             //                  Connection                 = ConnectionType.Close
@@ -6472,7 +6590,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
             //                  Date                       = Timestamp.Now,
             //                  Allow                      = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE],
             //                  AccessControlAllowOrigin   = "*",
-            //                  AccessControlAllowMethods  = [ "OPTIONS", "GET", "PUT", "DELETE" ],
+            //                  AccessControlAllowMethods  = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE ],
             //                  Connection                 = ConnectionType.Close
             //              }.AsImmutable;
 
@@ -6489,9 +6607,8 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
             #region OPTIONS  ~/reports
 
-            HTTPBaseAPI.AddMethodCallback(
+            HTTPBaseAPI.AddHandler(
 
-                HTTPHostname.Any,
                 HTTPMethod.OPTIONS,
                 URLPathPrefix + "reports",
                 HTTPDelegate: request =>
@@ -6503,7 +6620,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                             Date                        = Timestamp.Now,
                             Allow                       = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.POST ],
                             AccessControlAllowOrigin    = "*",
-                            AccessControlAllowMethods   = [ "OPTIONS", "GET", "POST" ],
+                            AccessControlAllowMethods   = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.POST ],
                             AccessControlAllowHeaders   = [ "Content-Type", "Accept", "Authorization"],
                             AccessControlExposeHeaders  = [ "X-Request-ID", "X-Correlation-ID", "Link", "X-Total-Count", "X-Filtered-Count" ]
                         }.AsImmutable
@@ -6515,9 +6632,8 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
             #region GET      ~/reports
 
-            HTTPBaseAPI.AddMethodCallback(
+            HTTPBaseAPI.AddHandler(
 
-                HTTPHostname.Any,
                 HTTPMethod.GET,
                 URLPathPrefix + "reports",
                 HTTPContentType.Application.JSON_UTF8,
@@ -6535,7 +6651,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                     //            StatusMessage        = "Invalid or blocked access token!",
                     //            HTTPResponseBuilder  = new HTTPResponse.Builder(request.HTTPRequest) {
                     //                HTTPStatusCode             = HTTPStatusCode.Forbidden,
-                    //                AccessControlAllowMethods  = [ "OPTIONS", "GET" ],
+                    //                AccessControlAllowMethods  = [ HTTPMethod.OPTIONS, HTTPMethod.GET ],
                     //                AccessControlAllowHeaders  = [ "Authorization" ]
                     //            }
                     //        });
@@ -6550,7 +6666,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                                new HTTPResponse.Builder(request) {
                                    HTTPStatusCode              = HTTPStatusCode.OK,
                                    Allow                       = [ HTTPMethod.OPTIONS, HTTPMethod.GET ],
-                                   AccessControlAllowMethods   = [ "OPTIONS", "GET" ],
+                                   AccessControlAllowMethods   = [ HTTPMethod.OPTIONS, HTTPMethod.GET ],
                                    AccessControlAllowHeaders   = [ "Authorization" ],
                                    AccessControlExposeHeaders  = [ "X-Request-ID", "X-Correlation-ID", "Link", "X-Total-Count", "X-Filtered-Count" ]
                                }.AsImmutable
@@ -6562,9 +6678,8 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
             #region POST     ~/reports
 
-            HTTPBaseAPI.AddMethodCallback(
+            HTTPBaseAPI.AddHandler(
 
-                HTTPHostname.Any,
                 HTTPMethod.POST,
                 URLPathPrefix + "reports",
                 HTTPContentType.Application.JSON_UTF8,
@@ -6582,7 +6697,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                     //            StatusMessage        = "Invalid or blocked access token!",
                     //            HTTPResponseBuilder  = new HTTPResponse.Builder(request.HTTPRequest) {
                     //                HTTPStatusCode             = HTTPStatusCode.Forbidden,
-                    //                AccessControlAllowMethods  = [ "OPTIONS", "GET" ],
+                    //                AccessControlAllowMethods  = [ HTTPMethod.OPTIONS, HTTPMethod.GET ],
                     //                AccessControlAllowHeaders  = [ "Authorization" ]
                     //            }
                     //        });
@@ -6597,7 +6712,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                                new HTTPResponse.Builder(request) {
                                    HTTPStatusCode              = HTTPStatusCode.OK,
                                    Allow                       = [ HTTPMethod.OPTIONS, HTTPMethod.GET ],
-                                   AccessControlAllowMethods   = [ "OPTIONS", "GET" ],
+                                   AccessControlAllowMethods   = [ HTTPMethod.OPTIONS, HTTPMethod.GET ],
                                    AccessControlAllowHeaders   = [ "Authorization" ],
                                    AccessControlExposeHeaders  = [ "X-Request-ID", "X-Correlation-ID", "Link", "X-Total-Count", "X-Filtered-Count" ]
                                }.AsImmutable
@@ -6616,9 +6731,8 @@ namespace cloud.charging.open.protocols.OpenADRv3
             // ----------------------------------------------------------
             // curl -v -X OPTIONS http://127.0.0.1:5500/reports/versions
             // ----------------------------------------------------------
-            HTTPBaseAPI.AddMethodCallback(
+            HTTPBaseAPI.AddHandler(
 
-                HTTPHostname.Any,
                 HTTPMethod.OPTIONS,
                 URLPathPrefix + "reports/{reportId}",
                 HTTPDelegate: request =>
@@ -6630,7 +6744,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                             Date                        = Timestamp.Now,
                             Allow                       = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE],
                             AccessControlAllowOrigin    = "*",
-                            AccessControlAllowMethods   = [ "OPTIONS", "GET", "PUT", "DELETE" ],
+                            AccessControlAllowMethods   = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE ],
                             AccessControlAllowHeaders   = [ "Content-Type", "Accept", "Authorization"],
                             AccessControlExposeHeaders  = [ "X-Request-ID", "X-Correlation-ID", "Link", "X-Total-Count", "X-Filtered-Count" ]
                         }.AsImmutable)
@@ -6644,7 +6758,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
             // -------------------------------------------------------------------------------
             // curl -v -H "Accept: application/json" http://127.0.0.1:5500/reports/versions
             // -------------------------------------------------------------------------------
-            HTTPBaseAPI.AddMethodCallback(HTTPHostname.Any,
+            HTTPBaseAPI.AddHandler(
                               HTTPMethod.GET,
                               URLPathPrefix + "reports/{reportId}",
                               HTTPContentType.Application.JSON_UTF8,
@@ -6659,7 +6773,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                                           Server                        = HTTPServiceName,
                                           Date                          = Timestamp.Now,
                                           AccessControlAllowOrigin      = "*",
-                                          AccessControlAllowMethods     = [ "GET", "OPTIONS" ],
+                                          AccessControlAllowMethods     = [ HTTPMethod.GET, HTTPMethod.OPTIONS ],
                                           AccessControlAllowHeaders     = [ "Content-Type", "Accept", "Authorization" ],
                                           ETag                          = "1",
                                           ContentType                   = HTTPContentType.Application.JSON_UTF8,
@@ -6677,7 +6791,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
             // -------------------------------------------------------------------------------
             // curl -v -H "Accept: application/json" http://127.0.0.1:5500/reports/versions
             // -------------------------------------------------------------------------------
-            HTTPBaseAPI.AddMethodCallback(HTTPHostname.Any,
+            HTTPBaseAPI.AddHandler(
                               HTTPMethod.PUT,
                               URLPathPrefix + "reports/{reportId}",
                               HTTPContentType.Application.JSON_UTF8,
@@ -6692,7 +6806,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                                           Server                        = HTTPServiceName,
                                           Date                          = Timestamp.Now,
                                           AccessControlAllowOrigin      = "*",
-                                          AccessControlAllowMethods     = [ "GET", "OPTIONS" ],
+                                          AccessControlAllowMethods     = [ HTTPMethod.GET, HTTPMethod.OPTIONS ],
                                           AccessControlAllowHeaders     = [ "Content-Type", "Accept", "Authorization" ],
                                           ETag                          = "1",
                                           ContentType                   = HTTPContentType.Application.JSON_UTF8,
@@ -6710,7 +6824,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
             // -------------------------------------------------------------------------------
             // curl -v -H "Accept: application/json" http://127.0.0.1:5500/reports/versions
             // -------------------------------------------------------------------------------
-            HTTPBaseAPI.AddMethodCallback(HTTPHostname.Any,
+            HTTPBaseAPI.AddHandler(
                               HTTPMethod.DELETE,
                               URLPathPrefix + "reports/{reportId}",
                               HTTPContentType.Application.JSON_UTF8,
@@ -6725,7 +6839,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                                           Server                        = HTTPServiceName,
                                           Date                          = Timestamp.Now,
                                           AccessControlAllowOrigin      = "*",
-                                          AccessControlAllowMethods     = [ "GET", "OPTIONS" ],
+                                          AccessControlAllowMethods     = [ HTTPMethod.GET, HTTPMethod.OPTIONS ],
                                           AccessControlAllowHeaders     = [ "Content-Type", "Accept", "Authorization" ],
                                           ETag                          = "1",
                                           ContentType                   = HTTPContentType.Application.JSON_UTF8,
@@ -6745,9 +6859,8 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
             #region OPTIONS  ~/events
 
-            HTTPBaseAPI.AddMethodCallback(
+            HTTPBaseAPI.AddHandler(
 
-                HTTPHostname.Any,
                 HTTPMethod.OPTIONS,
                 URLPathPrefix + "events",
                 HTTPDelegate: request =>
@@ -6759,7 +6872,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                             Date                        = Timestamp.Now,
                             Allow                       = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.POST ],
                             AccessControlAllowOrigin    = "*",
-                            AccessControlAllowMethods   = [ "OPTIONS", "GET", "POST" ],
+                            AccessControlAllowMethods   = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.POST ],
                             AccessControlAllowHeaders   = [ "Content-Type", "Accept", "Authorization"],
                             AccessControlExposeHeaders  = [ "X-Request-ID", "X-Correlation-ID", "Link", "X-Total-Count", "X-Filtered-Count" ]
                         }.AsImmutable
@@ -6771,9 +6884,8 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
             #region GET      ~/events
 
-            HTTPBaseAPI.AddMethodCallback(
+            HTTPBaseAPI.AddHandler(
 
-                HTTPHostname.Any,
                 HTTPMethod.GET,
                 URLPathPrefix + "events",
                 HTTPContentType.Application.JSON_UTF8,
@@ -6791,7 +6903,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                     //            StatusMessage        = "Invalid or blocked access token!",
                     //            HTTPResponseBuilder  = new HTTPResponse.Builder(request.HTTPRequest) {
                     //                HTTPStatusCode             = HTTPStatusCode.Forbidden,
-                    //                AccessControlAllowMethods  = [ "OPTIONS", "GET" ],
+                    //                AccessControlAllowMethods  = [ HTTPMethod.OPTIONS, HTTPMethod.GET ],
                     //                AccessControlAllowHeaders  = [ "Authorization" ]
                     //            }
                     //        });
@@ -6806,7 +6918,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                                new HTTPResponse.Builder(request) {
                                    HTTPStatusCode              = HTTPStatusCode.OK,
                                    Allow                       = [ HTTPMethod.OPTIONS, HTTPMethod.GET ],
-                                   AccessControlAllowMethods   = [ "OPTIONS", "GET" ],
+                                   AccessControlAllowMethods   = [ HTTPMethod.OPTIONS, HTTPMethod.GET ],
                                    AccessControlAllowHeaders   = [ "Authorization" ],
                                    AccessControlExposeHeaders  = [ "X-Request-ID", "X-Correlation-ID", "Link", "X-Total-Count", "X-Filtered-Count" ]
                                }.AsImmutable
@@ -6818,9 +6930,8 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
             #region POST     ~/events
 
-            HTTPBaseAPI.AddMethodCallback(
+            HTTPBaseAPI.AddHandler(
 
-                HTTPHostname.Any,
                 HTTPMethod.POST,
                 URLPathPrefix + "events",
                 HTTPContentType.Application.JSON_UTF8,
@@ -6838,7 +6949,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                     //            StatusMessage        = "Invalid or blocked access token!",
                     //            HTTPResponseBuilder  = new HTTPResponse.Builder(request.HTTPRequest) {
                     //                HTTPStatusCode             = HTTPStatusCode.Forbidden,
-                    //                AccessControlAllowMethods  = [ "OPTIONS", "GET" ],
+                    //                AccessControlAllowMethods  = [ HTTPMethod.OPTIONS, HTTPMethod.GET ],
                     //                AccessControlAllowHeaders  = [ "Authorization" ]
                     //            }
                     //        });
@@ -6853,7 +6964,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                                new HTTPResponse.Builder(request) {
                                    HTTPStatusCode              = HTTPStatusCode.OK,
                                    Allow                       = [ HTTPMethod.OPTIONS, HTTPMethod.GET ],
-                                   AccessControlAllowMethods   = [ "OPTIONS", "GET" ],
+                                   AccessControlAllowMethods   = [ HTTPMethod.OPTIONS, HTTPMethod.GET ],
                                    AccessControlAllowHeaders   = [ "Authorization" ],
                                    AccessControlExposeHeaders  = [ "X-Request-ID", "X-Correlation-ID", "Link", "X-Total-Count", "X-Filtered-Count" ]
                                }.AsImmutable
@@ -6872,9 +6983,8 @@ namespace cloud.charging.open.protocols.OpenADRv3
             // ----------------------------------------------------------
             // curl -v -X OPTIONS http://127.0.0.1:5500/events/versions
             // ----------------------------------------------------------
-            HTTPBaseAPI.AddMethodCallback(
+            HTTPBaseAPI.AddHandler(
 
-                HTTPHostname.Any,
                 HTTPMethod.OPTIONS,
                 URLPathPrefix + "events/{eventId}",
                 HTTPDelegate: request =>
@@ -6886,7 +6996,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                             Date                        = Timestamp.Now,
                             Allow                       = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE],
                             AccessControlAllowOrigin    = "*",
-                            AccessControlAllowMethods   = [ "OPTIONS", "GET", "PUT", "DELETE" ],
+                            AccessControlAllowMethods   = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE ],
                             AccessControlAllowHeaders   = [ "Content-Type", "Accept", "Authorization"],
                             AccessControlExposeHeaders  = [ "X-Request-ID", "X-Correlation-ID", "Link", "X-Total-Count", "X-Filtered-Count" ]
                         }.AsImmutable)
@@ -6900,7 +7010,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
             // -------------------------------------------------------------------------------
             // curl -v -H "Accept: application/json" http://127.0.0.1:5500/events/versions
             // -------------------------------------------------------------------------------
-            HTTPBaseAPI.AddMethodCallback(HTTPHostname.Any,
+            HTTPBaseAPI.AddHandler(
                               HTTPMethod.GET,
                               URLPathPrefix + "events/{eventId}",
                               HTTPContentType.Application.JSON_UTF8,
@@ -6915,7 +7025,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                                           Server                        = HTTPServiceName,
                                           Date                          = Timestamp.Now,
                                           AccessControlAllowOrigin      = "*",
-                                          AccessControlAllowMethods     = [ "GET", "OPTIONS" ],
+                                          AccessControlAllowMethods     = [ HTTPMethod.GET, HTTPMethod.OPTIONS ],
                                           AccessControlAllowHeaders     = [ "Content-Type", "Accept", "Authorization" ],
                                           ETag                          = "1",
                                           ContentType                   = HTTPContentType.Application.JSON_UTF8,
@@ -6933,7 +7043,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
             // -------------------------------------------------------------------------------
             // curl -v -H "Accept: application/json" http://127.0.0.1:5500/events/versions
             // -------------------------------------------------------------------------------
-            HTTPBaseAPI.AddMethodCallback(HTTPHostname.Any,
+            HTTPBaseAPI.AddHandler(
                               HTTPMethod.PUT,
                               URLPathPrefix + "events/{eventId}",
                               HTTPContentType.Application.JSON_UTF8,
@@ -6948,7 +7058,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                                           Server                        = HTTPServiceName,
                                           Date                          = Timestamp.Now,
                                           AccessControlAllowOrigin      = "*",
-                                          AccessControlAllowMethods     = [ "GET", "OPTIONS" ],
+                                          AccessControlAllowMethods     = [ HTTPMethod.GET, HTTPMethod.OPTIONS ],
                                           AccessControlAllowHeaders     = [ "Content-Type", "Accept", "Authorization" ],
                                           ETag                          = "1",
                                           ContentType                   = HTTPContentType.Application.JSON_UTF8,
@@ -6966,7 +7076,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
             // -------------------------------------------------------------------------------
             // curl -v -H "Accept: application/json" http://127.0.0.1:5500/events/versions
             // -------------------------------------------------------------------------------
-            HTTPBaseAPI.AddMethodCallback(HTTPHostname.Any,
+            HTTPBaseAPI.AddHandler(
                               HTTPMethod.DELETE,
                               URLPathPrefix + "events/{eventId}",
                               HTTPContentType.Application.JSON_UTF8,
@@ -6981,7 +7091,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                                           Server                        = HTTPServiceName,
                                           Date                          = Timestamp.Now,
                                           AccessControlAllowOrigin      = "*",
-                                          AccessControlAllowMethods     = [ "GET", "OPTIONS" ],
+                                          AccessControlAllowMethods     = [ HTTPMethod.GET, HTTPMethod.OPTIONS ],
                                           AccessControlAllowHeaders     = [ "Content-Type", "Accept", "Authorization" ],
                                           ETag                          = "1",
                                           ContentType                   = HTTPContentType.Application.JSON_UTF8,
@@ -7001,9 +7111,8 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
             #region OPTIONS  ~/subscriptions
 
-            HTTPBaseAPI.AddMethodCallback(
+            HTTPBaseAPI.AddHandler(
 
-                HTTPHostname.Any,
                 HTTPMethod.OPTIONS,
                 URLPathPrefix + "subscriptions",
                 HTTPDelegate: request =>
@@ -7015,7 +7124,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                             Date                        = Timestamp.Now,
                             Allow                       = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.POST ],
                             AccessControlAllowOrigin    = "*",
-                            AccessControlAllowMethods   = [ "OPTIONS", "GET", "POST" ],
+                            AccessControlAllowMethods   = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.POST ],
                             AccessControlAllowHeaders   = [ "Content-Type", "Accept", "Authorization"],
                             AccessControlExposeHeaders  = [ "X-Request-ID", "X-Correlation-ID", "Link", "X-Total-Count", "X-Filtered-Count" ]
                         }.AsImmutable
@@ -7027,9 +7136,8 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
             #region GET      ~/subscriptions
 
-            HTTPBaseAPI.AddMethodCallback(
+            HTTPBaseAPI.AddHandler(
 
-                HTTPHostname.Any,
                 HTTPMethod.GET,
                 URLPathPrefix + "subscriptions",
                 HTTPContentType.Application.JSON_UTF8,
@@ -7047,7 +7155,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                     //            StatusMessage        = "Invalid or blocked access token!",
                     //            HTTPResponseBuilder  = new HTTPResponse.Builder(request.HTTPRequest) {
                     //                HTTPStatusCode             = HTTPStatusCode.Forbidden,
-                    //                AccessControlAllowMethods  = [ "OPTIONS", "GET" ],
+                    //                AccessControlAllowMethods  = [ HTTPMethod.OPTIONS, HTTPMethod.GET ],
                     //                AccessControlAllowHeaders  = [ "Authorization" ]
                     //            }
                     //        });
@@ -7062,7 +7170,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                                new HTTPResponse.Builder(request) {
                                    HTTPStatusCode              = HTTPStatusCode.OK,
                                    Allow                       = [ HTTPMethod.OPTIONS, HTTPMethod.GET ],
-                                   AccessControlAllowMethods   = [ "OPTIONS", "GET" ],
+                                   AccessControlAllowMethods   = [ HTTPMethod.OPTIONS, HTTPMethod.GET ],
                                    AccessControlAllowHeaders   = [ "Authorization" ],
                                    AccessControlExposeHeaders  = [ "X-Request-ID", "X-Correlation-ID", "Link", "X-Total-Count", "X-Filtered-Count" ]
                                }.AsImmutable
@@ -7074,9 +7182,8 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
             #region POST     ~/subscriptions
 
-            HTTPBaseAPI.AddMethodCallback(
+            HTTPBaseAPI.AddHandler(
 
-                HTTPHostname.Any,
                 HTTPMethod.POST,
                 URLPathPrefix + "subscriptions",
                 HTTPContentType.Application.JSON_UTF8,
@@ -7094,7 +7201,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                     //            StatusMessage        = "Invalid or blocked access token!",
                     //            HTTPResponseBuilder  = new HTTPResponse.Builder(request.HTTPRequest) {
                     //                HTTPStatusCode             = HTTPStatusCode.Forbidden,
-                    //                AccessControlAllowMethods  = [ "OPTIONS", "GET" ],
+                    //                AccessControlAllowMethods  = [ HTTPMethod.OPTIONS, HTTPMethod.GET ],
                     //                AccessControlAllowHeaders  = [ "Authorization" ]
                     //            }
                     //        });
@@ -7109,7 +7216,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                                new HTTPResponse.Builder(request) {
                                    HTTPStatusCode              = HTTPStatusCode.OK,
                                    Allow                       = [ HTTPMethod.OPTIONS, HTTPMethod.GET ],
-                                   AccessControlAllowMethods   = [ "OPTIONS", "GET" ],
+                                   AccessControlAllowMethods   = [ HTTPMethod.OPTIONS, HTTPMethod.GET ],
                                    AccessControlAllowHeaders   = [ "Authorization" ],
                                    AccessControlExposeHeaders  = [ "X-Request-ID", "X-Correlation-ID", "Link", "X-Total-Count", "X-Filtered-Count" ]
                                }.AsImmutable
@@ -7128,9 +7235,8 @@ namespace cloud.charging.open.protocols.OpenADRv3
             // ----------------------------------------------------------
             // curl -v -X OPTIONS http://127.0.0.1:5500/subscriptions/versions
             // ----------------------------------------------------------
-            HTTPBaseAPI.AddMethodCallback(
+            HTTPBaseAPI.AddHandler(
 
-                HTTPHostname.Any,
                 HTTPMethod.OPTIONS,
                 URLPathPrefix + "subscriptions/{subscriptionId}",
                 HTTPDelegate: request =>
@@ -7142,7 +7248,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                             Date                        = Timestamp.Now,
                             Allow                       = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE],
                             AccessControlAllowOrigin    = "*",
-                            AccessControlAllowMethods   = [ "OPTIONS", "GET", "PUT", "DELETE" ],
+                            AccessControlAllowMethods   = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE ],
                             AccessControlAllowHeaders   = [ "Content-Type", "Accept", "Authorization"],
                             AccessControlExposeHeaders  = [ "X-Request-ID", "X-Correlation-ID", "Link", "X-Total-Count", "X-Filtered-Count" ]
                         }.AsImmutable)
@@ -7156,7 +7262,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
             // -------------------------------------------------------------------------------
             // curl -v -H "Accept: application/json" http://127.0.0.1:5500/subscriptions/versions
             // -------------------------------------------------------------------------------
-            HTTPBaseAPI.AddMethodCallback(HTTPHostname.Any,
+            HTTPBaseAPI.AddHandler(
                               HTTPMethod.GET,
                               URLPathPrefix + "subscriptions/{subscriptionId}",
                               HTTPContentType.Application.JSON_UTF8,
@@ -7171,7 +7277,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                                           Server                        = HTTPServiceName,
                                           Date                          = Timestamp.Now,
                                           AccessControlAllowOrigin      = "*",
-                                          AccessControlAllowMethods     = [ "GET", "OPTIONS" ],
+                                          AccessControlAllowMethods     = [ HTTPMethod.GET, HTTPMethod.OPTIONS ],
                                           AccessControlAllowHeaders     = [ "Content-Type", "Accept", "Authorization" ],
                                           ETag                          = "1",
                                           ContentType                   = HTTPContentType.Application.JSON_UTF8,
@@ -7189,7 +7295,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
             // -------------------------------------------------------------------------------
             // curl -v -H "Accept: application/json" http://127.0.0.1:5500/subscriptions/versions
             // -------------------------------------------------------------------------------
-            HTTPBaseAPI.AddMethodCallback(HTTPHostname.Any,
+            HTTPBaseAPI.AddHandler(
                               HTTPMethod.PUT,
                               URLPathPrefix + "subscriptions/{subscriptionId}",
                               HTTPContentType.Application.JSON_UTF8,
@@ -7204,7 +7310,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                                           Server                        = HTTPServiceName,
                                           Date                          = Timestamp.Now,
                                           AccessControlAllowOrigin      = "*",
-                                          AccessControlAllowMethods     = [ "GET", "OPTIONS" ],
+                                          AccessControlAllowMethods     = [ HTTPMethod.GET, HTTPMethod.OPTIONS ],
                                           AccessControlAllowHeaders     = [ "Content-Type", "Accept", "Authorization" ],
                                           ETag                          = "1",
                                           ContentType                   = HTTPContentType.Application.JSON_UTF8,
@@ -7222,7 +7328,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
             // -------------------------------------------------------------------------------
             // curl -v -H "Accept: application/json" http://127.0.0.1:5500/subscriptions/versions
             // -------------------------------------------------------------------------------
-            HTTPBaseAPI.AddMethodCallback(HTTPHostname.Any,
+            HTTPBaseAPI.AddHandler(
                               HTTPMethod.DELETE,
                               URLPathPrefix + "subscriptions/{subscriptionId}",
                               HTTPContentType.Application.JSON_UTF8,
@@ -7237,7 +7343,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                                           Server                        = HTTPServiceName,
                                           Date                          = Timestamp.Now,
                                           AccessControlAllowOrigin      = "*",
-                                          AccessControlAllowMethods     = [ "GET", "OPTIONS" ],
+                                          AccessControlAllowMethods     = [ HTTPMethod.GET, HTTPMethod.OPTIONS ],
                                           AccessControlAllowHeaders     = [ "Content-Type", "Accept", "Authorization" ],
                                           ETag                          = "1",
                                           ContentType                   = HTTPContentType.Application.JSON_UTF8,
@@ -7257,9 +7363,8 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
             #region OPTIONS  ~/vens
 
-            HTTPBaseAPI.AddMethodCallback(
+            HTTPBaseAPI.AddHandler(
 
-                HTTPHostname.Any,
                 HTTPMethod.OPTIONS,
                 URLPathPrefix + "vens",
                 HTTPDelegate: request =>
@@ -7271,7 +7376,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                             Date                        = Timestamp.Now,
                             Allow                       = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.POST ],
                             AccessControlAllowOrigin    = "*",
-                            AccessControlAllowMethods   = [ "OPTIONS", "GET", "POST" ],
+                            AccessControlAllowMethods   = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.POST ],
                             AccessControlAllowHeaders   = [ "Content-Type", "Accept", "Authorization"],
                             AccessControlExposeHeaders  = [ "X-Request-ID", "X-Correlation-ID", "Link", "X-Total-Count", "X-Filtered-Count" ]
                         }.AsImmutable
@@ -7283,9 +7388,8 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
             #region GET      ~/vens
 
-            HTTPBaseAPI.AddMethodCallback(
+            HTTPBaseAPI.AddHandler(
 
-                HTTPHostname.Any,
                 HTTPMethod.GET,
                 URLPathPrefix + "vens",
                 HTTPContentType.Application.JSON_UTF8,
@@ -7303,7 +7407,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                     //            StatusMessage        = "Invalid or blocked access token!",
                     //            HTTPResponseBuilder  = new HTTPResponse.Builder(request.HTTPRequest) {
                     //                HTTPStatusCode             = HTTPStatusCode.Forbidden,
-                    //                AccessControlAllowMethods  = [ "OPTIONS", "GET" ],
+                    //                AccessControlAllowMethods  = [ HTTPMethod.OPTIONS, HTTPMethod.GET ],
                     //                AccessControlAllowHeaders  = [ "Authorization" ]
                     //            }
                     //        });
@@ -7318,7 +7422,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                                new HTTPResponse.Builder(request) {
                                    HTTPStatusCode              = HTTPStatusCode.OK,
                                    Allow                       = [ HTTPMethod.OPTIONS, HTTPMethod.GET ],
-                                   AccessControlAllowMethods   = [ "OPTIONS", "GET" ],
+                                   AccessControlAllowMethods   = [ HTTPMethod.OPTIONS, HTTPMethod.GET ],
                                    AccessControlAllowHeaders   = [ "Authorization" ],
                                    AccessControlExposeHeaders  = [ "X-Request-ID", "X-Correlation-ID", "Link", "X-Total-Count", "X-Filtered-Count" ]
                                }.AsImmutable
@@ -7330,9 +7434,8 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
             #region POST     ~/vens
 
-            HTTPBaseAPI.AddMethodCallback(
+            HTTPBaseAPI.AddHandler(
 
-                HTTPHostname.Any,
                 HTTPMethod.POST,
                 URLPathPrefix + "vens",
                 HTTPContentType.Application.JSON_UTF8,
@@ -7350,7 +7453,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                     //            StatusMessage        = "Invalid or blocked access token!",
                     //            HTTPResponseBuilder  = new HTTPResponse.Builder(request.HTTPRequest) {
                     //                HTTPStatusCode             = HTTPStatusCode.Forbidden,
-                    //                AccessControlAllowMethods  = [ "OPTIONS", "GET" ],
+                    //                AccessControlAllowMethods  = [ HTTPMethod.OPTIONS, HTTPMethod.GET ],
                     //                AccessControlAllowHeaders  = [ "Authorization" ]
                     //            }
                     //        });
@@ -7365,7 +7468,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                                new HTTPResponse.Builder(request) {
                                    HTTPStatusCode              = HTTPStatusCode.OK,
                                    Allow                       = [ HTTPMethod.OPTIONS, HTTPMethod.GET ],
-                                   AccessControlAllowMethods   = [ "OPTIONS", "GET" ],
+                                   AccessControlAllowMethods   = [ HTTPMethod.OPTIONS, HTTPMethod.GET ],
                                    AccessControlAllowHeaders   = [ "Authorization" ],
                                    AccessControlExposeHeaders  = [ "X-Request-ID", "X-Correlation-ID", "Link", "X-Total-Count", "X-Filtered-Count" ]
                                }.AsImmutable
@@ -7384,9 +7487,8 @@ namespace cloud.charging.open.protocols.OpenADRv3
             // ----------------------------------------------------------
             // curl -v -X OPTIONS http://127.0.0.1:5500/vens/versions
             // ----------------------------------------------------------
-            HTTPBaseAPI.AddMethodCallback(
+            HTTPBaseAPI.AddHandler(
 
-                HTTPHostname.Any,
                 HTTPMethod.OPTIONS,
                 URLPathPrefix + "vens/{venId}",
                 HTTPDelegate: request =>
@@ -7398,7 +7500,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                             Date                        = Timestamp.Now,
                             Allow                       = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE],
                             AccessControlAllowOrigin    = "*",
-                            AccessControlAllowMethods   = [ "OPTIONS", "GET", "PUT", "DELETE" ],
+                            AccessControlAllowMethods   = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE ],
                             AccessControlAllowHeaders   = [ "Content-Type", "Accept", "Authorization"],
                             AccessControlExposeHeaders  = [ "X-Request-ID", "X-Correlation-ID", "Link", "X-Total-Count", "X-Filtered-Count" ]
                         }.AsImmutable)
@@ -7412,7 +7514,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
             // -------------------------------------------------------------------------------
             // curl -v -H "Accept: application/json" http://127.0.0.1:5500/vens/versions
             // -------------------------------------------------------------------------------
-            HTTPBaseAPI.AddMethodCallback(HTTPHostname.Any,
+            HTTPBaseAPI.AddHandler(
                               HTTPMethod.GET,
                               URLPathPrefix + "vens/{venId}",
                               HTTPContentType.Application.JSON_UTF8,
@@ -7427,7 +7529,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                                           Server                        = HTTPServiceName,
                                           Date                          = Timestamp.Now,
                                           AccessControlAllowOrigin      = "*",
-                                          AccessControlAllowMethods     = [ "GET", "OPTIONS" ],
+                                          AccessControlAllowMethods     = [ HTTPMethod.GET, HTTPMethod.OPTIONS ],
                                           AccessControlAllowHeaders     = [ "Content-Type", "Accept", "Authorization" ],
                                           ETag                          = "1",
                                           ContentType                   = HTTPContentType.Application.JSON_UTF8,
@@ -7445,7 +7547,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
             // -------------------------------------------------------------------------------
             // curl -v -H "Accept: application/json" http://127.0.0.1:5500/vens/versions
             // -------------------------------------------------------------------------------
-            HTTPBaseAPI.AddMethodCallback(HTTPHostname.Any,
+            HTTPBaseAPI.AddHandler(
                               HTTPMethod.PUT,
                               URLPathPrefix + "vens/{venId}",
                               HTTPContentType.Application.JSON_UTF8,
@@ -7460,7 +7562,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                                           Server                        = HTTPServiceName,
                                           Date                          = Timestamp.Now,
                                           AccessControlAllowOrigin      = "*",
-                                          AccessControlAllowMethods     = [ "GET", "OPTIONS" ],
+                                          AccessControlAllowMethods     = [ HTTPMethod.GET, HTTPMethod.OPTIONS ],
                                           AccessControlAllowHeaders     = [ "Content-Type", "Accept", "Authorization" ],
                                           ETag                          = "1",
                                           ContentType                   = HTTPContentType.Application.JSON_UTF8,
@@ -7478,7 +7580,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
             // -------------------------------------------------------------------------------
             // curl -v -H "Accept: application/json" http://127.0.0.1:5500/vens/versions
             // -------------------------------------------------------------------------------
-            HTTPBaseAPI.AddMethodCallback(HTTPHostname.Any,
+            HTTPBaseAPI.AddHandler(
                               HTTPMethod.DELETE,
                               URLPathPrefix + "vens/{venId}",
                               HTTPContentType.Application.JSON_UTF8,
@@ -7493,7 +7595,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                                           Server                        = HTTPServiceName,
                                           Date                          = Timestamp.Now,
                                           AccessControlAllowOrigin      = "*",
-                                          AccessControlAllowMethods     = [ "GET", "OPTIONS" ],
+                                          AccessControlAllowMethods     = [ HTTPMethod.GET, HTTPMethod.OPTIONS ],
                                           AccessControlAllowHeaders     = [ "Content-Type", "Accept", "Authorization" ],
                                           ETag                          = "1",
                                           ContentType                   = HTTPContentType.Application.JSON_UTF8,
@@ -7512,9 +7614,8 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
             #region OPTIONS  ~/vens/{venId}/resources
 
-            HTTPBaseAPI.AddMethodCallback(
+            HTTPBaseAPI.AddHandler(
 
-                HTTPHostname.Any,
                 HTTPMethod.OPTIONS,
                 URLPathPrefix + "vens/{venId}/resources",
                 HTTPDelegate: request =>
@@ -7526,7 +7627,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                             Date                        = Timestamp.Now,
                             Allow                       = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.POST ],
                             AccessControlAllowOrigin    = "*",
-                            AccessControlAllowMethods   = [ "OPTIONS", "GET", "POST" ],
+                            AccessControlAllowMethods   = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.POST ],
                             AccessControlAllowHeaders   = [ "Content-Type", "Accept", "Authorization"],
                             AccessControlExposeHeaders  = [ "X-Request-ID", "X-Correlation-ID", "Link", "X-Total-Count", "X-Filtered-Count" ]
                         }.AsImmutable
@@ -7538,9 +7639,8 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
             #region GET      ~/vens/{venId}/resources
 
-            HTTPBaseAPI.AddMethodCallback(
+            HTTPBaseAPI.AddHandler(
 
-                HTTPHostname.Any,
                 HTTPMethod.GET,
                 URLPathPrefix + "vens/{venId}/resources",
                 HTTPContentType.Application.JSON_UTF8,
@@ -7558,7 +7658,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                     //            StatusMessage        = "Invalid or blocked access token!",
                     //            HTTPResponseBuilder  = new HTTPResponse.Builder(request.HTTPRequest) {
                     //                HTTPStatusCode             = HTTPStatusCode.Forbidden,
-                    //                AccessControlAllowMethods  = [ "OPTIONS", "GET" ],
+                    //                AccessControlAllowMethods  = [ HTTPMethod.OPTIONS, HTTPMethod.GET ],
                     //                AccessControlAllowHeaders  = [ "Authorization" ]
                     //            }
                     //        });
@@ -7573,7 +7673,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                                new HTTPResponse.Builder(request) {
                                    HTTPStatusCode              = HTTPStatusCode.OK,
                                    Allow                       = [ HTTPMethod.OPTIONS, HTTPMethod.GET ],
-                                   AccessControlAllowMethods   = [ "OPTIONS", "GET" ],
+                                   AccessControlAllowMethods   = [ HTTPMethod.OPTIONS, HTTPMethod.GET ],
                                    AccessControlAllowHeaders   = [ "Authorization" ],
                                    AccessControlExposeHeaders  = [ "X-Request-ID", "X-Correlation-ID", "Link", "X-Total-Count", "X-Filtered-Count" ]
                                }.AsImmutable
@@ -7585,9 +7685,8 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
             #region POST     ~/vens/{venId}/resources
 
-            HTTPBaseAPI.AddMethodCallback(
+            HTTPBaseAPI.AddHandler(
 
-                HTTPHostname.Any,
                 HTTPMethod.POST,
                 URLPathPrefix + "vens/{venId}/resources",
                 HTTPContentType.Application.JSON_UTF8,
@@ -7605,7 +7704,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                     //            StatusMessage        = "Invalid or blocked access token!",
                     //            HTTPResponseBuilder  = new HTTPResponse.Builder(request.HTTPRequest) {
                     //                HTTPStatusCode             = HTTPStatusCode.Forbidden,
-                    //                AccessControlAllowMethods  = [ "OPTIONS", "GET" ],
+                    //                AccessControlAllowMethods  = [ HTTPMethod.OPTIONS, HTTPMethod.GET ],
                     //                AccessControlAllowHeaders  = [ "Authorization" ]
                     //            }
                     //        });
@@ -7620,7 +7719,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                                new HTTPResponse.Builder(request) {
                                    HTTPStatusCode              = HTTPStatusCode.OK,
                                    Allow                       = [ HTTPMethod.OPTIONS, HTTPMethod.GET ],
-                                   AccessControlAllowMethods   = [ "OPTIONS", "GET" ],
+                                   AccessControlAllowMethods   = [ HTTPMethod.OPTIONS, HTTPMethod.GET ],
                                    AccessControlAllowHeaders   = [ "Authorization" ],
                                    AccessControlExposeHeaders  = [ "X-Request-ID", "X-Correlation-ID", "Link", "X-Total-Count", "X-Filtered-Count" ]
                                }.AsImmutable
@@ -7639,9 +7738,8 @@ namespace cloud.charging.open.protocols.OpenADRv3
             // ----------------------------------------------------------
             // curl -v -X OPTIONS http://127.0.0.1:5500/vens/ven1/resources/res1
             // ----------------------------------------------------------
-            HTTPBaseAPI.AddMethodCallback(
+            HTTPBaseAPI.AddHandler(
 
-                HTTPHostname.Any,
                 HTTPMethod.OPTIONS,
                 URLPathPrefix + "vens/{venId}/resources/{resourceId}",
                 HTTPDelegate: request =>
@@ -7653,7 +7751,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                             Date                        = Timestamp.Now,
                             Allow                       = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE],
                             AccessControlAllowOrigin    = "*",
-                            AccessControlAllowMethods   = [ "OPTIONS", "GET", "PUT", "DELETE" ],
+                            AccessControlAllowMethods   = [ HTTPMethod.OPTIONS, HTTPMethod.GET, HTTPMethod.PUT, HTTPMethod.DELETE ],
                             AccessControlAllowHeaders   = [ "Content-Type", "Accept", "Authorization"],
                             AccessControlExposeHeaders  = [ "X-Request-ID", "X-Correlation-ID", "Link", "X-Total-Count", "X-Filtered-Count" ]
                         }.AsImmutable)
@@ -7667,7 +7765,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
             // -------------------------------------------------------------------------------
             // curl -v -H "Accept: application/json" http://127.0.0.1:5500/vens/ven1/resources/res1
             // -------------------------------------------------------------------------------
-            HTTPBaseAPI.AddMethodCallback(HTTPHostname.Any,
+            HTTPBaseAPI.AddHandler(
                               HTTPMethod.GET,
                               URLPathPrefix + "vens/{venId}/resources/{resourceId}",
                               HTTPContentType.Application.JSON_UTF8,
@@ -7682,7 +7780,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                                           Server                        = HTTPServiceName,
                                           Date                          = Timestamp.Now,
                                           AccessControlAllowOrigin      = "*",
-                                          AccessControlAllowMethods     = [ "GET", "OPTIONS" ],
+                                          AccessControlAllowMethods     = [ HTTPMethod.GET, HTTPMethod.OPTIONS ],
                                           AccessControlAllowHeaders     = [ "Content-Type", "Accept", "Authorization" ],
                                           ETag                          = "1",
                                           ContentType                   = HTTPContentType.Application.JSON_UTF8,
@@ -7700,7 +7798,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
             // -------------------------------------------------------------------------------
             // curl -v -H "Accept: application/json" http://127.0.0.1:5500/vens/ven1/resources/res1
             // -------------------------------------------------------------------------------
-            HTTPBaseAPI.AddMethodCallback(HTTPHostname.Any,
+            HTTPBaseAPI.AddHandler(
                               HTTPMethod.PUT,
                               URLPathPrefix + "vens/{venId}/resources/{resourceId}",
                               HTTPContentType.Application.JSON_UTF8,
@@ -7715,7 +7813,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                                           Server                        = HTTPServiceName,
                                           Date                          = Timestamp.Now,
                                           AccessControlAllowOrigin      = "*",
-                                          AccessControlAllowMethods     = [ "GET", "OPTIONS" ],
+                                          AccessControlAllowMethods     = [ HTTPMethod.GET, HTTPMethod.OPTIONS ],
                                           AccessControlAllowHeaders     = [ "Content-Type", "Accept", "Authorization" ],
                                           ETag                          = "1",
                                           ContentType                   = HTTPContentType.Application.JSON_UTF8,
@@ -7733,7 +7831,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
             // -------------------------------------------------------------------------------
             // curl -v -H "Accept: application/json" http://127.0.0.1:5500/vens/ven1/resources/res1
             // -------------------------------------------------------------------------------
-            HTTPBaseAPI.AddMethodCallback(HTTPHostname.Any,
+            HTTPBaseAPI.AddHandler(
                               HTTPMethod.DELETE,
                               URLPathPrefix + "vens/{venId}/resources/{resourceId}",
                               HTTPContentType.Application.JSON_UTF8,
@@ -7748,7 +7846,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                                           Server                        = HTTPServiceName,
                                           Date                          = Timestamp.Now,
                                           AccessControlAllowOrigin      = "*",
-                                          AccessControlAllowMethods     = [ "GET", "OPTIONS" ],
+                                          AccessControlAllowMethods     = [ HTTPMethod.GET, HTTPMethod.OPTIONS ],
                                           AccessControlAllowHeaders     = [ "Content-Type", "Accept", "Authorization" ],
                                           ETag                          = "1",
                                           ContentType                   = HTTPContentType.Application.JSON_UTF8,

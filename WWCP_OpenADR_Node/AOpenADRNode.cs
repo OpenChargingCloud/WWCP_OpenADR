@@ -160,7 +160,7 @@ namespace cloud.charging.open.protocols.OpenADRv3.Node
                             Boolean                              DisableMaintenanceTasks                 = false,
                             TimeSpan?                            MaintenanceEvery                        = null,
 
-                            ISMTPClient?                         SMTPClient                              = null,
+                            ISMTPSubmissionClient?                         SMTPClient                              = null,
                             DNSClient?                           DNSClient                               = null)
 
             : base(Id,
@@ -172,14 +172,17 @@ namespace cloud.charging.open.protocols.OpenADRv3.Node
 
                    !HTTPAPI_Disabled
                        ? new HTTPExtAPI(
-                             HTTPServerPort:         HTTPAPI_Port               ?? IPPort.Auto,
+                             new HTTPServer(
+                                 TCPPort:            HTTPAPI_Port               ?? IPPort.Auto,
+                                 HTTPServerName:     HTTPAPI_ServerName         ?? "GraphDefined OpenADR Test",
+                                 DNSClient:          DNSClient,
+                                 AutoStart:          true
+                             ),
                              HTTPServerName:         HTTPAPI_ServerName         ?? "GraphDefined OpenADR Test",
                              HTTPServiceName:        HTTPAPI_ServiceName        ?? "GraphDefined OpenADR Test Service",
                              APIRobotEMailAddress:   HTTPAPI_RobotEMailAddress  ?? EMailAddress.Parse("GraphDefined OpenADR Test Robot <robot@charging.cloud>"),
                              APIRobotGPGPassphrase:  HTTPAPI_RobotGPGPassphrase ?? "test123",
-                             SMTPClient:             SMTPClient                 ?? new NullMailer(),
-                             DNSClient:              DNSClient,
-                             AutoStart:              true
+                             SMTPSubmissionClient:   SMTPClient                 ?? new NullMailer()
                          )
                        : null,
                    ControlWebSocketServer,
@@ -230,17 +233,17 @@ namespace cloud.charging.open.protocols.OpenADRv3.Node
 
                     #region HTTP API Security Settings
 
-                    this.HTTPAPI.HTTPBaseAPI.HTTPServer.AddAuth(request => {
+//                    this.HTTPAPI.HTTPBaseAPI.HTTPServer.AddAuth(request => {
 
-                        // Allow some URLs for anonymous access...
-                        if (request.Path.StartsWith(this.HTTPAPI.URLPathPrefix + this.WebAPI_Path))
-                        {
-                            return HTTPExtAPI.Anonymous;
-                        }
+//                        // Allow some URLs for anonymous access...
+//                        if (request.Path.StartsWith(this.HTTPAPI.URLPathPrefix + this.WebAPI_Path))
+//                        {
+//                            return HTTPExtAPI.Anonymous;
+//                        }
 
-                        return null;
+//                        return null;
 
-                    });
+//                    });
 
                     #endregion
 

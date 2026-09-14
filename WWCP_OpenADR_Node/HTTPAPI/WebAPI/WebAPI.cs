@@ -41,8 +41,8 @@ namespace cloud.charging.open.protocols.OpenADRv3.Node
     /// <summary>
     /// The OpenADR WebAPI.
     /// </summary>
-    public class WebAPI : AHTTPAPIExtension<HTTPExtAPI>,
-                          IHTTPAPIExtension<HTTPExtAPI>
+    public class WebAPI : AHTTPAPIExtension<HTTPExtAPI>
+                        //IHTTPAPIExtension<HTTPExtAPI>
     {
 
         #region Data
@@ -89,9 +89,9 @@ namespace cloud.charging.open.protocols.OpenADRv3.Node
                       String?                                     HTMLTemplate     = null)
 
             : base(HTTPAPI,
-                   HTTPServerName ?? DefaultHTTPServerName,
                    URLPathPrefix,
-                   BasePath       ?? HTTPPath.Parse("webapi"))
+                   BasePath       ?? HTTPPath.Parse("webapi"),
+                   HTTPServerName:  HTTPServerName ?? DefaultHTTPServerName)
 
         {
 
@@ -104,7 +104,7 @@ namespace cloud.charging.open.protocols.OpenADRv3.Node
 
             RegisterURITemplates();
 
-            DebugX.Log($"OpenADR {Version.String} WebAPI started on {HTTPAPI.HTTPServer.IPSockets.AggregateWith(", ")}{URLPathPrefix}");
+            DebugX.Log($"OpenADR {Version.String} WebAPI started on {HTTPAPI.HTTPServer.IPSocket}{URLPathPrefix}");
 
         }
 
@@ -242,7 +242,7 @@ namespace cloud.charging.open.protocols.OpenADRv3.Node
             //                                         Server                     = DefaultHTTPServerName,
             //                                         Date                       = Timestamp.Now,
             //                                         AccessControlAllowOrigin   = "*",
-            //                                         AccessControlAllowMethods  = [ "OPTIONS", "GET" ],
+            //                                         AccessControlAllowMethods  = [ HTTPMethod.OPTIONS, HTTPMethod.GET ],
             //                                         AccessControlAllowHeaders  = [ "Authorization" ],
             //                                         ContentType                = HTTPContentType.Text.HTML_UTF8,
             //                                         Content                    = ("<html><body>" +
@@ -266,8 +266,7 @@ namespace cloud.charging.open.protocols.OpenADRv3.Node
             // --------------------------------------------------------------------
             // curl -v -H "Accept: application/json" http://127.0.0.1:3001/events
             // --------------------------------------------------------------------
-            HTTPBaseAPI.AddMethodCallback(
-                            HTTPHostname.Any,
+            HTTPBaseAPI.AddHandler(
                             HTTPMethod.GET,
                             URLPathPrefix + "events",
                             HTTPContentType.Text.HTML_UTF8,
@@ -293,7 +292,7 @@ namespace cloud.charging.open.protocols.OpenADRv3.Node
                                                Server                     = HTTPServiceName,
                                                Date                       = Timestamp.Now,
                                                AccessControlAllowOrigin   = "*",
-                                               AccessControlAllowMethods  = [ "GET" ],
+                                               AccessControlAllowMethods  = [ HTTPMethod.GET ],
                                                AccessControlAllowHeaders  = [ "Content-Type", "Accept", "Authorization" ],
                                                ContentType                = HTTPContentType.Text.HTML_UTF8,
                                                Content                    = MixWithHTMLTemplate("events.index.shtml").ToUTF8Bytes(),

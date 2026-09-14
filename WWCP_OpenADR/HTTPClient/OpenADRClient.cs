@@ -420,32 +420,41 @@ namespace cloud.charging.open.protocols.OpenADRv3
                              HTTPClientLogger?                                          HTTPLogger                   = null,
                              DNSClient?                                                 DNSClient                    = null)
 
-            : base(RemoteURL,
-                   VirtualHostname,
-                   Description,
-                   PreferIPv4,
-                   RemoteCertificateValidator,
-                   LocalCertificateSelector,
-                   ClientCertificate,
-                   TLSProtocol,
-                   ContentType        ?? HTTPContentType.Application.JSON_UTF8,
-                   Accept             ?? AcceptTypes.FromHTTPContentTypes(HTTPContentType.Application.JSON_UTF8),
-                   HTTPAuthentication ?? (AccessToken.IsNotNullOrEmpty()
-                                              ? HTTPTokenAuthentication.Parse(AccessToken)
-                                              : null),
-                   null,
-                   HTTPUserAgent      ?? DefaultHTTPUserAgent,
-                   Connection         ?? ConnectionType.Close,
-                   RequestTimeout     ?? DefaultRequestTimeout,
-                   TransmissionRetryDelay,
-                   MaxNumberOfRetries,
-                   InternalBufferSize,
-                   UseHTTPPipelining,
-                   DisableLogging,
-                   HTTPLogger,
-                   DNSClient)
+            : base(URL:                          RemoteURL,
+                   Description:                  Description,
+                   HTTPUserAgent:                HTTPUserAgent      ?? DefaultHTTPUserAgent,
+                   HTTPAuthentication:           HTTPAuthentication ?? (AccessToken.IsNotNullOrEmpty()
+                                                                            ? HTTPTokenAuthentication.Parse(AccessToken)
+                                                                            : null),
+                   Accept:                       Accept             ?? AcceptTypes.FromHTTPContentTypes(HTTPContentType.Application.JSON_UTF8),
+                   ContentType:                  ContentType        ?? HTTPContentType.Application.JSON_UTF8,
+                   Connection:                   Connection         ?? ConnectionType.Close,
+
+                   RemoteCertificateValidator:   RemoteCertificateValidator,
+                   LocalCertificateSelector:     LocalCertificateSelector,
+                   ClientCertificates:           ClientCertificate is not null
+                                                     ? [ ClientCertificate ]
+                                                     : null,
+                   TLSProtocols:                 TLSProtocol,
+
+                   IPVersionPreference:          PreferIPv4 == true
+                                                     ? org.GraphDefined.Vanaheimr.Hermod.IPVersionPreference.PreferIPv4
+                                                     : null,
+                   TransmissionRetryDelay:       TransmissionRetryDelay,
+                   MaxNumberOfRetries:           MaxNumberOfRetries,
+                   InternalBufferSize:           InternalBufferSize,
+
+                   DisableLogging:               DisableLogging,
+                   DNSClient:                    DNSClient)
 
         {
+
+            // No longer constructor parameters of AHTTPClient, but still settable properties.
+            this.VirtualHostname    = VirtualHostname;
+            this.UseHTTPPipelining  = UseHTTPPipelining ?? false;
+
+            if (RequestTimeout.HasValue)
+                this.RequestTimeout = RequestTimeout.Value;
 
 
 
@@ -537,32 +546,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
                 var dateAndPaginationFilters  = new DateAndPaginationFilters(From, To, Offset, Limit);
 
-                var httpResponse              = await HTTPClientFactory.Create(
-                                                          RemoteURL,
-                                                          VirtualHostname,
-                                                          Description,
-                                                          PreferIPv4,
-                                                          RemoteCertificateValidator,
-                                                          LocalCertificateSelector,
-                                                          ClientCertificate,
-                                                          TLSProtocols,
-                                                          ContentType,
-                                                          Accept,
-                                                          HTTPAuthentication,
-                                                          null,
-                                                          HTTPUserAgent,
-                                                          Connection,
-                                                          RequestTimeout,
-                                                          TransmissionRetryDelay,
-                                                          MaxNumberOfRetries,
-                                                          InternalBufferSize,
-                                                          UseHTTPPipelining,
-                                                          DisableLogging,
-                                                          HTTPLogger,
-                                                          DNSClient
-                                                      ).
-
-                                                      GET(RemoteURL.Path + "programs" + dateAndPaginationFilters.ToHTTPQueryString(),
+                var httpResponse              = await this.GET(RemoteURL.Path + "programs" + dateAndPaginationFilters.ToHTTPQueryString(),
                                                           Accept:                ocpiAcceptTypes,
                                                           //Authentication:        TokenAuth,
                                                           Connection:            ConnectionType.Close,
@@ -702,32 +686,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
                 #region Upstream HTTP request...
 
-                var httpResponse = await HTTPClientFactory.Create(
-                                             RemoteURL,
-                                             VirtualHostname,
-                                             Description,
-                                             PreferIPv4,
-                                             RemoteCertificateValidator,
-                                             LocalCertificateSelector,
-                                             ClientCertificate,
-                                             TLSProtocols,
-                                             ContentType,
-                                             Accept,
-                                             HTTPAuthentication,
-                                             null,
-                                             HTTPUserAgent,
-                                             Connection,
-                                             RequestTimeout,
-                                             TransmissionRetryDelay,
-                                             MaxNumberOfRetries,
-                                             InternalBufferSize,
-                                             UseHTTPPipelining,
-                                             DisableLogging,
-                                             HTTPLogger,
-                                             DNSClient
-                                         ).
-
-                                         GET(RemoteURL.Path + ProgramId.ToString(),
+                var httpResponse = await this.GET(RemoteURL.Path + ProgramId.ToString(),
                                              Accept:                ocpiAcceptTypes,
                                              //Authentication:        TokenAuth,
                                              Connection:            ConnectionType.Close,
