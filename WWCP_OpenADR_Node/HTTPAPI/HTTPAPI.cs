@@ -284,20 +284,22 @@ namespace cloud.charging.open.protocols.OpenADRv3.Node
         private void RegisterURITemplates()
         {
 
-//            HTTPBaseAPI.HTTPServer.AddAuth(request => {
+            #region Allow some URLs for anonymous access...
 
-//                if (request.Path.ToString() == "/systemInfo"       ||
-//                    request.Path.ToString() == "/webSocketClients" ||
-//                    request.Path.ToString() == "/webSocketServers" ||
-//                    request.Path.ToString() == "/ocppAdapter"      ||
-//                    request.Path.ToString() == "/connections")
-//                {
-//                    return HTTPExtAPI.Anonymous;
-//                }
+            HTTPBaseAPI.HTTPServer.AddPipeline(
+                new AnonymousAccessPipeline(
+                    request => request.Path.ToString() switch {
+                                   "/systemInfo"        => true,
+                                   "/webSocketClients"  => true,
+                                   "/webSocketServers"  => true,
+                                   "/ocppAdapter"       => true,
+                                   "/connections"       => true,
+                                   _                    => false
+                               }
+                )
+            );
 
-//                return null;
-
-//            });
+            #endregion
 
 
             #region / (HTTPRoot)

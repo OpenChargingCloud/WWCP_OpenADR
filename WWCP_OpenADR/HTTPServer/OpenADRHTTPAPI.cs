@@ -6037,20 +6037,15 @@ namespace cloud.charging.open.protocols.OpenADRv3
         private void RegisterURLTemplates()
         {
 
-//            HTTPBaseAPI.HTTPServer.AddAuth(request => {
+            #region Allow some URLs for anonymous access...
 
-//                #region Allow some URLs for anonymous access...
+            HTTPBaseAPI.HTTPServer.AddPipeline(
+                new AnonymousAccessPipeline(
+                    request => request.Path.Equals(URLPathPrefix)
+                )
+            );
 
-//                if (request.Path.Equals(URLPathPrefix))
-//                {
-//                    return HTTPExtAPI.Anonymous;
-//                }
-
-//                #endregion
-
-//                return null;
-
-//            });
+            #endregion
 
 
             #region ~/programs
