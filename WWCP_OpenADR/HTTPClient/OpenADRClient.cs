@@ -418,7 +418,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                              String?                                                    LoggingContext               = null,
                              LogfileCreatorDelegate?                                    LogfileCreator               = null,
                              HTTPClientLogger?                                          HTTPLogger                   = null,
-                             DNSClient?                                                 DNSClient                    = null)
+                             IDNSClient?                                                DNSClient                    = null)
 
             : base(URL:                          RemoteURL,
                    Description:                  Description,
