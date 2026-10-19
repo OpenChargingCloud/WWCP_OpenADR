@@ -232,7 +232,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
             var json = JSONObject.Create(
 
                                  new JProperty("id",               Id.Value),
-                                 new JProperty("payloads",         new JArray(Payloads)),
+                                 new JProperty("payloads",         new JArray(Payloads.Select(payload => payload.ToJSON()))),
 
                            IntervalPeriod is not null
                                ? new JProperty("interval",   IntervalPeriod.ToJSON(CustomIntervalPeriodSerializer))
