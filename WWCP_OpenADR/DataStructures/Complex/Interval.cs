@@ -30,7 +30,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
     /// <summary>
     /// An object defining a temporal window and a list of valuesMaps.
-    /// if interval present may set temporal aspects of interval or override event.interval.
+    /// if intervalPeriod present may set temporal aspects of interval or override event.intervalPeriod.
     /// </summary>
     public class Interval : IEquatable<Interval>
 
@@ -94,7 +94,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
         //   type: object
         //   description: |
         //     An object defining a temporal window and a list of valuesMaps.
-        //     if interval present may set temporal aspects of interval or override event.interval.
+        //     if intervalPeriod present may set temporal aspects of interval or override event.intervalPeriod.
         //   required:
         //     - id
         //     - payloads
@@ -104,8 +104,8 @@ namespace cloud.charging.open.protocols.OpenADRv3
         //       format: int32
         //       description: A client generated number assigned an interval object. Not a sequence number.
         //       example: 0
-        //     interval:
-        //       $ref: '#/components/schemas/interval'
+        //     intervalPeriod:
+        //       $ref: '#/components/schemas/intervalPeriod'
         //       # Defines start and duration of interval.
         //     payloads:
         //       type: array
@@ -181,10 +181,10 @@ namespace cloud.charging.open.protocols.OpenADRv3
 
                 #region IntervalPeriod    [optional]
 
-                if (JSON.ParseOptionalJSON("interval",
+                if (JSON.ParseOptionalJSON("intervalPeriod",
                                            "interval period",
                                            IntervalPeriod.TryParse,
-                                           out IntervalPeriod? interval,
+                                           out IntervalPeriod? intervalPeriod,
                                            out ErrorResponse))
                 {
                     if (ErrorResponse is not null)
@@ -197,7 +197,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                 Interval = new Interval(
                                id,
                                payloads,
-                               interval
+                               intervalPeriod
                            );
 
                 if (CustomIntervalParser is not null)
@@ -235,7 +235,7 @@ namespace cloud.charging.open.protocols.OpenADRv3
                                  new JProperty("payloads",         new JArray(Payloads.Select(payload => payload.ToJSON()))),
 
                            IntervalPeriod is not null
-                               ? new JProperty("interval",   IntervalPeriod.ToJSON(CustomIntervalPeriodSerializer))
+                               ? new JProperty("intervalPeriod",   IntervalPeriod.ToJSON(CustomIntervalPeriodSerializer))
                                : null
 
                        );
